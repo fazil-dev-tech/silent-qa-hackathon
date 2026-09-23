@@ -731,3 +731,25 @@ textarea.input-field {
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
+
+/* ========== PRINT / PDF EXPORT ========== */
+@media print {
+  body::before { display: none; }
+  body { background: white !important; color: black !important; }
+  .sidebar, .hide-on-print, .btn { display: none !important; }
+  .main-content { margin-left: 0 !important; padding: 0 !important; }
+  .glass-card { 
+    background: white !important; 
+    border: 1px solid #ddd !important; 
+    box-shadow: none !important; 
+    color: black !important;
+  }
+  .report-section-title { color: #333 !important; }
+  .report-preview, .report-editable, .evidence-item { 
+    background: #f9f9f9 !important; 
+    color: black !important; 
+    border: 1px solid #ddd !important; 
+  }
+  .badge { border: 1px solid #333 !important; color: #333 !important; background: transparent !important; }
+  h1, h2, h3, p, div, span, label { color: black !important; -webkit-text-fill-color: black !important; }
+}

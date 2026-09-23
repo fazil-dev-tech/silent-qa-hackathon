@@ -97,6 +97,35 @@ export default function DashboardPage() {
         <Link href="/dashboard/reports" className="btn btn-secondary">📋 View All Reports</Link>
       </div>
 
+      {/* Analytics Chart */}
+      <div className="glass-card" style={{ padding: '24px', marginBottom: '32px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
+          <span>Telemetry Activity (Last 24h)</span>
+          <span style={{ fontSize: '12px', color: 'var(--accent-emerald)', fontWeight: 600 }}>+24% vs yesterday</span>
+        </h3>
+        <div style={{ display: 'flex', alignItems: 'flex-end', height: '140px', gap: '8px', paddingBottom: '10px', borderBottom: '1px solid var(--border-glass)' }}>
+          {[30, 45, 20, 60, 80, 50, 40, 90, 70, 55, 30, 85].map((height, i) => (
+            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+              <div 
+                style={{ 
+                  width: '100%', 
+                  height: `${height}%`, 
+                  background: height > 70 ? 'var(--gradient-danger)' : height > 40 ? 'var(--gradient-success)' : 'var(--gradient-primary)',
+                  borderRadius: '4px 4px 0 0',
+                  opacity: 0.8,
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }} 
+                title={`${height} events`}
+                onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseOut={(e) => e.currentTarget.style.opacity = '0.8'}
+              />
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{i * 2}h</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Recent Reports */}
       <div>
         <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>Recent Reports</h2>

@@ -17,6 +17,7 @@ OUTPUT FORMAT (JSON only, no markdown):
   "actualResult": "What actually happened",
   "technicalEvidence": "Detailed technical findings from logs/network/DOM",
   "rootCauseHypothesis": "Best guess at the root cause based on evidence",
+  "suggestedFixCode": "```javascript\n// Proposed code fix or diff to resolve the bug\n```",
   "confidenceScore": 0.85,
   "confidenceReason": "Why this confidence level"
 }`;
@@ -39,6 +40,7 @@ OUTPUT FORMAT (JSON only, no markdown):
   "actualResult": "...",
   "technicalEvidence": "...",
   "rootCauseHypothesis": "...",
+  "suggestedFixCode": "...",
   "confidenceScore": 0.0,
   "confidenceReason": "..."
 }`;

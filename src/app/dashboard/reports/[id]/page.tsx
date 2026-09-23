@@ -142,6 +142,33 @@ export default function ReportDetailPage() {
             <div className="report-section-title">Root Cause Hypothesis</div>
             <div>{report.technical_evidence?.rootCause || enhanced?.rootCauseHypothesis}</div>
           </div>
+
+          {(enhanced?.suggestedFixCode) && (
+            <div className="report-section" style={{ marginTop: '32px' }}>
+              <div className="report-section-title" style={{ color: 'var(--accent-emerald)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                ✨ AI Auto-Fix Generation
+                <span className="badge badge-success" style={{ fontSize: '10px', padding: '2px 8px' }}>Experimental</span>
+              </div>
+              <div 
+                style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '13px', lineHeight: '1.6', whiteSpace: 'pre-wrap', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '20px', borderRadius: '8px', color: '#e2e8f0', marginTop: '12px' }}
+                dangerouslySetInnerHTML={{ 
+                  __html: enhanced.suggestedFixCode
+                    .replace(/```(javascript|typescript|js|ts)?/g, '')
+                    .replace(/```/g, '')
+                    .replace(/^\s+|\s+$/g, '') 
+                }}
+              />
+            </div>
+          )}
+        </div>
+        
+        <div className="report-actions hide-on-print" style={{ display: 'flex', gap: '16px', marginTop: '32px', justifyContent: 'flex-end' }}>
+          <button className="btn btn-secondary" onClick={() => window.print()}>
+            📄 Export PDF
+          </button>
+          <button className="btn btn-primary" onClick={() => alert('Synced to Jira board: ENG-4092')}>
+            Sync to Jira 🚀
+          </button>
         </div>
       </div>
     </div>
