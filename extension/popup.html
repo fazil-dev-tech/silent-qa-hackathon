@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Silent QA Extension</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">🔍</div>
+      <h2>Silent Backend QA</h2>
+    </div>
+    
+    <div class="content">
+      <div id="status-card" class="card inactive">
+        <div class="status-indicator"></div>
+        <span id="status-text">Not Monitoring</span>
+      </div>
+
+      <div class="input-group" id="name-group">
+        <label>QA Engineer Name</label>
+        <input type="text" id="qa-name" placeholder="e.g. John Doe">
+      </div>
+
+      <button id="toggle-btn" class="btn btn-primary">Start Monitoring</button>
+      
+      <div class="stats" id="stats-section" style="display: none;">
+        <div class="stat-row">
+          <span>Session ID:</span>
+          <span id="session-id-display" class="mono">Pending...</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <a href="http://localhost:3000/dashboard" target="_blank">Open Dashboard ↗</a>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
