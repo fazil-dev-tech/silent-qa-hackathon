@@ -13,6 +13,8 @@ export const EventTypeSchema = z.enum([
   'websocket_in',
   'websocket_out',
   'route_change',
+  'navigation',
+  'form_submit',
 ]);
 
 export const TelemetryEventSchema = z.object({

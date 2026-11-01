@@ -23,7 +23,9 @@ function generateUUID(): string {
   });
 }
 
-const BUFFER_CAP = 500;
+let bufferCap = 500;
+let flushRateMs = 2000;
+let flushTimer: any = null;
 const ringBuffer: StoredEvent[] = [];
 
 // Dynamic session & project state loaded from Chrome storage
@@ -31,18 +33,36 @@ let sessionId = generateUUID();
 let projectToken = 'sqa_live_demo_key_2026';
 let apiEndpoint = 'http://localhost:3000/api/ingest';
 
+function restartFlushTimer() {
+  if (flushTimer) clearInterval(flushTimer);
+  flushTimer = setInterval(flushEvents, flushRateMs);
+}
+
 // Hydrate from storage
-chrome.storage.local.get(['project_token', 'session_id', 'api_endpoint'], (res) => {
-  if (res.project_token) projectToken = res.project_token;
-  if (res.session_id) sessionId = res.session_id;
-  if (res.api_endpoint) apiEndpoint = res.api_endpoint;
-  else chrome.storage.local.set({ session_id: sessionId });
-});
+chrome.storage.local.get(
+  ['project_token', 'session_id', 'api_endpoint', 'buffer_cap', 'flush_rate'],
+  (res) => {
+    if (res.project_token) projectToken = res.project_token;
+    if (res.session_id) sessionId = res.session_id;
+    if (res.api_endpoint) apiEndpoint = res.api_endpoint;
+    if (res.buffer_cap) bufferCap = Number(res.buffer_cap);
+    if (res.flush_rate) {
+      flushRateMs = Number(res.flush_rate);
+      restartFlushTimer();
+    }
+    if (!res.session_id) chrome.storage.local.set({ session_id: sessionId });
+  }
+);
 
 chrome.storage.onChanged.addListener((changes) => {
   if (changes.project_token) projectToken = changes.project_token.newValue;
   if (changes.session_id) sessionId = changes.session_id.newValue;
   if (changes.api_endpoint) apiEndpoint = changes.api_endpoint.newValue;
+  if (changes.buffer_cap) bufferCap = Number(changes.buffer_cap.newValue);
+  if (changes.flush_rate) {
+    flushRateMs = Number(changes.flush_rate.newValue);
+    restartFlushTimer();
+  }
 });
 
 // 1. Dual Keep-Alive: Port connections + Alarm watchdog
@@ -74,7 +94,7 @@ function pushEvent(event: StoredEvent) {
   if (!event.id || !event.id.includes('-')) {
     event.id = generateUUID();
   }
-  if (ringBuffer.length >= BUFFER_CAP) {
+  if (ringBuffer.length >= bufferCap) {
     ringBuffer.shift(); // Evict oldest
   }
   ringBuffer.push(event);
@@ -104,11 +124,35 @@ async function flushEvents() {
     if (!response.ok) {
       throw new Error(`Ingest HTTP status ${response.status}`);
     }
+
+    // Success: Check if offline queue has accumulated events to drain
+    chrome.storage.local.get(['sqa_offline_queue'], async (res) => {
+      const offlineQueue = (res.sqa_offline_queue || []) as StoredEvent[];
+      if (offlineQueue.length > 0) {
+        const drainBatch = offlineQueue.splice(0, 50);
+        try {
+          const drainRes = await fetch(apiEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              project_token: projectToken,
+              session_id: sessionId,
+              events: drainBatch,
+            }),
+          });
+          if (drainRes.ok) {
+            chrome.storage.local.set({ sqa_offline_queue: offlineQueue });
+          }
+        } catch {
+          // If network dropped again, leave queue intact
+        }
+      }
+    });
   } catch (err) {
     // Offline / Network failure: Spool into chrome.storage.local
     chrome.storage.local.get(['sqa_offline_queue'], (result) => {
       const queue = (result.sqa_offline_queue || []) as StoredEvent[];
-      const merged = queue.concat(batch).slice(-BUFFER_CAP);
+      const merged = queue.concat(batch).slice(-bufferCap);
       chrome.storage.local.set({ sqa_offline_queue: merged });
     });
   } finally {
@@ -116,5 +160,5 @@ async function flushEvents() {
   }
 }
 
-// Flush every 2 seconds for low-latency realtime stream
-setInterval(flushEvents, 2000);
+// Start recurring flush timer based on configured flush rate
+restartFlushTimer();

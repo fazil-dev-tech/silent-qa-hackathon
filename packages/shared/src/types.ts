@@ -8,7 +8,9 @@ export type EventType =
   | 'signal'
   | 'websocket_in'
   | 'websocket_out'
-  | 'route_change';
+  | 'route_change'
+  | 'navigation'
+  | 'form_submit';
 
 export type EventSeverity = 'info' | 'warn' | 'error' | 'critical';
 

@@ -5,7 +5,7 @@ const EMAIL_REGEX = /[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/g;
 const PHONE_REGEX = /(\+?\d{1,3}[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/g;
 const JWT_REGEX = /eyJ[a-zA-Z0-9_-]{10,}\.eyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}/g;
 const BEARER_REGEX = /Bearer\s+[a-zA-Z0-9_.~+/-]+=*/gi;
-const API_KEY_REGEX = /(?:api[_-]?key|secret|token|password|auth)[\s:=]+['"]?([a-zA-Z0-9_-]{16,})['"]?/gi;
+const API_KEY_REGEX = /((?:api[_-]?key|secret|token|password|auth)[\s:=]+['"]?)([a-zA-Z0-9_-]{16,})(['"]?)/gi;
 const PAN_REGEX = /[A-Z]{5}[0-9]{4}[A-Z]{1}/g;
 const AADHAAR_REGEX = /\b[2-9]{1}[0-9]{3}\s?[0-9]{4}\s?[0-9]{4}\b/g;
 
@@ -44,7 +44,7 @@ export function scrubText(input: string): string {
     .replace(BEARER_REGEX, 'Bearer [TOKEN_REDACTED]')
     .replace(PAN_REGEX, '[PAN_REDACTED]')
     .replace(AADHAAR_REGEX, '[AADHAAR_REDACTED]')
-    .replace(API_KEY_REGEX, '$1=[REDACTED]');
+    .replace(API_KEY_REGEX, '$1[SECRET_REDACTED]$3');
 
   // Check potential credit cards with Luhn
   scrubbed = scrubbed.replace(/\b(?:\d[ -]*?){13,19}\b/g, (match) => {

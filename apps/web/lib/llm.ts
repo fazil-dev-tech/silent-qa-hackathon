@@ -168,6 +168,16 @@ ${JSON.stringify(
     const parsedJson = JSON.parse(cleanedJson);
     const validated = LLMReportOutputSchema.parse(parsedJson);
 
+    // Anti-Hallucination Filter: Strictly enforce that evidence_ids match real recorded event IDs
+    const realEventIdSet = new Set(events.map((e) => e.id));
+    const verifiedEvidenceIds = (validated.evidence_ids || []).filter((id) => realEventIdSet.has(id));
+
+    if (verifiedEvidenceIds.length === 0 && events.length > 0) {
+      validated.evidence_ids = events.slice(0, 5).map((e) => e.id);
+    } else {
+      validated.evidence_ids = verifiedEvidenceIds;
+    }
+
     return {
       report: validated,
       isFallback: false,

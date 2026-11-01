@@ -22,8 +22,8 @@ test('Phase 1 - Scrubber: Validates Luhn credit card check', () => {
   assert.strictEqual(isValidLuhn('12345'), false); // Too short
 });
 
-test('Phase 1 - Scrubber: Redacts emails, tokens, PAN, Aadhaar, and PII', () => {
-  const input = 'User test.user@example.com logged in with Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.doNotLeakThis and PAN ABCDE1234F and Aadhaar 2345 6789 0123 with card 4532015112830366';
+test('Phase 1 - Scrubber: Redacts emails, tokens, PAN, Aadhaar, secrets, and PII', () => {
+  const input = 'User test.user@example.com logged in with Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.doNotLeakThis and PAN ABCDE1234F and Aadhaar 2345 6789 0123 with card 4532015112830366 and api_key: secret_key_value_987654321';
   const scrubbed = scrubText(input);
 
   assert.ok(!scrubbed.includes('test.user@example.com'), 'Email redacted');
@@ -34,6 +34,8 @@ test('Phase 1 - Scrubber: Redacts emails, tokens, PAN, Aadhaar, and PII', () => 
   assert.ok(scrubbed.includes('[AADHAAR_REDACTED]'));
   assert.ok(!scrubbed.includes('4532015112830366'), 'Card redacted');
   assert.ok(scrubbed.includes('[CARD_REDACTED]'));
+  assert.ok(!scrubbed.includes('secret_key_value_987654321'), 'API key value must not leak');
+  assert.ok(scrubbed.includes('[SECRET_REDACTED]'));
 });
 
 test('Phase 1 - Scrubber: Extracts safe body shape and masks sensitive keys', () => {
@@ -185,4 +187,19 @@ test('Phase 1 - Playwright: Synthesizes valid reproduction test script from evid
   assert.ok(script.includes("@playwright/test"));
   assert.ok(script.includes("page.locator('button#add-to-cart').click()"));
   assert.ok(script.includes("expect(requestCount).toBe(1)"));
+});
+
+test('Phase 1 - Signals: Summarizes dead clicks, rage clicks, and ranks them accurately', () => {
+  const telemetry = [
+    { id: 'dc1', session_id: 's1', ts: 100, type: 'signal', severity: 'warn', text: 'dead_click: Click on button#checkout produced no DOM update' },
+    { id: 'rc1', session_id: 's1', ts: 200, type: 'signal', severity: 'warn', text: 'rage_click: 3+ clicks on button#submit within 2s' },
+    { id: 'inp1', session_id: 's1', ts: 300, type: 'input', severity: 'info', selector: 'input#email', text: 'input_change: user@example.com' },
+  ];
+
+  const summary = buildSignalSummary(telemetry);
+  assert.strictEqual(summary.dead_click_count, 1);
+  assert.strictEqual(summary.rage_click_count, 1);
+
+  const ranked = rankEventsForMapper(telemetry, 'checkout button did nothing');
+  assert.strictEqual(ranked[0].id, 'dc1', 'Dead click event ranks first for matching note');
 });
