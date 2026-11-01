@@ -34,7 +34,11 @@ export function buildFallbackReport(
 
   return {
     title: `[Fallback] ${note.slice(0, 60)}`,
-    severity: (signals.error_count > 0 || signals.duplicate_request_count > 0 ? 'high' : 'medium') as 'low' | 'medium' | 'high' | 'critical',
+    severity: (signals.error_count > 0 || signals.duplicate_request_count > 0 ? 'high' : 'medium') as
+      | 'low'
+      | 'medium'
+      | 'high'
+      | 'critical',
     steps,
     expected: 'Action executes once and completes without duplicate requests or errors',
     actual,
@@ -49,14 +53,14 @@ export function buildFallbackReport(
 }
 
 /**
- * Provider-agnostic LLM caller with strict 15-second AbortController
+ * Provider-agnostic LLM caller with OpenRouter, Gemini, and OpenAI-compatible support
  */
 export async function generateDefectReport(
   note: string,
   events: TelemetryEvent[],
   signals: SignalSummary
 ) {
-  const timeoutMs = Number(process.env.LLM_TIMEOUT_MS ?? 15000);
+  const timeoutMs = Number(process.env.LLM_TIMEOUT_MS ?? 25000);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -101,7 +105,7 @@ ${JSON.stringify(
 </untrusted_telemetry>`;
 
   try {
-    const provider = process.env.LLM_PROVIDER || 'openai';
+    const provider = process.env.LLM_PROVIDER || 'openrouter';
     let rawText = '';
 
     if (provider === 'gemini') {
@@ -123,18 +127,23 @@ ${JSON.stringify(
       const data = await res.json();
       rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     } else {
-      // Default: OpenAI / Groq / Together / Ollama
-      const baseUrl = process.env.LLM_BASE_URL || 'https://api.openai.com/v1';
+      // OpenRouter / OpenAI / Groq / Ollama
+      const baseUrl = process.env.LLM_BASE_URL || 'https://openrouter.ai/api/v1';
       const apiKey = process.env.LLM_API_KEY || '';
+      const model = process.env.LLM_MODEL || 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free';
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://silentqa.dev',
+        'X-Title': 'Silent QA',
+      };
 
       const res = await fetch(`${baseUrl}/chat/completions`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
+        headers,
         body: JSON.stringify({
-          model: process.env.LLM_MODEL || 'gpt-4o-mini',
+          model,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userContent },
@@ -143,19 +152,28 @@ ${JSON.stringify(
         }),
         signal: controller.signal,
       });
+
       const data = await res.json();
       rawText = data?.choices?.[0]?.message?.content || '';
     }
 
-    const parsedJson = JSON.parse(rawText);
+    // Clean JSON if model returns markdown wrapping (e.g. ```json ... ```)
+    let cleanedJson = rawText.trim();
+    if (cleanedJson.startsWith('```json')) {
+      cleanedJson = cleanedJson.replace(/^```json/, '').replace(/```$/, '').trim();
+    } else if (cleanedJson.startsWith('```')) {
+      cleanedJson = cleanedJson.replace(/^```/, '').replace(/```$/, '').trim();
+    }
+
+    const parsedJson = JSON.parse(cleanedJson);
     const validated = LLMReportOutputSchema.parse(parsedJson);
 
     return {
       report: validated,
       isFallback: false,
     };
-  } catch {
-    // Graceful fallback to deterministic report
+  } catch (err: any) {
+    console.warn('[LLM Gateway Warning] Using fallback report:', err?.message);
     return {
       report: buildFallbackReport(note, events, signals),
       isFallback: true,
@@ -164,4 +182,3 @@ ${JSON.stringify(
     clearTimeout(timer);
   }
 }
-
