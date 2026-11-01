@@ -63,7 +63,7 @@ export function scrubText(input: string): string {
 /**
  * Converts a raw JSON payload into a safe BodyShape (keys and data types only)
  */
-export function extractBodyShape(payload: unknown, depth = 0): BodyShape | string {
+export function extractBodyShape(payload: unknown, depth = 0): BodyShape {
   if (depth > 5) return '[MAX_DEPTH]';
   if (payload === null) return 'null';
   if (payload === undefined) return 'undefined';
@@ -75,11 +75,11 @@ export function extractBodyShape(payload: unknown, depth = 0): BodyShape | strin
 
   if (Array.isArray(payload)) {
     if (payload.length === 0) return [];
-    return [extractBodyShape(payload[0], depth + 1) as any];
+    return [extractBodyShape(payload[0], depth + 1)];
   }
 
   if (type === 'object') {
-    const shape: BodyShape = {};
+    const shape: Record<string, any> = {};
     for (const [key, value] of Object.entries(payload as Record<string, unknown>)) {
       // Lowercase check for secret key names
       const lowerKey = key.toLowerCase();

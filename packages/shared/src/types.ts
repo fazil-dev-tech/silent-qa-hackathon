@@ -22,9 +22,16 @@ export type SignalType =
   | 'listener_leak'
   | 'websocket_drop';
 
-export interface BodyShape {
-  [key: string]: string | number | boolean | BodyShape | Array<string | number | boolean | BodyShape>;
-}
+export type BodyShapeValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | { [key: string]: BodyShapeValue }
+  | BodyShapeValue[];
+
+export type BodyShape = { [key: string]: BodyShapeValue } | BodyShapeValue[] | string;
 
 export interface TelemetryEvent {
   id: string;
