@@ -8,6 +8,17 @@
   if ((window as any).__SILENT_QA_INJECTED__) return;
   (window as any).__SILENT_QA_INJECTED__ = true;
 
+  function generateUUID(): string {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
   function relay(
     type: string,
     data: Record<string, unknown>,
@@ -17,7 +28,7 @@
       {
         source: 'SILENT_QA_MAIN',
         payload: {
-          id: 'evt_' + Math.random().toString(36).slice(2, 10),
+          id: generateUUID(),
           ts: Date.now(),
           type,
           severity,

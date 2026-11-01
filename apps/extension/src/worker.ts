@@ -12,11 +12,22 @@ interface StoredEvent {
   [key: string]: unknown;
 }
 
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 const BUFFER_CAP = 500;
 const ringBuffer: StoredEvent[] = [];
 
 // Dynamic session & project state loaded from Chrome storage
-let sessionId = 'ses_' + Math.random().toString(36).slice(2, 10);
+let sessionId = generateUUID();
 let projectToken = 'sqa_live_demo_key_2026';
 let apiEndpoint = 'http://localhost:3000/api/ingest';
 
@@ -60,6 +71,9 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // 2. Buffer Management
 function pushEvent(event: StoredEvent) {
+  if (!event.id || !event.id.includes('-')) {
+    event.id = generateUUID();
+  }
   if (ringBuffer.length >= BUFFER_CAP) {
     ringBuffer.shift(); // Evict oldest
   }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { IngestBatchSchema, computeFingerprint } from '@silent-qa/shared';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin, ensureUUID } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +18,7 @@ export async function POST(req: Request) {
     }
 
     const { project_token, session_id, events } = result.data;
+    const safeSessionId = ensureUUID(session_id);
 
     // 1. Verify Project Authentication via API key hash
     const tokenHash = crypto.createHash('sha256').update(project_token).digest('hex');
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
     await supabaseAdmin
       .from('sessions')
       .upsert({
-        id: session_id,
+        id: safeSessionId,
         project_id: projectId,
         app_url: events[0]?.url || 'http://localhost:4000',
         user_agent: req.headers.get('user-agent') || 'Browser-Agent',
@@ -44,8 +45,8 @@ export async function POST(req: Request) {
 
     // 3. Enrich events with computed fingerprints and valid timestamps
     const enriched = events.map((e) => ({
-      id: e.id,
-      session_id,
+      id: ensureUUID(e.id),
+      session_id: safeSessionId,
       type: e.type,
       severity: e.severity,
       url: e.url || null,

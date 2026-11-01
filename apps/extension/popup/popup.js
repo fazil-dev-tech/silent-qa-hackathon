@@ -40,7 +40,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Retrieve active session ID from chrome storage
     chrome.storage.local.get(['session_id', 'api_endpoint'], async (stored) => {
-      const activeSessionId = stored.session_id || 'ses_' + Date.now();
+      let activeSessionId = stored.session_id;
+      if (!activeSessionId) {
+        activeSessionId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+          ? crypto.randomUUID()
+          : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+              const r = (Math.random() * 16) | 0;
+              const v = c === 'x' ? r : (r & 0x3) | 0x8;
+              return v.toString(16);
+            });
+        chrome.storage.local.set({ session_id: activeSessionId });
+      }
       const baseApiUrl = (stored.api_endpoint || 'http://localhost:3000/api/ingest').replace('/api/ingest', '');
 
       try {

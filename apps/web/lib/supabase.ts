@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -21,3 +22,17 @@ export const supabaseAdmin = createClient(
     },
   }
 );
+
+/**
+ * Ensures any string is a valid RFC-4122 UUID format for Postgres UUID columns.
+ * If already a UUID, returns as-is. If missing, generates a fresh randomUUID().
+ * If arbitrary string (e.g. 'ses_abc123', 'evt_99'), deterministically hashes to UUID v4 format.
+ */
+export function ensureUUID(val?: string | null): string {
+  if (!val) return crypto.randomUUID();
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidRegex.test(val)) return val;
+  const hash = crypto.createHash('md5').update(val).digest('hex');
+  return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(13, 16)}-a${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
+}
+

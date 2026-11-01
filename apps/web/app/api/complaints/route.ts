@@ -8,7 +8,7 @@ import {
 } from '@silent-qa/shared';
 import type { TelemetryEvent } from '@silent-qa/shared';
 import { generateDefectReport } from '@/lib/llm';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin, ensureUUID } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +25,7 @@ export async function POST(req: Request) {
     }
 
     const { session_id, note, picked_selector, submitted_at } = parsed.data;
+    const safeSessionId = ensureUUID(session_id);
 
     // 1. Record Complaint in Supabase
     const complaintId = crypto.randomUUID();
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
 
     const { error: complaintErr } = await supabaseAdmin.from('complaints').insert({
       id: complaintId,
-      session_id,
+      session_id: safeSessionId,
       note,
       picked_selector: picked_selector || null,
       submitted_at: new Date(submitted_at).toISOString(),
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
     const { data: dbEvents, error: eventsErr } = await supabaseAdmin
       .from('events')
       .select('*')
-      .eq('session_id', session_id)
+      .eq('session_id', safeSessionId)
       .gte('ts', windowStartIso)
       .lte('ts', windowEndIso)
       .order('ts', { ascending: false });
