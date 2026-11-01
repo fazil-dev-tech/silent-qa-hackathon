@@ -6,6 +6,59 @@
 (() => {
   let port: chrome.runtime.Port | null = null;
   let heartbeatTimer: any = null;
+  let isRecordingEnabled = true;
+
+  // Track recent interactions for quick selection in popup
+  interface RecentInteraction {
+    id: string;
+    type: 'click' | 'input' | 'error' | 'network_error';
+    label: string;
+    selector?: string;
+    status?: number;
+    url?: string;
+    ts: number;
+  }
+
+  let recentInteractions: RecentInteraction[] = [];
+  let statsCaptured = 0;
+  let statsErrors = 0;
+
+  // Hydrate recording state and recent items
+  try {
+    chrome.storage?.local?.get(['sqa_recording_enabled', 'sqa_recent_interactions', 'sqa_stats'], (res) => {
+      if (typeof res?.sqa_recording_enabled === 'boolean') {
+        isRecordingEnabled = res.sqa_recording_enabled;
+      }
+      if (Array.isArray(res?.sqa_recent_interactions)) {
+        recentInteractions = res.sqa_recent_interactions;
+      }
+      if (res?.sqa_stats) {
+        statsCaptured = res.sqa_stats.captured || 0;
+        statsErrors = res.sqa_stats.errors || 0;
+      }
+    });
+
+    chrome.storage?.onChanged?.addListener((changes) => {
+      if (changes.sqa_recording_enabled) {
+        isRecordingEnabled = !!changes.sqa_recording_enabled.newValue;
+      }
+    });
+  } catch {}
+
+  function updateRecentInteraction(item: RecentInteraction) {
+    if (!isRecordingEnabled) return;
+    recentInteractions = [item, ...recentInteractions.filter((i) => i.id !== item.id)].slice(0, 5);
+    statsCaptured++;
+    if (item.type === 'error' || item.type === 'network_error') {
+      statsErrors++;
+    }
+    try {
+      chrome.storage?.local?.set({
+        sqa_recent_interactions: recentInteractions,
+        sqa_stats: { captured: statsCaptured, errors: statsErrors, lastActive: Date.now() },
+      });
+    } catch {}
+  }
 
   // 1. Establish resilient port with worker (Keep-Alive loophole fix)
   function connectPort() {
@@ -31,6 +84,7 @@
   connectPort();
 
   function sendToWorker(eventData: Record<string, unknown>) {
+    if (!isRecordingEnabled) return; // 0 overhead when paused
     try {
       if (port) {
         port.postMessage({ type: 'EVENT', payload: eventData });
@@ -49,8 +103,31 @@
 
   window.addEventListener('message', (event) => {
     if (event.source !== window || event.data?.source !== 'SILENT_QA_MAIN') return;
+    if (!isRecordingEnabled) return;
     hasActivitySinceLastClick = true;
-    sendToWorker(event.data.payload);
+    const payload = event.data?.payload;
+    if (!payload) return;
+
+    // Track API errors or exceptions in recent interactions
+    if (payload.type === 'network' && payload.status >= 400) {
+      updateRecentInteraction({
+        id: payload.id,
+        type: 'network_error',
+        label: `${payload.method || 'API'} ${payload.url} (${payload.status})`,
+        url: payload.url,
+        status: payload.status,
+        ts: payload.ts || Date.now(),
+      });
+    } else if (payload.type === 'error' || payload.severity === 'error' || payload.severity === 'critical') {
+      updateRecentInteraction({
+        id: payload.id,
+        type: 'error',
+        label: `Error: ${(payload.text || payload.message || 'Exception').slice(0, 50)}`,
+        ts: payload.ts || Date.now(),
+      });
+    }
+
+    sendToWorker(payload);
   });
 
   // 3. Helper: Generate unique CSS selector
@@ -81,6 +158,7 @@
   document.addEventListener(
     'click',
     (e) => {
+      if (!isRecordingEnabled) return;
       const path = e.composedPath();
       let targetNode = (path && path.length > 0 ? path[0] : e.target) as Element;
 
@@ -94,8 +172,18 @@
       const isObscured = topEl && topEl !== targetNode && !targetNode.contains(topEl);
 
       const now = Date.now();
+      const clickEventId = generateUUID();
       recentClicks.push({ ts: now, selector });
       recentClicks = recentClicks.filter((c) => now - c.ts <= 2000);
+
+      // Track into recent interactions for 1-click bug reporting in popup
+      updateRecentInteraction({
+        id: clickEventId,
+        type: 'click',
+        label: text ? `"${text}" (${selector})` : selector,
+        selector,
+        ts: now,
+      });
 
       // Rage click check
       const sameClicks = recentClicks.filter((c) => c.selector === selector);
@@ -111,7 +199,7 @@
       }
 
       sendToWorker({
-        id: generateUUID(),
+        id: clickEventId,
         ts: now,
         type: 'click',
         severity: 'info',
@@ -162,6 +250,7 @@
   document.addEventListener(
     'change',
     (e) => {
+      if (!isRecordingEnabled) return;
       const target = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
       if (!target || !target.tagName) return;
 
@@ -176,9 +265,18 @@
       const val = target.value || '';
       const maskedText = isSensitive ? '[MASKED]' : val.slice(0, 30);
 
+      const inputEventId = generateUUID();
+      updateRecentInteraction({
+        id: inputEventId,
+        type: 'input',
+        label: `${selector} (${inputType || 'field'})`,
+        selector,
+        ts: Date.now(),
+      });
+
       hasActivitySinceLastClick = true;
       sendToWorker({
-        id: generateUUID(),
+        id: inputEventId,
         ts: Date.now(),
         type: 'input',
         severity: 'info',
@@ -257,8 +355,19 @@
     characterData: true,
   });
 
-  // 6. Interactive Element Picker Listener
+  // 6. Interactive Element Picker & State Listener
   chrome.runtime.onMessage?.addListener((request, sender, sendResponse) => {
+    if (request.action === 'SET_RECORDING_STATE') {
+      isRecordingEnabled = !!request.enabled;
+      sendResponse({ success: true, enabled: isRecordingEnabled });
+      return;
+    }
+
+    if (request.action === 'GET_RECORDING_STATE') {
+      sendResponse({ enabled: isRecordingEnabled });
+      return;
+    }
+
     if (request.action === 'START_PICKER') {
       let activeHoverEl: HTMLElement | null = null;
 

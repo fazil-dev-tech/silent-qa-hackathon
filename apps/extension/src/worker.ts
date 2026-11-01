@@ -28,10 +28,24 @@ let flushRateMs = 2000;
 let flushTimer: any = null;
 const ringBuffer: StoredEvent[] = [];
 
-// Dynamic session & project state loaded from Chrome storage
+// Dynamic session, tester & project state loaded from Chrome storage
 let sessionId = generateUUID();
 let projectToken = 'sqa_live_demo_key_2026';
 let apiEndpoint = 'http://localhost:3000/api/ingest';
+let testerName = 'Engineer #1';
+let deviceTag = 'Station-01';
+let isRecordingEnabled = true;
+
+function updateBadge() {
+  try {
+    if (chrome.action?.setBadgeText) {
+      chrome.action.setBadgeText({ text: isRecordingEnabled ? 'REC' : 'OFF' });
+      chrome.action.setBadgeBackgroundColor({
+        color: isRecordingEnabled ? '#16A34A' : '#6B7280',
+      });
+    }
+  } catch {}
+}
 
 function restartFlushTimer() {
   if (flushTimer) clearInterval(flushTimer);
@@ -40,17 +54,23 @@ function restartFlushTimer() {
 
 // Hydrate from storage
 chrome.storage.local.get(
-  ['project_token', 'session_id', 'api_endpoint', 'buffer_cap', 'flush_rate'],
+  ['project_token', 'session_id', 'api_endpoint', 'buffer_cap', 'flush_rate', 'tester_name', 'device_tag', 'sqa_recording_enabled'],
   (res) => {
     if (res.project_token) projectToken = res.project_token;
     if (res.session_id) sessionId = res.session_id;
     if (res.api_endpoint) apiEndpoint = res.api_endpoint;
     if (res.buffer_cap) bufferCap = Number(res.buffer_cap);
+    if (res.tester_name) testerName = res.tester_name;
+    if (res.device_tag) deviceTag = res.device_tag;
+    if (typeof res.sqa_recording_enabled === 'boolean') {
+      isRecordingEnabled = res.sqa_recording_enabled;
+    }
     if (res.flush_rate) {
       flushRateMs = Number(res.flush_rate);
       restartFlushTimer();
     }
     if (!res.session_id) chrome.storage.local.set({ session_id: sessionId });
+    updateBadge();
   }
 );
 
@@ -59,6 +79,12 @@ chrome.storage.onChanged.addListener((changes) => {
   if (changes.session_id) sessionId = changes.session_id.newValue;
   if (changes.api_endpoint) apiEndpoint = changes.api_endpoint.newValue;
   if (changes.buffer_cap) bufferCap = Number(changes.buffer_cap.newValue);
+  if (changes.tester_name) testerName = changes.tester_name.newValue;
+  if (changes.device_tag) deviceTag = changes.device_tag.newValue;
+  if (changes.sqa_recording_enabled) {
+    isRecordingEnabled = !!changes.sqa_recording_enabled.newValue;
+    updateBadge();
+  }
   if (changes.flush_rate) {
     flushRateMs = Number(changes.flush_rate.newValue);
     restartFlushTimer();
@@ -72,6 +98,7 @@ chrome.runtime.onConnect.addListener((port) => {
       if (msg.type === 'HEARTBEAT') {
         port.postMessage({ type: 'HEARTBEAT_ACK', ts: Date.now() });
       } else if (msg.type === 'EVENT' && msg.payload) {
+        if (!isRecordingEnabled) return;
         pushEvent({
           session_id: sessionId,
           ...msg.payload,
@@ -91,6 +118,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // 2. Buffer Management
 function pushEvent(event: StoredEvent) {
+  if (!isRecordingEnabled) return;
   if (!event.id || !event.id.includes('-')) {
     event.id = generateUUID();
   }
@@ -103,7 +131,7 @@ function pushEvent(event: StoredEvent) {
 // 3. Batch Flush to API
 let isFlushing = false;
 async function flushEvents() {
-  if (isFlushing || ringBuffer.length === 0) return;
+  if (isFlushing || ringBuffer.length === 0 || !isRecordingEnabled) return;
   isFlushing = true;
 
   const batch = ringBuffer.splice(0, 50);
@@ -117,6 +145,8 @@ async function flushEvents() {
       body: JSON.stringify({
         project_token: projectToken,
         session_id: sessionId,
+        tester_name: testerName,
+        device_tag: deviceTag,
         events: batch,
       }),
     });
@@ -137,6 +167,8 @@ async function flushEvents() {
             body: JSON.stringify({
               project_token: projectToken,
               session_id: sessionId,
+              tester_name: testerName,
+              device_tag: deviceTag,
               events: drainBatch,
             }),
           });
@@ -162,3 +194,4 @@ async function flushEvents() {
 
 // Start recurring flush timer based on configured flush rate
 restartFlushTimer();
+updateBadge();

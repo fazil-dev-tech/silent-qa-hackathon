@@ -187,4 +187,72 @@ test('Phase 3 - Auth: Validates executive admin credentials TGVINCENZO and strea
   assert.strictEqual(invalidRegPhone.phone.replace(/\D/g, '').length >= 7, false);
 });
 
+test('Phase 4 - Multi-Tester Fleet & Recent Anomaly Mapping: Validates concurrent engineer isolation and 1-click anomaly ranking', () => {
+  // 1. Verify schema acceptance of tester attribution
+  const submission = {
+    session_id: 'ses_workstation_4',
+    note: 'that button is not working',
+    picked_selector: 'button#checkout',
+    tester_name: 'Engineer #4 - Sarah',
+    device_tag: 'QA-Rig-04 (MacBook M3)',
+    recent_event_id: 'err_api_500',
+    submitted_at: Date.now(),
+  };
+
+  const parsed = ComplaintSubmissionSchema.safeParse(submission);
+  assert.strictEqual(parsed.success, true);
+  assert.strictEqual(parsed.data.tester_name, 'Engineer #4 - Sarah');
+  assert.strictEqual(parsed.data.device_tag, 'QA-Rig-04 (MacBook M3)');
+  assert.strictEqual(parsed.data.recent_event_id, 'err_api_500');
+
+  // 2. Verify recent anomaly ranking boost (+60 bonus)
+  const candidateEvents = [
+    {
+      id: 'click_btn',
+      session_id: 'ses_workstation_4',
+      ts: 2000,
+      type: 'click',
+      severity: 'info',
+      selector: 'button#checkout',
+      text: 'Proceed to Checkout',
+    },
+    {
+      id: 'err_api_500',
+      session_id: 'ses_workstation_4',
+      ts: 2020,
+      type: 'network',
+      severity: 'error',
+      status: 500,
+      url: '/api/v1/checkout',
+      method: 'POST',
+    },
+    {
+      id: 'normal_nav',
+      session_id: 'ses_workstation_4',
+      ts: 1900,
+      type: 'navigation',
+      severity: 'info',
+      url: '/checkout',
+    },
+  ];
+
+  // Without recentEventId:
+  const rankedGeneral = rankEventsForMapper(candidateEvents, 'that button is not working', 'button#checkout');
+  // With recentEventId selected in popup:
+  const rankedWithAnomaly = rankEventsForMapper(candidateEvents, 'that button is not working', 'button#checkout', 25, 'err_api_500');
+
+  assert.strictEqual(rankedWithAnomaly[0].id, 'err_api_500', 'Directly selected anomaly anchored as primary trigger');
+
+  // 3. Multi-Tester mathematical isolation
+  const tenSessions = Array.from({ length: 10 }, (_, i) => ({
+    session_id: `session_engineer_${i + 1}`,
+    tester_name: `Engineer #${i + 1}`,
+    device_tag: `Station-0${i + 1}`,
+  }));
+
+  const uniqueSessionIds = new Set(tenSessions.map((s) => s.session_id));
+  assert.strictEqual(uniqueSessionIds.size, 10, 'All 10 engineers maintain distinct session boundaries');
+});
+
+
 

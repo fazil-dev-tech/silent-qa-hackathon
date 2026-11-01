@@ -2,22 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Silent QA — Extension Settings & Preferences</title>
+  <title>Silent QA — Multi-Tester Fleet Settings & Carrier Configuration</title>
   <style>
     :root {
       --bg: #FFF8F8;
       --card: #FFFFFF;
       --accent: #DC2626;
       --accent-hover: #B91C1C;
+      --green: #16A34A;
+      --green-bg: #DCFCE7;
       --ink: #111827;
       --ink-secondary: #4B5563;
+      --ink-muted: #9CA3AF;
       --border: rgba(17, 24, 39, 0.12);
+      --shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      max-width: 680px;
+      max-width: 720px;
       margin: 2.5rem auto;
-      padding: 0 1.5rem;
+      padding: 0 1.5rem 3rem 1.5rem;
       background: var(--bg);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: var(--ink);
@@ -27,7 +37,10 @@
     .header {
       margin-bottom: 2rem;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 1rem;
+      padding-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
     }
 
     h1 {
@@ -44,10 +57,19 @@
       color: var(--accent);
     }
 
-    p {
+    p.subtitle {
       color: var(--ink-secondary);
-      font-size: 0.9rem;
-      margin: 0;
+      font-size: 0.88rem;
+    }
+
+    .fleet-badge {
+      background: #FEE2E2;
+      color: var(--accent);
+      border: 1px solid #FCA5A5;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
     }
 
     .card {
@@ -56,19 +78,28 @@
       border-radius: 12px;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      box-shadow: var(--shadow);
     }
 
     .card-title {
       font-size: 1.05rem;
       font-weight: 800;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
     .card-desc {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: var(--ink-secondary);
-      margin-bottom: 1rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
     }
 
     .field {
@@ -80,17 +111,19 @@
       font-size: 0.825rem;
       font-weight: 700;
       margin-bottom: 0.35rem;
+      color: var(--ink);
     }
 
     input[type="text"], input[type="number"], select {
       width: 100%;
-      box-sizing: border-box;
       padding: 0.6rem 0.75rem;
       border: 1px solid var(--border);
       border-radius: 8px;
       font-size: 0.875rem;
       outline: none;
       font-family: inherit;
+      background: #FFFFFF;
+      transition: all 0.15s ease;
     }
 
     input[type="text"]:focus, select:focus {
@@ -98,9 +131,14 @@
       box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
     }
 
-    .actions {
+    .field-hint {
+      font-size: 0.73rem;
+      color: var(--ink-muted);
+      margin-top: 0.3rem;
+    }
+
+    .btn-row {
       display: flex;
-      justify-content: flex-end;
       gap: 0.75rem;
       margin-top: 1.5rem;
     }
@@ -113,103 +151,205 @@
       cursor: pointer;
       border: none;
       transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
     }
 
     .btn-primary {
       background: var(--accent);
-      color: #FFFFFF;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
     }
 
     .btn-primary:hover {
       background: var(--accent-hover);
+      transform: translateY(-1px);
     }
 
     .btn-secondary {
-      background: #FFFFFF;
+      background: #fff;
       color: var(--ink);
       border: 1px solid var(--border);
     }
 
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
     .status-msg {
       margin-top: 1rem;
-      padding: 0.75rem;
+      padding: 0.75rem 1rem;
       border-radius: 8px;
       font-size: 0.85rem;
       font-weight: 600;
       display: none;
     }
+
+    .test-box {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: #F9FAFB;
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-top: 0.75rem;
+    }
+
+    .session-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.85rem;
+      background: #F3F4F6;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid rgba(17, 24, 39, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1><span>●</span> Silent QA Extension Preferences</h1>
-    <p>Configure carrier-grade in-browser telemetry ingestion, buffer capacity, and privacy scrubbing.</p>
+    <div>
+      <h1><span>●</span> Silent QA Fleet Settings</h1>
+      <p class="subtitle">Multi-Tester Attribution, Recording Rules & Supabase Cloud Carrier</p>
+    </div>
+    <div class="fleet-badge">Fleet v2.4 Active</div>
   </div>
 
   <form id="settings-form">
-    <!-- Server & API Ingestion -->
+    <!-- Section 1: Tester Identity & Fleet Attribution -->
     <div class="card">
-      <div class="card-title">Backend Connection & Carrier API</div>
-      <div class="card-desc">Specify the target Next.js API endpoint where flight recorder telemetry batches are dispatched.</div>
+      <div class="card-title">👤 Tester Identity & Workstation Profile</div>
+      <div class="card-desc">
+        Used to attribute telemetry events, reports, and AI reproduction scripts to the exact engineer and computer in concurrent team testing.
+      </div>
 
-      <div class="field">
-        <label for="api-endpoint">Ingest Endpoint URL:</label>
-        <input type="text" id="api-endpoint" value="http://localhost:3000/api/ingest" placeholder="http://localhost:3000/api/ingest" />
+      <div class="grid-2">
+        <div class="field">
+          <label for="tester-name">Tester Full Name / Tag</label>
+          <input type="text" id="tester-name" placeholder="e.g. Engineer #1 - Alex Rivera" required>
+          <div class="field-hint">Displayed in Admin Command Center & defect reports.</div>
+        </div>
+
+        <div class="field">
+          <label for="device-tag">Device / Machine Station Tag</label>
+          <input type="text" id="device-tag" placeholder="e.g. QA-Station-01 (Win 11)" required>
+          <div class="field-hint">Allows isolating reports across 10+ concurrent workstations.</div>
+        </div>
       </div>
 
       <div class="field">
-        <label for="project-token">Project Ingestion Token:</label>
-        <input type="text" id="project-token" value="sqa_live_demo_key_2026" />
+        <label for="default-rec-state">Default Recording State on Browser Launch</label>
+        <select id="default-rec-state">
+          <option value="active">Active (ON) — Automatically capture telemetry on browser startup</option>
+          <option value="paused">Paused (OFF) — Start paused; only record when explicitly enabled</option>
+        </select>
+        <div class="field-hint">You can always toggle recording at any time from the extension popup.</div>
       </div>
     </div>
 
-    <!-- Buffer & Streaming -->
+    <!-- Section 2: Gateway & Project Authentication -->
     <div class="card">
-      <div class="card-title">Telemetry Ring Buffer & Flush Rate</div>
-      <div class="card-desc">Tune the in-memory circular buffer capacity and periodic transmission frequency.</div>
+      <div class="card-title">🌐 Ingest Gateway & Project Authentication</div>
+      <div class="card-desc">Target API endpoint and SHA-256 verified project key for Supabase persistence.</div>
 
       <div class="field">
-        <label for="flush-interval">Flush Frequency (seconds):</label>
-        <select id="flush-interval">
-          <option value="2000">2 seconds (Ultra-Low Latency — Recommended)</option>
-          <option value="5000">5 seconds (Standard)</option>
-          <option value="10000">10 seconds (Throttled Bandwidth)</option>
-        </select>
+        <label for="api-endpoint">Backend Ingestion Endpoint</label>
+        <input type="text" id="api-endpoint" value="http://localhost:3000/api/ingest" required>
+        <div class="field-hint">Dispatches ring-buffered telemetry to the partitioned events table.</div>
       </div>
 
       <div class="field">
-        <label for="buffer-capacity">FIFO Buffer Slots:</label>
-        <select id="buffer-capacity">
-          <option value="250">250 slots (Lightweight)</option>
-          <option value="500" selected>500 slots (Carrier Grade — Recommended)</option>
-          <option value="1000">1000 slots (Heavy Web Apps)</option>
-        </select>
+        <label for="project-token">Project API Token</label>
+        <input type="text" id="project-token" value="sqa_live_demo_key_2026" required>
+        <div class="field-hint">Matches your project's hashed token in the Supabase database.</div>
+      </div>
+
+      <div class="test-box">
+        <button type="button" id="btn-test-gateway" class="btn-secondary" style="font-size: 0.8rem; padding: 0.5rem 0.8rem;">
+          ⚡ Test Gateway Latency
+        </button>
+        <span id="gateway-status" style="font-size: 0.8rem; color: var(--ink-secondary); font-weight: 600;">
+          Not tested yet.
+        </span>
       </div>
     </div>
 
-    <!-- Privacy & Redaction -->
+    <!-- Section 3: Telemetry Buffering & PII Controls -->
     <div class="card">
-      <div class="card-title">Client-Side Privacy Scrubber</div>
-      <div class="card-desc">Sanitizes sensitive customer data before telemetry leaves the browser context.</div>
+      <div class="card-title">⚙ Ring Buffer & Privacy Scrubbing</div>
+      <div class="card-desc">Tune telemetry resolution, transmission frequency, and client-side masking.</div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="buffer-capacity">Ring Buffer Capacity</label>
+          <select id="buffer-capacity">
+            <option value="250">250 events (Lightweight)</option>
+            <option value="500" selected>500 events (Recommended)</option>
+            <option value="1000">1,000 events (High Precision)</option>
+            <option value="2500">2,500 events (Heavy Stress Test)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="flush-interval">Flush Frequency</label>
+          <select id="flush-interval">
+            <option value="1000">1 second (Ultra-Low Latency)</option>
+            <option value="2000" selected>2 seconds (Default Balance)</option>
+            <option value="5000">5 seconds (Bandwidth Saver)</option>
+          </select>
+        </div>
+      </div>
 
       <div class="field">
-        <label for="pii-level">PII Scrubbing Policy:</label>
+        <label for="pii-level">PII & Credential Scrubbing</label>
         <select id="pii-level">
-          <option value="strict">Strict (Luhn CC + Tokens + PAN/Aadhaar + Email Redaction)</option>
-          <option value="standard">Standard (Tokens + Luhn CC)</option>
+          <option value="strict" selected>Strict — Mask passwords, cards, tokens & sensitive form values</option>
+          <option value="standard">Standard — Mask passwords and bearer tokens only</option>
+          <option value="off">Minimal — Retain form inputs (internal testing only)</option>
         </select>
       </div>
     </div>
 
-    <div class="actions">
-      <button type="button" class="btn-secondary" id="btn-reset">Reset to Defaults</button>
-      <button type="submit" class="btn-primary" id="btn-save">Save Preferences</button>
+    <!-- Section 4: Session Lifecycle & Reset -->
+    <div class="card">
+      <div class="card-title">🔄 Active Testing Session UUID</div>
+      <div class="card-desc">
+        Each workstation maintains an isolated RFC-4122 UUID session. Click Regenerate to start a fresh test run.
+      </div>
+
+      <div class="field">
+        <label>Current Workstation Session UUID</label>
+        <div class="session-code">
+          <span id="current-session-id">Loading...</span>
+          <button type="button" id="btn-copy-session" class="btn-secondary" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">Copy</button>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+        <button type="button" id="btn-new-session" class="btn-secondary" style="font-size: 0.8rem; padding: 0.5rem 0.85rem;">
+          🔄 Generate New Session UUID
+        </button>
+        <button type="button" id="btn-clear-queue" class="btn-secondary" style="font-size: 0.8rem; padding: 0.5rem 0.85rem; color: #DC2626;">
+          🗑 Clear Local Offline Queue
+        </button>
+      </div>
     </div>
 
-    <div class="status-msg" id="status-msg"></div>
+    <!-- Action Bar -->
+    <div class="btn-row">
+      <button type="submit" class="btn-primary">Save Preferences</button>
+      <button type="button" id="btn-reset" class="btn-secondary">Reset to Defaults</button>
+    </div>
+
+    <div id="status-msg" class="status-msg"></div>
   </form>
 
   <script src="options.js"></script>
 </body>
 </html>
-

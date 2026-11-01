@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { session_id, note, picked_selector, submitted_at } = parsed.data;
+    const { session_id, note, picked_selector, tester_name, device_tag, recent_event_id, submitted_at } = parsed.data;
     const safeSessionId = ensureUUID(session_id);
 
     // 1. Record Complaint in Supabase
@@ -78,8 +78,8 @@ export async function POST(req: Request) {
       fingerprint: e.fingerprint,
     }));
 
-    // 3. Rank events and summarize signals
-    const rankedEvents = rankEventsForMapper(candidateEvents, note, picked_selector, 25);
+    // 3. Rank events and summarize signals (Anchoring recent event if clicked in popup)
+    const rankedEvents = rankEventsForMapper(candidateEvents, note, picked_selector, 25, recent_event_id);
     const signalSummary = buildSignalSummary(rankedEvents);
 
     // 4. Generate AI defect report with deterministic fallback
@@ -93,12 +93,17 @@ export async function POST(req: Request) {
     const playwrightScript = generatePlaywrightReproductionScript(generatedReport, rankedEvents);
 
     const reportId = crypto.randomUUID();
+    const enrichedSteps = [
+      `[Tester: ${tester_name || 'Engineer #1'} • Device: ${device_tag || 'Station-01'}] Browser flight session initialized`,
+      ...generatedReport.steps,
+    ];
+
     const fullReport = {
       id: reportId,
       complaint_id: complaintId,
       title: generatedReport.title,
       severity: generatedReport.severity,
-      steps: generatedReport.steps,
+      steps: enrichedSteps,
       expected: generatedReport.expected,
       actual: generatedReport.actual,
       root_cause: generatedReport.root_cause_hypothesis,
@@ -134,13 +139,22 @@ export async function POST(req: Request) {
       }
     }
 
-    // 8. Record audit log
+    // 8. Record audit log with multi-tester attribution
     try {
       await supabaseAdmin.from('audit_log').insert({
         id: crypto.randomUUID(),
         action: 'REPORT_SYNTHESIZED',
         target_id: reportId,
-        details: { title: fullReport.title, severity: fullReport.severity, is_fallback: isFallback },
+        actor_email: tester_name || 'tester@silentqa.local',
+        details: {
+          title: fullReport.title,
+          severity: fullReport.severity,
+          is_fallback: isFallback,
+          tester_name: tester_name || 'Engineer #1',
+          device_tag: device_tag || 'Station-01',
+          session_id: safeSessionId,
+          recent_event_id: recent_event_id || null,
+        },
         timestamp: new Date().toISOString(),
       });
     } catch {

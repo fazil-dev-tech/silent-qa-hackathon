@@ -41,6 +41,8 @@ interface ReportItem {
   status: string;
   created_at: string;
   playwright_script?: string;
+  tester_name?: string;
+  device_tag?: string;
 }
 
 interface AdminUser {
@@ -545,8 +547,13 @@ export default function AdminDashboardPage() {
                           <Trash2 size={13} />
                         </button>
                       </div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', marginBottom: '0.35rem' }}>
                         {d.title}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: '#6B7280', marginBottom: '0.65rem' }}>
+                        <span>👤 {d.tester_name || 'QA Tester'}</span>
+                        <span>•</span>
+                        <span>💻 {d.device_tag || 'Station-01'}</span>
                       </div>
                       <div style={{ display: 'flex', gap: '0.4rem' }}>
                         <button
@@ -602,8 +609,13 @@ export default function AdminDashboardPage() {
                           <Trash2 size={13} />
                         </button>
                       </div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', marginBottom: '0.35rem' }}>
                         {d.title}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: '#6B7280', marginBottom: '0.65rem' }}>
+                        <span>👤 {d.tester_name || 'QA Tester'}</span>
+                        <span>•</span>
+                        <span>💻 {d.device_tag || 'Station-01'}</span>
                       </div>
                       <div style={{ display: 'flex', gap: '0.4rem' }}>
                         <button
@@ -659,8 +671,13 @@ export default function AdminDashboardPage() {
                           <Trash2 size={13} />
                         </button>
                       </div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', marginBottom: '0.35rem' }}>
                         {d.title}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: '#6B7280', marginBottom: '0.65rem' }}>
+                        <span>👤 {d.tester_name || 'QA Tester'}</span>
+                        <span>•</span>
+                        <span>💻 {d.device_tag || 'Station-01'}</span>
                       </div>
                       <div style={{ display: 'flex', gap: '0.4rem' }}>
                         <button
@@ -716,8 +733,13 @@ export default function AdminDashboardPage() {
                           <Trash2 size={13} />
                         </button>
                       </div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', marginBottom: '0.35rem' }}>
                         {d.title}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: '#6B7280', marginBottom: '0.65rem' }}>
+                        <span>👤 {d.tester_name || 'QA Tester'}</span>
+                        <span>•</span>
+                        <span>💻 {d.device_tag || 'Station-01'}</span>
                       </div>
                       <div style={{ display: 'flex', gap: '0.4rem' }}>
                         <span style={{ fontSize: '0.75rem', color: '#16A34A', fontWeight: 700, padding: '0.3rem 0' }}>

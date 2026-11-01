@@ -6,29 +6,41 @@
   <style>
     :root {
       --bg: #FFF8F8;
-      --glass: rgba(255, 255, 255, 0.95);
+      --card-bg: rgba(255, 255, 255, 0.98);
       --red-600: #DC2626;
       --red-500: #EF4444;
+      --red-50: #FEF2F2;
+      --green-600: #16A34A;
+      --green-50: #DCFCE7;
+      --amber-600: #D97706;
+      --amber-50: #FEF3C7;
       --ink: #111827;
       --ink-2: #4B5563;
-      --shadow: 0 8px 24px rgba(220, 38, 38, 0.12);
+      --ink-3: #9CA3AF;
+      --border: rgba(220, 38, 38, 0.15);
+      --shadow: 0 10px 28px rgba(220, 38, 38, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      width: 340px;
-      margin: 0;
-      padding: 1.25rem;
+      width: 360px;
+      padding: 1.15rem;
       background: var(--bg);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: var(--ink);
-      box-sizing: border-box;
     }
 
+    /* Header & ON/OFF Switch */
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.85rem;
+      margin-bottom: 0.75rem;
     }
 
     .title {
@@ -37,74 +49,307 @@
       display: flex;
       align-items: center;
       gap: 0.35rem;
+      letter-spacing: -0.01em;
     }
 
     .title span {
       color: var(--red-600);
     }
 
-    .badge {
-      background: #DCFCE7;
-      color: #166534;
+    .rec-toggle {
       border: 1px solid #86EFAC;
+      background: var(--green-50);
+      color: #166534;
       font-size: 0.72rem;
-      font-weight: 700;
-      padding: 0.2rem 0.6rem;
+      font-weight: 800;
+      padding: 0.25rem 0.65rem;
       border-radius: 9999px;
       display: flex;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.35rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 6px rgba(22, 163, 74, 0.15);
+      user-select: none;
     }
 
-    .badge-dot {
-      width: 6px;
-      height: 6px;
+    .rec-toggle:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(22, 163, 74, 0.25);
+    }
+
+    .rec-dot {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: #16A34A;
+      background: var(--green-600);
+      animation: pulse-dot 2s infinite;
     }
 
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+
+    .rec-toggle.is-paused {
+      background: var(--amber-50);
+      color: #92400E;
+      border-color: #FCD34D;
+      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.15);
+    }
+
+    .rec-toggle.is-paused .rec-dot {
+      background: var(--amber-600);
+      animation: none;
+    }
+
+    /* Main Container Card */
     .card {
-      background: var(--glass);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(220, 38, 38, 0.15);
-      border-radius: 12px;
-      padding: 1rem;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.95rem;
       box-shadow: var(--shadow);
+    }
+
+    /* Paused Banner */
+    .paused-banner {
+      background: var(--amber-50);
+      border: 1px dashed var(--amber-600);
+      color: #92400E;
+      padding: 0.5rem 0.65rem;
+      border-radius: 8px;
+      font-size: 0.73rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Strips */
+    .meta-strips {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
     }
 
     .site-strip {
       font-size: 0.75rem;
       color: var(--ink-2);
-      margin-bottom: 0.75rem;
-      padding: 0.35rem 0.5rem;
+      padding: 0.35rem 0.55rem;
       background: #F9FAFB;
       border-radius: 6px;
-      border: 1px solid rgba(17, 24, 39, 0.06);
-      text-overflow: ellipsis;
+      border: 1px solid rgba(17, 24, 39, 0.08);
       overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
     }
 
+    .tester-strip {
+      font-size: 0.73rem;
+      color: var(--ink-2);
+      padding: 0.3rem 0.55rem;
+      background: #FFF1F2;
+      border-radius: 6px;
+      border: 1px solid rgba(220, 38, 38, 0.12);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--red-600);
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    /* Recent Interactions & Errors */
+    .recent-box {
+      margin-bottom: 0.75rem;
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      background: #FAFAFA;
+      border-radius: 8px;
+      padding: 0.5rem;
+    }
+
+    .recent-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
+    }
+
+    .recent-heading {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--ink-2);
+    }
+
+    .recent-count {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--red-600);
+      background: var(--red-50);
+      padding: 0.1rem 0.4rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .recent-chips {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .recent-chip {
+      background: #FFFFFF;
+      border: 1px solid rgba(17, 24, 39, 0.12);
+      border-radius: 6px;
+      padding: 0.35rem 0.5rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.74rem;
+      text-align: left;
+    }
+
+    .recent-chip:hover {
+      border-color: var(--red-600);
+      background: #FFF5F5;
+      transform: translateX(2px);
+    }
+
+    .recent-chip.is-selected {
+      border-color: var(--green-600);
+      background: var(--green-50);
+      box-shadow: 0 0 0 1.5px rgba(22, 163, 74, 0.25);
+    }
+
+    .chip-icon {
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .chip-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .chip-title {
+      font-weight: 700;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chip-meta {
+      font-size: 0.66rem;
+      color: var(--ink-3);
+    }
+
+    .recent-empty {
+      font-size: 0.72rem;
+      color: var(--ink-3);
+      padding: 0.4rem 0.2rem;
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* Bound Target Pill */
+    .bound-target-pill {
+      background: #DCFCE7;
+      border: 1px solid #86EFAC;
+      border-radius: 6px;
+      padding: 0.35rem 0.55rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      font-size: 0.74rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: #166534;
+    }
+
+    .bound-text {
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 0.5rem;
+    }
+
+    .btn-clear-target {
+      background: none;
+      border: none;
+      color: #166534;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 0 0.2rem;
+    }
+
+    /* Quick Phrases */
+    .quick-phrases {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .phrase-chip {
+      background: #F3F4F6;
+      border: 1px solid rgba(17, 24, 39, 0.1);
+      border-radius: 4px;
+      padding: 0.2rem 0.45rem;
+      font-size: 0.69rem;
+      font-weight: 600;
+      color: var(--ink-2);
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .phrase-chip:hover {
+      background: #FEE2E2;
+      border-color: #F87171;
+      color: var(--red-600);
+    }
+
+    /* Form Inputs */
     label {
       display: block;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--ink-2);
-      margin-bottom: 0.4rem;
+      font-size: 0.79rem;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 0.35rem;
     }
 
     textarea {
       width: 100%;
-      box-sizing: border-box;
-      border: 1px solid rgba(17, 24, 39, 0.15);
+      border: 1px solid rgba(17, 24, 39, 0.18);
       border-radius: 8px;
-      padding: 0.65rem;
-      font-size: 0.85rem;
+      padding: 0.6rem;
+      font-size: 0.83rem;
       font-family: inherit;
       resize: vertical;
-      min-height: 65px;
-      margin-bottom: 0.75rem;
+      min-height: 60px;
+      margin-bottom: 0.7rem;
       outline: none;
+      transition: border 0.15s ease, box-shadow 0.15s ease;
     }
 
     textarea:focus {
@@ -112,20 +357,25 @@
       box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
     }
 
+    /* Buttons */
     .btn-row {
       display: flex;
       gap: 0.5rem;
     }
 
-    button {
+    button.btn-action {
       flex: 1;
-      padding: 0.65rem 0.85rem;
-      font-size: 0.85rem;
-      font-weight: 700;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.83rem;
+      font-weight: 800;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.15s ease;
       border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
     }
 
     .btn-primary {
@@ -134,70 +384,145 @@
       box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover:not(:disabled) {
       background: var(--red-500);
       transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .btn-secondary {
       background: #fff;
       color: var(--ink);
-      border: 1px solid rgba(17, 24, 39, 0.15);
+      border: 1px solid rgba(17, 24, 39, 0.18) !important;
     }
 
     .btn-secondary:hover {
-      border-color: var(--red-600);
+      border-color: var(--red-600) !important;
       color: var(--red-600);
     }
 
+    /* Status Text */
     .status {
-      margin-top: 0.75rem;
-      font-size: 0.78rem;
+      margin-top: 0.6rem;
+      font-size: 0.76rem;
       color: var(--ink-2);
       text-align: center;
       min-height: 1.2rem;
       font-weight: 600;
+      line-height: 1.3;
     }
 
+    .btn-workspace {
+      width: 100%;
+      margin-top: 0.6rem;
+      font-size: 0.78rem;
+      padding: 0.5rem;
+      background: #F9FAFB;
+      border: 1px solid rgba(17, 24, 39, 0.12);
+      border-radius: 6px;
+      font-weight: 700;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-workspace:hover {
+      background: #FFFFFF;
+      border-color: var(--red-600);
+      color: var(--red-600);
+    }
+
+    /* Meta Footer */
     .session-meta {
-      margin-top: 0.75rem;
+      margin-top: 0.7rem;
       border-top: 1px solid rgba(17, 24, 39, 0.08);
-      padding-top: 0.6rem;
+      padding-top: 0.55rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.7rem;
-      color: #9CA3AF;
-      font-family: monospace;
+      font-size: 0.68rem;
+      color: var(--ink-3);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     }
   </style>
 </head>
 <body>
+  <!-- Header with Master Toggle -->
   <div class="header">
     <div class="title"><span>●</span> Silent QA</div>
-    <div class="badge"><span class="badge-dot"></span> Active Recording</div>
+    <button id="btn-toggle-recording" class="rec-toggle" type="button" title="Click to toggle telemetry recording ON/OFF">
+      <span class="rec-dot"></span>
+      <span id="rec-status-text">RECORDING: ON</span>
+    </button>
   </div>
 
   <div class="card">
-    <div class="site-strip" id="site-strip">
-      Host: <strong id="site-host">Monitoring Active Tab</strong>
+    <!-- Paused Warning Banner -->
+    <div id="paused-banner" class="paused-banner" style="display: none;">
+      <span>⏸</span>
+      <span>Recording is paused. Telemetry capture is suspended.</span>
     </div>
 
+    <!-- Metadata Strips -->
+    <div class="meta-strips">
+      <div class="site-strip" id="site-strip">
+        Host: <strong id="site-host">Monitoring Active Tab</strong>
+      </div>
+      <div class="tester-strip">
+        <span>👤 <strong id="tester-display">Engineer #1</strong> (<span id="station-display">Station-01</span>)</span>
+        <button id="btn-open-options" class="link-btn" type="button">⚙ Settings</button>
+      </div>
+    </div>
+
+    <!-- Recent Interactions Quick Picker -->
+    <div class="recent-box">
+      <div class="recent-top">
+        <span class="recent-heading">⚡ Recent Actions & Detected Issues</span>
+        <span class="recent-count" id="recent-count">0 events</span>
+      </div>
+      <div class="recent-chips" id="recent-chips">
+        <div class="recent-empty">No actions captured yet. Interacting with page populates this list.</div>
+      </div>
+    </div>
+
+    <!-- Bound Target Indicator -->
+    <div id="bound-target-pill" class="bound-target-pill" style="display: none;">
+      <span style="margin-right: 0.3rem;">🎯 Bound:</span>
+      <span id="bound-text" class="bound-text">button#checkout</span>
+      <button id="btn-clear-target" type="button" class="btn-clear-target" title="Clear selection">✕</button>
+    </div>
+
+    <!-- Quick Phrase Shortcuts -->
+    <div class="quick-phrases">
+      <button type="button" class="phrase-chip" data-phrase="That button is not working / unresponsive">Unresponsive</button>
+      <button type="button" class="phrase-chip" data-phrase="Clicking this triggered a 500 server error">500 Server Error</button>
+      <button type="button" class="phrase-chip" data-phrase="Screen froze or endless loading spinner">Endless Spinner</button>
+      <button type="button" class="phrase-chip" data-phrase="Incorrect calculations or wrong data rendered">Wrong Data</button>
+    </div>
+
+    <!-- Complaint Note -->
     <label for="complaint-note">Flag an issue in one sentence:</label>
-    <textarea id="complaint-note" placeholder="Example: clicking checkout button causes 500 error"></textarea>
+    <textarea id="complaint-note" placeholder="Example: that button is not working / causes 500 error"></textarea>
 
+    <!-- Button Row -->
     <div class="btn-row">
-      <button class="btn-secondary" id="btn-pick" type="button">🎯 Pick Element</button>
-      <button class="btn-primary" id="btn-submit" type="button">Flag Bug →</button>
+      <button class="btn-secondary btn-action" id="btn-pick" type="button">🎯 Pick Element</button>
+      <button class="btn-primary btn-action" id="btn-submit" type="button">Flag Bug →</button>
     </div>
-    <div id="picked-label" style="font-size: 0.75rem; color: #DC2626; margin-top: 0.4rem; display: none; font-family: monospace;"></div>
 
+    <!-- Live Status Text -->
     <div class="status" id="status-text"></div>
 
-    <button id="btn-workspace" type="button" class="btn-secondary" style="width: 100%; margin-top: 0.6rem; font-size: 0.78rem; padding: 0.5rem;">
+    <!-- QA Flight Workspace Navigation -->
+    <button id="btn-workspace" type="button" class="btn-workspace">
       Open QA Flight Workspace ↗
     </button>
 
+    <!-- Session Identity Footer -->
     <div class="session-meta">
       <span>SESSION:</span>
       <span id="session-display">Loading...</span>

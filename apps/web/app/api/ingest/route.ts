@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { project_token, session_id, events } = result.data;
+    const { project_token, session_id, tester_name, device_tag, events } = result.data;
     const safeSessionId = ensureUUID(session_id);
 
     // 1. Verify Project Authentication via API key hash
@@ -32,12 +32,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Database project lookup failed', details: projErr.message }, { status: 500 });
     }
 
-    // 2. Ensure active session exists in database
+    // 2. Ensure active session exists in database with tester attribution
     const projectId = project?.id || '33333333-3333-3333-3333-333333333333';
     const clientAppUrl = events.find((e) => e.url && e.url.startsWith('http'))?.url ||
       req.headers.get('origin') ||
       req.headers.get('referer') ||
       'https://production-app';
+
+    const rawAgent = req.headers.get('user-agent') || 'Browser-Agent';
+    const enrichedAgent = tester_name || device_tag
+      ? `[Tester: ${tester_name || 'QA Engineer'}] [Device: ${device_tag || 'Workstation'}] ${rawAgent}`
+      : rawAgent;
 
     await supabaseAdmin
       .from('sessions')
@@ -45,7 +50,7 @@ export async function POST(req: Request) {
         id: safeSessionId,
         project_id: projectId,
         app_url: clientAppUrl,
-        user_agent: req.headers.get('user-agent') || 'Browser-Agent',
+        user_agent: enrichedAgent,
       }, { onConflict: 'id' });
 
     // 3. Enrich events with computed fingerprints and valid timestamps

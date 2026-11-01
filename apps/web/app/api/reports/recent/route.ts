@@ -15,9 +15,28 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    const enrichedReports = (reports || []).map((r) => {
+      let testerName = 'QA Tester';
+      let deviceTag = 'Station-01';
+
+      if (Array.isArray(r.steps) && r.steps[0]) {
+        const match = r.steps[0].match(/\[Tester:\s*([^•\]]+)(?:•\s*Device:\s*([^\]]+))?\]/);
+        if (match) {
+          testerName = match[1].trim();
+          if (match[2]) deviceTag = match[2].trim();
+        }
+      }
+
+      return {
+        ...r,
+        tester_name: testerName,
+        device_tag: deviceTag,
+      };
+    });
+
     return NextResponse.json({
       success: true,
-      reports: reports || [],
+      reports: enrichedReports,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message }, { status: 500 });

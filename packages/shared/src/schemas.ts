@@ -38,6 +38,8 @@ export const TelemetryEventSchema = z.object({
 export const IngestBatchSchema = z.object({
   project_token: z.string().min(1),
   session_id: z.string().min(1),
+  tester_name: z.string().optional(),
+  device_tag: z.string().optional(),
   events: z.array(TelemetryEventSchema).min(1).max(200),
 });
 
@@ -45,6 +47,9 @@ export const ComplaintSubmissionSchema = z.object({
   session_id: z.string().min(1),
   note: z.string().min(1).max(500),
   picked_selector: z.string().optional(),
+  tester_name: z.string().optional(),
+  device_tag: z.string().optional(),
+  recent_event_id: z.string().optional(),
   submitted_at: z.number().int().positive().default(() => Date.now()),
 });
 

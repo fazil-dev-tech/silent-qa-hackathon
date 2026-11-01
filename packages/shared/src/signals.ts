@@ -113,7 +113,8 @@ export function rankEventsForMapper(
   events: TelemetryEvent[],
   note: string,
   pickedSelector?: string,
-  limit = 25
+  limit = 25,
+  recentEventId?: string
 ): TelemetryEvent[] {
   const noteKeywords = note
     .toLowerCase()
@@ -140,8 +141,13 @@ export function rankEventsForMapper(
     }
 
     // 4. Picked selector bonus
-    if (pickedSelector && event.selector && event.selector.includes(pickedSelector)) {
-      score += 35;
+    if (pickedSelector && event.selector && (event.selector.includes(pickedSelector) || pickedSelector.includes(event.selector))) {
+      score += 45;
+    }
+
+    // 5. Recent Event ID direct mapping bonus
+    if (recentEventId && (event.id === recentEventId || event.trigger_event_id === recentEventId)) {
+      score += 60;
     }
 
     return { event, score };

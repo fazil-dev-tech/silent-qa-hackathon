@@ -41,6 +41,8 @@ interface ReportItem {
   playwright_script?: string;
   status: string;
   ai_fallback: boolean;
+  tester_name?: string;
+  device_tag?: string;
   created_at: string;
 }
 
@@ -237,6 +239,8 @@ export default function TesterWorkspacePage() {
   // Search & filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
+  const [testerFilter, setTesterFilter] = useState<string>('all');
+  const distinctTesters = Array.from(new Set(reports.map((r) => r.tester_name).filter(Boolean))) as string[];
   const [copiedScript, setCopiedScript] = useState(false);
   const [copiedCmd, setCopiedCmd] = useState(false);
 
@@ -271,7 +275,8 @@ export default function TesterWorkspacePage() {
       r.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.root_cause?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesSeverity = severityFilter === 'all' || r.severity === severityFilter;
-    return matchesQuery && matchesSeverity;
+    const matchesTester = testerFilter === 'all' || r.tester_name === testerFilter;
+    return matchesQuery && matchesSeverity && matchesTester;
   });
 
   // Load real reports directly from Supabase API
@@ -669,6 +674,11 @@ export default function TesterWorkspacePage() {
                     <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#111827', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                       {r.title}
                     </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: '#6B7280', marginTop: '0.25rem' }}>
+                      <span>👤 {r.tester_name || 'QA Tester'}</span>
+                      <span>•</span>
+                      <span>💻 {r.device_tag || 'Station-01'}</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -683,7 +693,7 @@ export default function TesterWorkspacePage() {
               {/* Header Bar */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                     <span className={`badge-severity severity-${selectedReport.severity}`}>{selectedReport.severity}</span>
                     <span
                       style={{
@@ -716,6 +726,11 @@ export default function TesterWorkspacePage() {
                   <h2 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#111827' }}>
                     {selectedReport.title}
                   </h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.35rem', fontSize: '0.8rem', color: '#6B7280' }}>
+                    <span>Reported by: <strong style={{ color: '#111827' }}>{selectedReport.tester_name || 'QA Tester'}</strong></span>
+                    <span>•</span>
+                    <span>Station: <strong style={{ color: '#111827' }}>{selectedReport.device_tag || 'Station-01'}</strong></span>
+                  </div>
                 </div>
 
                 {/* Actions Toolbar */}
