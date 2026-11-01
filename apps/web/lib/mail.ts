@@ -83,3 +83,64 @@ export function renderReportEmailHtml(report: DefectReport, publicUrl: string): 
 </html>`;
 }
 
+export function renderOtpEmailHtml(code: string, purpose: 'login' | 'register'): string {
+  const isRegister = purpose === 'register';
+  const actionTitle = isRegister ? 'Complete Your Team Registration' : 'Sign In to Your Workspace';
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #FFF8F8; margin: 0; padding: 32px 16px; color: #111827; }
+    .card { max-width: 500px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #FEE2E2; overflow: hidden; box-shadow: 0 8px 30px rgba(220, 38, 38, 0.08); }
+    .header { background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); color: #ffffff; padding: 24px; text-align: center; }
+    .logo-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ffffff; margin-right: 6px; }
+    .title { font-size: 18px; font-weight: 800; letter-spacing: 0.05em; margin: 0; }
+    .content { padding: 32px 24px; text-align: center; }
+    .subtitle { font-size: 15px; color: #4B5563; margin-bottom: 24px; line-height: 1.5; }
+    .otp-box { background: #FEF2F2; border: 2px dashed #DC2626; border-radius: 12px; padding: 18px; margin: 24px 0; }
+    .otp-code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 34px; font-weight: 900; letter-spacing: 8px; color: #DC2626; margin: 0; }
+    .expiry { font-size: 12px; color: #6B7280; margin-top: 8px; font-weight: 600; }
+    .security-note { font-size: 12px; color: #9CA3AF; margin-top: 24px; line-height: 1.5; border-top: 1px solid #F3F4F6; padding-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="title"><span class="logo-dot"></span>SILENT QA ACCESS VERIFICATION</div>
+    </div>
+    <div class="content">
+      <h2 style="font-size: 20px; font-weight: 800; color: #111827; margin: 0 0 8px;">${actionTitle}</h2>
+      <p class="subtitle">Use the verification code below to securely verify your email address and access the Silent QA platform.</p>
+      
+      <div class="otp-box">
+        <div class="otp-code">${code}</div>
+        <div class="expiry">Expires in 10 minutes • Single-use only</div>
+      </div>
+
+      <p style="font-size: 13px; color: #4B5563;">Enter this 6-digit code in the login verification screen to proceed.</p>
+
+      <div class="security-note">
+        If you did not request this code, you can safely ignore this email. Someone may have typed your address by mistake.
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+export async function sendOtpMail(to: string, code: string, purpose: 'login' | 'register') {
+  const isRegister = purpose === 'register';
+  const subject = `[Silent QA] Your 6-Digit Verification Code: ${code}`;
+  const html = renderOtpEmailHtml(code, purpose);
+
+  return transport.sendMail({
+    from: process.env.MAIL_FROM || 'Silent QA <mohamedfazilpasha156@gmail.com>',
+    to,
+    subject,
+    html,
+  });
+}
+
+

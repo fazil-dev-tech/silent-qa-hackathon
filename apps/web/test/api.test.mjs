@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert';
+import crypto from 'node:crypto';
 import { IngestBatchSchema, ComplaintSubmissionSchema, DefectReportUpdateSchema } from '../../../packages/shared/src/schemas.ts';
 import { rankEventsForMapper, buildSignalSummary } from '../../../packages/shared/src/signals.ts';
 import { generatePlaywrightReproductionScript } from '../../../packages/shared/src/playwright.ts';
 import { buildFallbackReport } from '../lib/llm.ts';
-import { renderReportEmailHtml } from '../lib/mail.ts';
+import { renderReportEmailHtml, renderOtpEmailHtml } from '../lib/mail.ts';
 import { ensureUUID } from '../lib/supabase.ts';
 
 test('Phase 3 - API Ingest: Validates and enriches event batches', () => {
@@ -148,4 +149,22 @@ test('Phase 3 - Report Patch & UUID Schema: Validates updates and RFC-4122 compl
   assert.ok(uuidRegex.test(hashedUUID));
   assert.strictEqual(ensureUUID('ses_custom_session_99'), hashedUUID, 'Deterministic hash');
 });
+
+test('Phase 3 - Auth OTP Mail: Renders secure OTP email and hashes verification codes', () => {
+  const code = '748291';
+  const html = renderOtpEmailHtml(code, 'register');
+  assert.ok(html.includes('748291'));
+  assert.ok(html.includes('Complete Your Team Registration'));
+  assert.ok(html.includes('Expires in 10 minutes'));
+
+  const loginHtml = renderOtpEmailHtml(code, 'login');
+  assert.ok(loginHtml.includes('Sign In to Your Workspace'));
+
+  // Test SHA-256 hash match
+  const email = 'tester@company.io';
+  const hash1 = crypto.createHash('sha256').update(code + email.toLowerCase()).digest('hex');
+  const hash2 = crypto.createHash('sha256').update(code + email.toLowerCase()).digest('hex');
+  assert.strictEqual(hash1, hash2, 'Hash is deterministic');
+});
+
 

@@ -68,6 +68,9 @@ export default function RootLayout({
               <Link href="/admin" style={{ color: '#4B5563', transition: 'color 0.15s' }}>
                 Admin Dashboard
               </Link>
+              <Link href="/login" style={{ color: '#DC2626', transition: 'color 0.15s' }}>
+                Sign In / Register
+              </Link>
             </nav>
           </div>
 
