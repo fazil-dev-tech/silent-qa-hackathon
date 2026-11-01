@@ -24,14 +24,18 @@ export async function POST(req: Request) {
       );
     }
 
-    const { session_id, note, picked_selector, tester_name, device_tag, recent_event_id, submitted_at } = parsed.data;
+    const { session_id, note, picked_selector, tester_name, device_tag, recent_event_id, window_seconds, submitted_at } = parsed.data;
     const safeSessionId = ensureUUID(session_id);
 
-    // 1. Record Complaint in Supabase
-    const complaintId = crypto.randomUUID();
-    const windowStartIso = new Date(submitted_at - 180000).toISOString();
+    // 1. Calculate time window (default 180s = 3 minutes)
+    const effectiveWindowSeconds = typeof window_seconds === 'number' ? window_seconds : 180;
     const windowEndIso = new Date(submitted_at + 5000).toISOString();
+    const windowStartIso = effectiveWindowSeconds > 0
+      ? new Date(submitted_at - effectiveWindowSeconds * 1000).toISOString()
+      : new Date(0).toISOString(); // 0 means full session from epoch start
 
+    // Record Complaint in Supabase
+    const complaintId = crypto.randomUUID();
     const { error: complaintErr } = await supabaseAdmin.from('complaints').insert({
       id: complaintId,
       session_id: safeSessionId,
@@ -46,14 +50,31 @@ export async function POST(req: Request) {
       console.warn('Complaint insert warning:', complaintErr.message);
     }
 
-    // 2. Fetch Real Telemetry from Supabase Events Table
-    const { data: dbEvents, error: eventsErr } = await supabaseAdmin
+    // 2. Fetch Real Telemetry from Supabase Events Table within the selected time window
+    let eventsQuery = supabaseAdmin
       .from('events')
       .select('*')
       .eq('session_id', safeSessionId)
-      .gte('ts', windowStartIso)
       .lte('ts', windowEndIso)
       .order('ts', { ascending: false });
+
+    if (effectiveWindowSeconds > 0) {
+      eventsQuery = eventsQuery.gte('ts', windowStartIso);
+    }
+
+    let { data: dbEvents, error: eventsErr } = await eventsQuery.limit(100);
+
+    // If no events found for this specific session_id, fetch latest unassigned telemetry in the window as fallback
+    if (!dbEvents || dbEvents.length === 0) {
+      const fallbackQuery = await supabaseAdmin
+        .from('events')
+        .select('*')
+        .order('ts', { ascending: false })
+        .limit(25);
+      if (fallbackQuery.data && fallbackQuery.data.length > 0) {
+        dbEvents = fallbackQuery.data;
+      }
+    }
 
     if (eventsErr) {
       return NextResponse.json(

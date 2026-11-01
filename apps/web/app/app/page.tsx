@@ -62,6 +62,11 @@ export default function TesterWorkspacePage() {
   const [selectedReport, setSelectedReport] = useState<ReportItem | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Session & Time Window Selection
+  const [availableSessions, setAvailableSessions] = useState<any[]>([]);
+  const [selectedSessionId, setSelectedSessionId] = useState<string>('');
+  const [timeWindowSeconds, setTimeWindowSeconds] = useState<number>(180); // 180s = 3 minutes default
+
   // Manual telemetry test flag input (for real tester notes, no fake presets)
   const [testNote, setTestNote] = useState('');
   const [pickedSelector, setPickedSelector] = useState('');
@@ -103,12 +108,23 @@ export default function TesterWorkspacePage() {
         setCurrentUser(data.user);
         setAuthChecked(true);
         fetchReports();
+        fetchSessions();
       } catch {
         window.location.replace('/login?redirect=/app');
       }
     }
     verifyAuth();
   }, []);
+
+  async function fetchSessions() {
+    try {
+      const res = await fetch('/api/sessions');
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableSessions(data.sessions || []);
+      }
+    } catch {}
+  }
 
   // 2. Load genuine reports directly from Supabase API
   async function fetchReports() {
@@ -146,7 +162,7 @@ export default function TesterWorkspacePage() {
     setProbeResult(null);
 
     try {
-      const sessionId = crypto.randomUUID();
+      const sessionId = selectedSessionId || crypto.randomUUID();
       const baseTs = Date.now();
 
       // Submit complaint & trigger OpenRouter AI causal synthesis
@@ -159,6 +175,7 @@ export default function TesterWorkspacePage() {
           picked_selector: pickedSelector.trim() || undefined,
           tester_name: currentUser?.name || 'QA Engineer',
           device_tag: 'Station-01 (Active Workstation)',
+          window_seconds: timeWindowSeconds,
           submitted_at: baseTs,
         }),
       });
@@ -426,6 +443,79 @@ export default function TesterWorkspacePage() {
                   background: '#FFFFFF',
                 }}
               />
+            </div>
+
+            {/* Extension Recorded Session Selector */}
+            <div style={{ marginBottom: '0.65rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                <label style={{ fontSize: '0.725rem', fontWeight: 700, color: '#374151' }}>
+                  Recorded Session:
+                </label>
+                <span style={{ fontSize: '0.68rem', color: '#6B7280' }}>
+                  {availableSessions.length} active sessions
+                </span>
+              </div>
+              <select
+                value={selectedSessionId}
+                onChange={(e) => setSelectedSessionId(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem 0.6rem',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(17, 24, 39, 0.14)',
+                  fontSize: '0.8rem',
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                  background: '#FFFFFF',
+                  color: '#111827',
+                }}
+              >
+                <option value="">● Live / Latest Active Browser Session</option>
+                {availableSessions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.tester} ({s.device}) — {s.host} ({new Date(s.started_at).toLocaleTimeString()})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Time Window Slice Selector */}
+            <div style={{ marginBottom: '0.75rem' }}>
+              <label style={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, color: '#374151', marginBottom: '0.3rem' }}>
+                Telemetry Time Window (Slice):
+              </label>
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                {[
+                  { label: '60s', value: 60, desc: 'Last 1 min' },
+                  { label: '3m (Rec)', value: 180, desc: 'Last 3 mins' },
+                  { label: '5m', value: 300, desc: 'Last 5 mins' },
+                  { label: '15m', value: 900, desc: 'Last 15 mins' },
+                  { label: 'Full Session', value: 0, desc: 'Full Session' },
+                ].map((win) => (
+                  <button
+                    key={win.value}
+                    type="button"
+                    onClick={() => setTimeWindowSeconds(win.value)}
+                    style={{
+                      flex: 1,
+                      minWidth: '55px',
+                      padding: '0.25rem 0.35rem',
+                      borderRadius: '6px',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      border: timeWindowSeconds === win.value ? '1px solid #DC2626' : '1px solid rgba(17, 24, 39, 0.12)',
+                      background: timeWindowSeconds === win.value ? '#FEE2E2' : '#FFFFFF',
+                      color: timeWindowSeconds === win.value ? '#991B1B' : '#4B5563',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      textAlign: 'center',
+                    }}
+                    title={win.desc}
+                  >
+                    {win.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div style={{ marginBottom: '0.85rem' }}>

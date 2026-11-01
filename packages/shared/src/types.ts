@@ -62,6 +62,7 @@ export interface Complaint {
   tester_name?: string;
   device_tag?: string;
   recent_event_id?: string;
+  window_seconds?: number;
   submitted_at: number;
   window_start?: number;
   window_end?: number;

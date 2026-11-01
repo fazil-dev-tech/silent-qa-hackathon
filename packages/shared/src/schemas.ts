@@ -51,6 +51,7 @@ export const ComplaintSubmissionSchema = z.object({
   tester_name: z.string().optional(),
   device_tag: z.string().optional(),
   recent_event_id: z.string().optional(),
+  window_seconds: z.number().int().optional(),
   submitted_at: z.number().int().positive().default(() => Date.now()),
 });
 
