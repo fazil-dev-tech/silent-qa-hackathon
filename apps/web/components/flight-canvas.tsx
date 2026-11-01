@@ -68,11 +68,30 @@ export default function FlightCanvas() {
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
+    // Soft radial texture for circular glowing particles
+    const canvas = document.createElement('canvas');
+    canvas.width = 32;
+    canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+      gradient.addColorStop(0, 'rgba(220, 38, 38, 1)');
+      gradient.addColorStop(0.4, 'rgba(220, 38, 38, 0.5)');
+      gradient.addColorStop(1, 'rgba(220, 38, 38, 0)');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(16, 16, 16, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    const particleTexture = new THREE.CanvasTexture(canvas);
+
     const particleMaterial = new THREE.PointsMaterial({
-      size: 2.2,
-      vertexColors: true,
+      size: 1.6,
+      map: particleTexture,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.55,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
     });
 
     const particleSystem = new THREE.Points(particleGeometry, particleMaterial);

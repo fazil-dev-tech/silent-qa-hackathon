@@ -7,13 +7,18 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    const { email, mode = 'login' } = await req.json();
+    const { email, phone, mode = 'login' } = await req.json();
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {
       return NextResponse.json({ error: 'Please enter a valid email address' }, { status: 400 });
     }
 
+    if (mode === 'register' && (!phone || typeof phone !== 'string' || phone.replace(/\D/g, '').length < 7)) {
+      return NextResponse.json({ error: 'Please enter a valid mobile number with at least 7 digits' }, { status: 400 });
+    }
+
     const cleanEmail = email.trim().toLowerCase();
+    const cleanPhone = phone ? phone.trim() : '';
 
     // 1. Generate cryptographically strong 6-digit OTP code
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();

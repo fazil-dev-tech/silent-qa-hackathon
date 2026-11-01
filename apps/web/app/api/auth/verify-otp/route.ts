@@ -6,13 +6,14 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    const { email, code, mode = 'login', org_name, role = 'tester' } = await req.json();
+    const { email, phone, code, mode = 'login' } = await req.json();
 
     if (!email || !code) {
       return NextResponse.json({ error: 'Email and 6-digit verification code are required' }, { status: 400 });
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const cleanPhone = phone ? String(phone).trim() : '';
     const cleanCode = code.trim();
 
     // 1. Compute submitted code hash
@@ -59,42 +60,23 @@ export async function POST(req: Request) {
       .update({ used_at: new Date().toISOString() })
       .eq('id', activeOtp.id);
 
-    // 5. Registration / Profile Resolution in Supabase
-    let orgId: string | null = null;
-
-    if (mode === 'register' && org_name) {
-      // Find or create organization
-      const cleanOrgName = org_name.trim();
-      const { data: existingOrg } = await supabaseAdmin
-        .from('organizations')
-        .select('id')
-        .eq('name', cleanOrgName)
-        .maybeSingle();
-
-      if (existingOrg) {
-        orgId = existingOrg.id;
-      } else {
-        const { data: newOrg } = await supabaseAdmin
-          .from('organizations')
-          .insert({ name: cleanOrgName })
-          .select('id')
-          .single();
-        orgId = newOrg?.id || null;
-      }
-    }
-
-    if (!orgId) {
-      // Default fallback organization
+    // 5. Organization association in Supabase
+    let orgId = '11111111-1111-1111-1111-111111111111';
+    try {
       const { data: defaultOrg } = await supabaseAdmin
         .from('organizations')
         .select('id')
         .limit(1)
         .maybeSingle();
-      orgId = defaultOrg?.id || '11111111-1111-1111-1111-111111111111';
+      if (defaultOrg?.id) {
+        orgId = defaultOrg.id;
+      }
+    } catch {
+      // fallback
     }
 
-    // Upsert user profile
-    const validRole = role === 'lead' ? 'lead' : role === 'admin' ? 'admin' : 'tester';
+    // Default role for registered users is 'tester' (roles input removed)
+    const validRole = 'tester';
     const { data: profile, error: profErr } = await supabaseAdmin
       .from('profiles')
       .upsert({
@@ -109,8 +91,21 @@ export async function POST(req: Request) {
       console.warn('[Profile Upsert Warning]:', profErr.message);
     }
 
-    // Determine target redirect
-    const targetRedirect = validRole === 'lead' || validRole === 'admin' ? '/admin' : '/app';
+    // Log to audit trail
+    try {
+      await supabaseAdmin.from('audit_log').insert({
+        id: crypto.randomUUID(),
+        action: mode === 'register' ? 'USER_REGISTERED' : 'USER_LOGIN',
+        target_id: profile?.id || cleanEmail,
+        details: { email: cleanEmail, phone: cleanPhone, role: validRole },
+        timestamp: new Date().toISOString(),
+      });
+    } catch {
+      // non-blocking
+    }
+
+    // Always redirect regular users to /app
+    const targetRedirect = '/app';
 
     // 6. Return verified session payload & set auth cookie
     const response = NextResponse.json({
@@ -118,6 +113,7 @@ export async function POST(req: Request) {
       message: 'Verification successful',
       user: {
         email: cleanEmail,
+        phone: cleanPhone,
         role: validRole,
         org_id: orgId,
       },
@@ -126,7 +122,7 @@ export async function POST(req: Request) {
 
     response.cookies.set({
       name: 'sqa_session',
-      value: JSON.stringify({ email: cleanEmail, role: validRole, ts: Date.now() }),
+      value: JSON.stringify({ email: cleanEmail, phone: cleanPhone, role: validRole, ts: Date.now() }),
       httpOnly: true,
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 days

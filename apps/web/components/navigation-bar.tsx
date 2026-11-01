@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { User, LogOut, ShieldCheck, ChevronRight } from 'lucide-react';
+import { User, LogOut, ShieldCheck, ChevronRight, Sparkles, KeyRound } from 'lucide-react';
 
 interface AuthUser {
+  name?: string;
   email: string;
+  phone?: string;
   role: string;
   loginTime: number;
 }
@@ -28,6 +30,8 @@ export default function NavigationBar() {
         } else {
           setUser(null);
         }
+      } else {
+        setUser(null);
       }
     } catch {
       setUser(null);
@@ -53,22 +57,25 @@ export default function NavigationBar() {
     }
   }
 
+  const isAdmin = user?.role === 'admin';
+
   return (
     <header
       style={{
         position: 'sticky',
         top: 0,
         zIndex: 50,
-        background: 'rgba(255, 248, 248, 0.88)',
-        backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(220, 38, 38, 0.1)',
+        background: 'rgba(255, 248, 248, 0.92)',
+        backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(220, 38, 38, 0.12)',
         padding: '0.85rem 2rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.02)',
       }}
     >
-      {/* Brand & Nav */}
+      {/* Brand & Left Navigation */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
         <Link
           href="/"
@@ -76,10 +83,11 @@ export default function NavigationBar() {
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            fontSize: '1.15rem',
+            fontSize: '1.2rem',
             fontWeight: 800,
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.025em',
             color: '#111827',
+            textDecoration: 'none',
           }}
         >
           <span
@@ -96,40 +104,71 @@ export default function NavigationBar() {
           <span style={{ color: '#DC2626' }}>QA</span>
         </Link>
 
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', fontSize: '0.9rem', fontWeight: 600 }}>
-          <Link
-            href="/"
+        {/* Navigation links: Visible ONLY AFTER user logs in */}
+        {user && (
+          <nav
             style={{
-              color: pathname === '/' ? '#DC2626' : '#4B5563',
-              transition: 'color 0.15s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.25rem',
+              fontSize: '0.875rem',
+              fontWeight: 600,
             }}
           >
-            Overview
-          </Link>
-          <Link
-            href="/app"
-            style={{
-              color: pathname === '/app' || pathname?.startsWith('/app/report') ? '#DC2626' : '#4B5563',
-              transition: 'color 0.15s',
-            }}
-          >
-            Tester Workspace
-          </Link>
-          <Link
-            href="/admin"
-            style={{
-              color: pathname === '/admin' ? '#DC2626' : '#4B5563',
-              transition: 'color 0.15s',
-            }}
-          >
-            Admin Dashboard
-          </Link>
-        </nav>
+            <Link
+              href="/"
+              style={{
+                color: pathname === '/' ? '#DC2626' : '#4B5563',
+                textDecoration: 'none',
+                transition: 'color 0.15s',
+              }}
+            >
+              Overview
+            </Link>
+            <Link
+              href="/app"
+              style={{
+                color: pathname === '/app' || pathname?.startsWith('/app/report') ? '#DC2626' : '#4B5563',
+                textDecoration: 'none',
+                transition: 'color 0.15s',
+              }}
+            >
+              Tester Workspace
+            </Link>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                style={{
+                  color: pathname === '/admin' ? '#DC2626' : '#4B5563',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                }}
+              >
+                <span>Admin Command Center</span>
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    fontWeight: 800,
+                    background: '#FEE2E2',
+                    color: '#DC2626',
+                    padding: '0.1rem 0.35rem',
+                    borderRadius: '4px',
+                  }}
+                >
+                  CONSOLE
+                </span>
+              </Link>
+            )}
+          </nav>
+        )}
       </div>
 
       {/* Right Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        {/* Supabase Status Pill */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        {/* Supabase Realtime Health Pill */}
         <div
           style={{
             display: 'flex',
@@ -152,7 +191,7 @@ export default function NavigationBar() {
               backgroundColor: '#16A34A',
             }}
           />
-          Supabase Live
+          Live Cloud
         </div>
 
         {/* User Account / Auth Status */}
@@ -162,42 +201,59 @@ export default function NavigationBar() {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.4rem',
-                fontSize: '0.8rem',
+                gap: '0.45rem',
+                fontSize: '0.82rem',
                 fontWeight: 600,
                 color: '#1F2937',
                 background: '#FFFFFF',
-                padding: '0.3rem 0.65rem',
+                padding: '0.35rem 0.75rem',
                 borderRadius: '8px',
                 border: '1px solid rgba(17, 24, 39, 0.1)',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
               }}
             >
               <User size={14} color="#DC2626" />
               <span
                 style={{
-                  maxWidth: '140px',
+                  maxWidth: '150px',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                 }}
-                title={user.email}
+                title={user.name || user.email}
               >
-                {user.email}
+                {user.name || (user.email ? user.email.split('@')[0] : 'User')}
               </span>
               <span
                 style={{
                   fontSize: '0.65rem',
                   fontWeight: 800,
                   textTransform: 'uppercase',
-                  background: '#FEE2E2',
-                  color: '#991B1B',
-                  padding: '0.1rem 0.35rem',
+                  background: isAdmin ? '#FEE2E2' : '#E0E7FF',
+                  color: isAdmin ? '#991B1B' : '#3730A3',
+                  padding: '0.12rem 0.4rem',
                   borderRadius: '4px',
                 }}
               >
                 {user.role}
               </span>
             </div>
+
+            <Link
+              href={isAdmin ? '/admin' : '/app'}
+              className="btn-primary"
+              style={{
+                padding: '0.45rem 1rem',
+                fontSize: '0.82rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                textDecoration: 'none',
+              }}
+            >
+              <span>{isAdmin ? 'Admin Portal' : 'Workspace'}</span>
+              <ChevronRight size={14} />
+            </Link>
 
             <button
               onClick={handleSignOut}
@@ -207,7 +263,7 @@ export default function NavigationBar() {
                 background: 'transparent',
                 border: '1px solid rgba(17, 24, 39, 0.15)',
                 borderRadius: '8px',
-                padding: '0.35rem 0.55rem',
+                padding: '0.4rem 0.6rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -219,43 +275,31 @@ export default function NavigationBar() {
               }}
             >
               <LogOut size={13} />
-              <span>{signingOut ? '...' : 'Exit'}</span>
+              <span>{signingOut ? '...' : 'Sign Out'}</span>
             </button>
           </div>
         ) : (
-          <Link
-            href="/login"
-            style={{
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              color: '#DC2626',
-              padding: '0.35rem 0.75rem',
-              borderRadius: '8px',
-              border: '1px solid rgba(220, 38, 38, 0.25)',
-              background: '#FFF1F2',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            Sign In / Register
-          </Link>
+          /* When NOT logged in: Prominent Sign In / Register CTA */
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <Link
+              href="/login"
+              className="btn-primary"
+              style={{
+                padding: '0.5rem 1.15rem',
+                fontSize: '0.875rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                textDecoration: 'none',
+                boxShadow: '0 4px 14px rgba(220, 38, 38, 0.25)',
+              }}
+            >
+              <KeyRound size={14} />
+              <span>Sign In / Register</span>
+            </Link>
+          </div>
         )}
-
-        <Link
-          href="/app"
-          className="btn-primary"
-          style={{
-            padding: '0.45rem 1rem',
-            fontSize: '0.85rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.3rem',
-          }}
-        >
-          <span>Workspace</span>
-          <ChevronRight size={14} />
-        </Link>
       </div>
     </header>
   );
 }
-

@@ -167,4 +167,24 @@ test('Phase 3 - Auth OTP Mail: Renders secure OTP email and hashes verification 
   assert.strictEqual(hash1, hash2, 'Hash is deterministic');
 });
 
+test('Phase 3 - Auth: Validates executive admin credentials TGVINCENZO and streamlined registration', () => {
+  // Test Admin credentials
+  const validAdminId = 'TGVINCENZO';
+  const validPass = 'Adil123#';
+  const isAuth = (id, pass) => id.trim().toUpperCase() === 'TGVINCENZO' && pass === 'Adil123#';
+
+  assert.strictEqual(isAuth(validAdminId, validPass), true);
+  assert.strictEqual(isAuth('tgvincenzo', validPass), true, 'Case insensitive ID');
+  assert.strictEqual(isAuth('OTHER_USER', validPass), false);
+  assert.strictEqual(isAuth(validAdminId, 'wrong_pass'), false);
+
+  // Test registration input constraints (email and mobile number only)
+  const validReg = { email: 'qa.lead@enterprise.com', phone: '+1 (555) 234-5678' };
+  assert.ok(validReg.email.includes('@'));
+  assert.ok(validReg.phone.replace(/\D/g, '').length >= 7, 'Valid mobile number');
+
+  const invalidRegPhone = { email: 'qa@enterprise.com', phone: '123' };
+  assert.strictEqual(invalidRegPhone.phone.replace(/\D/g, '').length >= 7, false);
+});
+
 

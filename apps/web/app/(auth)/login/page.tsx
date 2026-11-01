@@ -1,33 +1,47 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShieldCheck,
   Mail,
-  Building,
-  UserCheck,
+  Phone,
+  Lock,
   Sparkles,
   ArrowRight,
   RotateCcw,
   CheckCircle2,
   AlertCircle,
   KeyRound,
-  Compass,
+  Shield,
+  Eye,
+  EyeOff,
+  User,
 } from 'lucide-react';
 
-export default function AuthPage() {
+export const dynamic = 'force-dynamic';
+
+function AuthForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTarget = searchParams?.get('redirect') || null;
 
-  // Mode: login or register
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  // Active Login Method: 'tester' (Email & Mobile OTP) or 'admin' (ID & Password)
+  const [authMethod, setAuthMethod] = useState<'tester' | 'admin'>('tester');
 
-  // Form fields
+  // Tester Mode: 'login' (Email only) or 'register' (Email + Mobile)
+  const [testerMode, setTesterMode] = useState<'login' | 'register'>('login');
+
+  // Tester Form fields (ONLY Email and Mobile Number — roles removed)
   const [email, setEmail] = useState('');
-  const [orgName, setOrgName] = useState('');
-  const [role, setRole] = useState<'tester' | 'lead' | 'admin'>('tester');
+  const [phone, setPhone] = useState('');
+
+  // Admin Form fields (ID: TGVINCENZO, Password: Adil123#)
+  const [adminId, setAdminId] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // OTP State
   const [otpSent, setOtpSent] = useState(false);
@@ -38,7 +52,6 @@ export default function AuthPage() {
 
   // Resend countdown
   const [cooldown, setCooldown] = useState(0);
-
   const otpInputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
@@ -49,10 +62,15 @@ export default function AuthPage() {
     return () => clearInterval(timer);
   }, [cooldown]);
 
-  // 1. Submit email to receive real OTP via Gmail Nodemailer
+  // 1. Submit email (+ mobile for registration) to receive OTP
   async function handleSendOtp(e: React.FormEvent) {
     e.preventDefault();
     if (!email) return;
+
+    if (testerMode === 'register' && (!phone || phone.replace(/\D/g, '').length < 7)) {
+      setMessage({ text: 'Please enter a valid mobile number with at least 7 digits', type: 'error' });
+      return;
+    }
 
     setLoading(true);
     setMessage(null);
@@ -63,9 +81,8 @@ export default function AuthPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
-          mode,
-          org_name: mode === 'register' ? orgName : undefined,
-          role: mode === 'register' ? role : undefined,
+          phone: testerMode === 'register' ? phone : undefined,
+          mode: testerMode,
         }),
       });
 
@@ -73,7 +90,7 @@ export default function AuthPage() {
       if (res.ok) {
         setOtpSent(true);
         setCooldown(60);
-        setMessage({ text: `✓ Verification code sent to ${email}`, type: 'success' });
+        setMessage({ text: `✓ 6-digit code dispatched to ${email}`, type: 'success' });
         setTimeout(() => otpInputsRef.current[0]?.focus(), 150);
       } else {
         throw new Error(data.error || 'Failed to dispatch verification code');
@@ -87,7 +104,6 @@ export default function AuthPage() {
 
   // 2. Handle OTP input changes, paste events & auto-focus
   function handleOtpChange(index: number, val: string) {
-    // If user pasted multi-digit code
     if (val.length > 1) {
       const digits = val.replace(/\D/g, '').slice(0, 6).split('');
       const updated = [...otpCode];
@@ -97,25 +113,16 @@ export default function AuthPage() {
       setOtpCode(updated);
       const nextIdx = Math.min(5, digits.length);
       otpInputsRef.current[nextIdx]?.focus();
-
-      if (digits.length === 6) {
-        verifyCode(digits.join(''));
-      }
       return;
     }
 
+    const singleDigit = val.replace(/\D/g, '');
     const updated = [...otpCode];
-    updated[index] = val;
+    updated[index] = singleDigit;
     setOtpCode(updated);
 
-    if (val && index < 5) {
+    if (singleDigit && index < 5) {
       otpInputsRef.current[index + 1]?.focus();
-    }
-
-    // Auto verify once all 6 digits entered
-    const complete = updated.join('');
-    if (complete.length === 6 && !updated.includes('')) {
-      verifyCode(complete);
     }
   }
 
@@ -125,8 +132,15 @@ export default function AuthPage() {
     }
   }
 
-  // 3. Verify OTP code against Supabase database
-  async function verifyCode(codeToVerify: string) {
+  // 3. Verify submitted OTP Code
+  async function handleVerifyOtp(e: React.FormEvent) {
+    e.preventDefault();
+    const fullCode = otpCode.join('');
+    if (fullCode.length !== 6) {
+      setMessage({ text: 'Please enter all 6 verification digits', type: 'error' });
+      return;
+    }
+
     setVerifying(true);
     setMessage(null);
 
@@ -136,382 +150,674 @@ export default function AuthPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
-          code: codeToVerify,
-          mode,
-          org_name: orgName,
-          role,
+          phone: testerMode === 'register' ? phone : undefined,
+          code: fullCode,
+          mode: testerMode,
         }),
       });
 
       const data = await res.json();
       if (res.ok) {
-        setMessage({ text: '✓ Verified! Entering Silent QA...', type: 'success' });
+        setMessage({ text: '✓ Verified successfully! Redirecting...', type: 'success' });
         setTimeout(() => {
-          router.push(data.redirect || '/app');
+          router.push(redirectTarget || data.redirect || '/app');
         }, 600);
       } else {
-        throw new Error(data.error || 'Verification code failed');
+        throw new Error(data.error || 'Verification failed');
       }
     } catch (err: any) {
-      setMessage({ text: err?.message || 'Invalid code', type: 'error' });
+      setMessage({ text: err?.message || 'Verification failed', type: 'error' });
     } finally {
       setVerifying(false);
+    }
+  }
+
+  // 4. Admin Direct Authentication (ID: TGVINCENZO, Pass: Adil123#)
+  async function handleAdminLogin(e: React.FormEvent) {
+    e.preventDefault();
+    if (!adminId || !adminPassword) {
+      setMessage({ text: 'Please enter Administrator ID and password', type: 'error' });
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const res = await fetch('/api/auth/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: adminId,
+          password: adminPassword,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setMessage({ text: '✓ Administrator verified! Entering Command Center...', type: 'success' });
+        setTimeout(() => {
+          router.push(redirectTarget || '/admin');
+        }, 500);
+      } else {
+        throw new Error(data.error || 'Invalid Administrator credentials');
+      }
+    } catch (err: any) {
+      setMessage({ text: err?.message || 'Admin authentication failed', type: 'error' });
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
     <div
       style={{
+        minHeight: 'calc(100vh - 72px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '85vh',
-        padding: '2.5rem 1.5rem',
-        position: 'relative',
-        overflow: 'hidden',
+        padding: '2rem 1.5rem',
+        background: 'linear-gradient(180deg, #FFF8F8 0%, #FFFFFF 100%)',
       }}
     >
-      {/* Background Ambient Glow */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '500px',
-          height: '500px',
-          background: 'radial-gradient(circle, rgba(220, 38, 38, 0.08) 0%, rgba(255, 248, 248, 0) 70%)',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }}
-      />
-
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="glass-panel"
         style={{
           width: '100%',
           maxWidth: '460px',
-          padding: '2.5rem 2rem',
-          position: 'relative',
-          zIndex: 1,
-          background: '#ffffff',
-          borderRadius: '20px',
-          boxShadow: '0 20px 60px rgba(220, 38, 38, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04)',
         }}
       >
-        {/* Header Branding */}
+        {/* Brand Card Header */}
         <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
           <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '52px',
-              height: '52px',
+              width: '48px',
+              height: '48px',
               borderRadius: '14px',
-              background: 'rgba(220, 38, 38, 0.1)',
+              background: '#FEE2E2',
               color: '#DC2626',
-              marginBottom: '1rem',
+              marginBottom: '0.85rem',
+              boxShadow: '0 4px 12px rgba(220, 38, 38, 0.15)',
             }}
           >
-            <ShieldCheck size={28} />
+            <ShieldCheck size={26} />
           </div>
-
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#111827', letterSpacing: '-0.02em', marginBottom: '0.35rem' }}>
-            {otpSent ? 'Enter Verification Code' : mode === 'register' ? 'Register Your QA Team' : 'Sign In to Silent QA'}
+          <h1
+            style={{
+              fontSize: '1.65rem',
+              fontWeight: 800,
+              letterSpacing: '-0.025em',
+              color: '#111827',
+              margin: '0 0 0.4rem 0',
+            }}
+          >
+            Silent QA Access Portal
           </h1>
-          <p style={{ fontSize: '0.85rem', color: '#6B7280' }}>
-            {otpSent
-              ? `We sent a single-use code to ${email}`
-              : mode === 'register'
-              ? 'Create your organization account with real Gmail OTP verification.'
-              : 'Passwordless team access with real Gmail SMTP verification.'}
+          <p style={{ fontSize: '0.875rem', color: '#6B7280', margin: 0 }}>
+            {authMethod === 'admin'
+              ? 'Lead & Administrative Command Center access'
+              : 'Passkey-free flight recorder access via verified OTP'}
           </p>
         </div>
 
-        {/* Feedback Alert */}
-        {message && (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
+        {/* Primary Method Switcher (Tester vs Admin) */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            background: '#F3F4F6',
+            padding: '0.25rem',
+            borderRadius: '10px',
+            marginBottom: '1.25rem',
+            border: '1px solid rgba(17, 24, 39, 0.06)',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => {
+              setAuthMethod('tester');
+              setMessage(null);
+            }}
             style={{
-              padding: '0.75rem 1rem',
-              borderRadius: '10px',
-              marginBottom: '1.25rem',
-              background: message.type === 'success' ? '#DCFCE7' : '#FEE2E2',
-              border: `1px solid ${message.type === 'success' ? '#86EFAC' : '#F87171'}`,
-              color: message.type === 'success' ? '#166534' : '#991B1B',
-              fontSize: '0.825rem',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
+              padding: '0.55rem',
+              borderRadius: '8px',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              border: 'none',
+              cursor: 'pointer',
+              background: authMethod === 'tester' ? '#FFFFFF' : 'transparent',
+              color: authMethod === 'tester' ? '#111827' : '#6B7280',
+              boxShadow: authMethod === 'tester' ? '0 2px 6px rgba(0, 0, 0, 0.06)' : 'none',
+              transition: 'all 0.15s ease',
             }}
           >
-            {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-            <span>{message.text}</span>
-          </motion.div>
-        )}
+            Tester Workspace
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setAuthMethod('admin');
+              setMessage(null);
+            }}
+            style={{
+              padding: '0.55rem',
+              borderRadius: '8px',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              border: 'none',
+              cursor: 'pointer',
+              background: authMethod === 'admin' ? '#FFFFFF' : 'transparent',
+              color: authMethod === 'admin' ? '#DC2626' : '#6B7280',
+              boxShadow: authMethod === 'admin' ? '0 2px 6px rgba(0, 0, 0, 0.06)' : 'none',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            Admin Portal
+          </button>
+        </div>
 
-        {/* View 1: Send OTP (Sign In / Register) */}
-        {!otpSent ? (
-          <div>
-            {/* Mode Switcher Tabs */}
-            <div
-              style={{
-                display: 'flex',
-                background: '#F3F4F6',
-                borderRadius: '10px',
-                padding: '0.25rem',
-                marginBottom: '1.5rem',
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('login');
-                  setMessage(null);
-                }}
+        {/* Auth Glass Card */}
+        <div
+          style={{
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(16px)',
+            borderRadius: '16px',
+            padding: '1.75rem',
+            border: '1px solid rgba(220, 38, 38, 0.14)',
+            boxShadow: '0 12px 36px rgba(220, 38, 38, 0.08)',
+          }}
+        >
+          {/* Notification Alert Message */}
+          <AnimatePresence>
+            {message && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                animate={{ opacity: 1, height: 'auto', marginBottom: '1.25rem' }}
+                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                 style={{
-                  flex: 1,
-                  padding: '0.55rem',
-                  borderRadius: '8px',
-                  border: 'none',
-                  fontSize: '0.85rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  background: mode === 'login' ? '#ffffff' : 'transparent',
-                  color: mode === 'login' ? '#DC2626' : '#6B7280',
-                  boxShadow: mode === 'login' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
-                  transition: 'all 0.15s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '10px',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  background: message.type === 'success' ? '#DCFCE7' : '#FEE2E2',
+                  color: message.type === 'success' ? '#15803D' : '#DC2626',
+                  border: `1px solid ${message.type === 'success' ? '#86EFAC' : '#FCA5A5'}`,
+                  overflow: 'hidden',
                 }}
               >
-                Sign In
-              </button>
+                {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                <span>{message.text}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('register');
-                  setMessage(null);
-                }}
-                style={{
-                  flex: 1,
-                  padding: '0.55rem',
-                  borderRadius: '8px',
-                  border: 'none',
-                  fontSize: '0.85rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  background: mode === 'register' ? '#ffffff' : 'transparent',
-                  color: mode === 'register' ? '#DC2626' : '#6B7280',
-                  boxShadow: mode === 'register' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                Register Team
-              </button>
-            </div>
+          {/* TAB 1: TESTER WORKSPACE AUTH (EMAIL & MOBILE OTP) */}
+          {authMethod === 'tester' && (
+            <>
+              {/* Login vs Register Toggle */}
+              {!otpSent && (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '1.5rem',
+                    marginBottom: '1.5rem',
+                    borderBottom: '1px solid #F3F4F6',
+                    paddingBottom: '0.75rem',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTesterMode('login');
+                      setMessage(null);
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '0.875rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      color: testerMode === 'login' ? '#DC2626' : '#9CA3AF',
+                      borderBottom: testerMode === 'login' ? '2px solid #DC2626' : '2px solid transparent',
+                      paddingBottom: '0.5rem',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    Tester Sign In
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTesterMode('register');
+                      setMessage(null);
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '0.875rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      color: testerMode === 'register' ? '#DC2626' : '#9CA3AF',
+                      borderBottom: testerMode === 'register' ? '2px solid #DC2626' : '2px solid transparent',
+                      paddingBottom: '0.5rem',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    New Registration
+                  </button>
+                </div>
+              )}
 
-            <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
-              {/* Registration Specific Fields */}
-              {mode === 'register' && (
-                <>
+              {/* Step 1: Input Details and Send OTP */}
+              {!otpSent ? (
+                <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                  {/* Email Input */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#374151', marginBottom: '0.35rem' }}>
-                      Organization / Company Name
+                    <label
+                      htmlFor="email"
+                      style={{
+                        display: 'block',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        color: '#374151',
+                        marginBottom: '0.4rem',
+                      }}
+                    >
+                      Email Address
                     </label>
                     <div style={{ position: 'relative' }}>
                       <input
-                        type="text"
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="developer@company.com"
                         required
-                        placeholder="e.g. Acme Engineering Lab"
-                        value={orgName}
-                        onChange={(e) => setOrgName(e.target.value)}
+                        disabled={loading}
                         style={{
                           width: '100%',
-                          padding: '0.65rem 0.85rem 0.65rem 2.25rem',
+                          padding: '0.65rem 0.85rem 0.65rem 2.4rem',
                           borderRadius: '8px',
-                          border: '1px solid rgba(17, 24, 39, 0.15)',
-                          fontSize: '0.9rem',
+                          border: '1px solid rgba(17, 24, 39, 0.16)',
+                          fontSize: '0.875rem',
+                          boxSizing: 'border-box',
                           outline: 'none',
-                          fontFamily: 'inherit',
                         }}
                       />
-                      <Building size={16} color="#9CA3AF" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
+                      <Mail
+                        size={16}
+                        color="#9CA3AF"
+                        style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }}
+                      />
                     </div>
                   </div>
 
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#374151', marginBottom: '0.35rem' }}>
-                      Select Your Role
-                    </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
-                      {(['tester', 'lead', 'admin'] as const).map((r) => (
-                        <div
-                          key={r}
-                          onClick={() => setRole(r)}
+                  {/* Mobile Number Input (Shown on Registration) */}
+                  {testerMode === 'register' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <label
+                        htmlFor="phone"
+                        style={{
+                          display: 'block',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          color: '#374151',
+                          marginBottom: '0.4rem',
+                        }}
+                      >
+                        Mobile Number
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          id="phone"
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="+1 (555) 000-0000"
+                          required
+                          disabled={loading}
                           style={{
-                            padding: '0.6rem 0.4rem',
+                            width: '100%',
+                            padding: '0.65rem 0.85rem 0.65rem 2.4rem',
                             borderRadius: '8px',
-                            border: role === r ? '2px solid #DC2626' : '1px solid rgba(17, 24, 39, 0.12)',
-                            background: role === r ? '#FFF1F2' : '#ffffff',
-                            textAlign: 'center',
-                            cursor: 'pointer',
-                            fontSize: '0.78rem',
-                            fontWeight: 700,
-                            color: role === r ? '#DC2626' : '#4B5563',
-                            textTransform: 'capitalize',
+                            border: '1px solid rgba(17, 24, 39, 0.16)',
+                            fontSize: '0.875rem',
+                            boxSizing: 'border-box',
+                            outline: 'none',
                           }}
-                        >
-                          {r === 'tester' ? '🧪 Tester' : r === 'lead' ? '🛡️ QA Lead' : '⚡ Admin'}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
+                        />
+                        <Phone
+                          size={16}
+                          color="#9CA3AF"
+                          style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }}
+                        />
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: '#6B7280', marginTop: '0.25rem', display: 'block' }}>
+                        Only mobile number and email required. Role is automatically provisioned as Flight Tester.
+                      </span>
+                    </motion.div>
+                  )}
 
-              {/* Email Address */}
+                  <button
+                    type="submit"
+                    disabled={loading || !email}
+                    className="btn-primary"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      fontSize: '0.9rem',
+                      fontWeight: 700,
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.45rem',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      marginTop: '0.5rem',
+                    }}
+                  >
+                    {loading ? (
+                      <span>Dispatching OTP via Gmail SMTP...</span>
+                    ) : (
+                      <>
+                        <span>{testerMode === 'register' ? 'Register & Send Code' : 'Send Verification Code'}</span>
+                        <ArrowRight size={16} />
+                      </>
+                    )}
+                  </button>
+                </form>
+              ) : (
+                /* Step 2: 6-Digit OTP Verification Boxes */
+                <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.35rem' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.85rem', color: '#4B5563', marginBottom: '0.2rem' }}>
+                      Enter the 6-digit code delivered to:
+                    </div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#111827' }}>{email}</div>
+                  </div>
+
+                  {/* 6 Digit Input Group */}
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                    {otpCode.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        ref={(el) => {
+                          otpInputsRef.current[idx] = el;
+                        }}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(idx, e.target.value)}
+                        onKeyDown={(e) => handleKeyDown(idx, e)}
+                        disabled={verifying}
+                        style={{
+                          width: '46px',
+                          height: '52px',
+                          textAlign: 'center',
+                          fontSize: '1.4rem',
+                          fontWeight: 800,
+                          borderRadius: '10px',
+                          border: digit ? '2px solid #DC2626' : '1px solid rgba(17, 24, 39, 0.2)',
+                          background: digit ? '#FFF8F8' : '#FFFFFF',
+                          outline: 'none',
+                          color: '#111827',
+                          transition: 'all 0.15s ease',
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={verifying || otpCode.join('').length !== 6}
+                    className="btn-primary"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      fontSize: '0.9rem',
+                      fontWeight: 700,
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.45rem',
+                      cursor: verifying ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {verifying ? (
+                      <span>Verifying Code...</span>
+                    ) : (
+                      <>
+                        <KeyRound size={16} />
+                        <span>Verify & Enter Workspace</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Resend & Back controls */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setOtpSent(false)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#6B7280',
+                        cursor: 'pointer',
+                        padding: 0,
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      ← Change details
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={cooldown > 0 || loading}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: cooldown > 0 ? '#9CA3AF' : '#DC2626',
+                        fontWeight: 700,
+                        cursor: cooldown > 0 ? 'default' : 'pointer',
+                        padding: 0,
+                      }}
+                    >
+                      {cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend Code'}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </>
+          )}
+
+          {/* TAB 2: ADMINISTRATOR DIRECT ACCESS (TGVINCENZO / Adil123#) */}
+          {authMethod === 'admin' && (
+            <form onSubmit={handleAdminLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+              <div
+                style={{
+                  background: '#FEF2F2',
+                  border: '1px solid #FCA5A5',
+                  padding: '0.65rem 0.85rem',
+                  borderRadius: '8px',
+                  fontSize: '0.78rem',
+                  color: '#991B1B',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+              >
+                <Shield size={16} color="#DC2626" />
+                <span>Executive Command Center. Pre-authorized credentials required.</span>
+              </div>
+
+              {/* Admin ID Input */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#374151', marginBottom: '0.35rem' }}>
-                  Work Email Address
+                <label
+                  htmlFor="adminId"
+                  style={{
+                    display: 'block',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    color: '#374151',
+                    marginBottom: '0.4rem',
+                  }}
+                >
+                  Administrator ID
                 </label>
                 <div style={{ position: 'relative' }}>
                   <input
-                    type="email"
+                    id="adminId"
+                    type="text"
+                    value={adminId}
+                    onChange={(e) => setAdminId(e.target.value)}
+                    placeholder="e.g. TGVINCENZO"
                     required
-                    placeholder="name@company.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loading}
+                    autoComplete="username"
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.85rem 0.65rem 2.25rem',
+                      padding: '0.65rem 0.85rem 0.65rem 2.4rem',
                       borderRadius: '8px',
-                      border: '1px solid rgba(17, 24, 39, 0.15)',
-                      fontSize: '0.9rem',
+                      border: '1px solid rgba(17, 24, 39, 0.16)',
+                      fontSize: '0.875rem',
+                      boxSizing: 'border-box',
                       outline: 'none',
-                      fontFamily: 'inherit',
                     }}
                   />
-                  <Mail size={16} color="#9CA3AF" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
+                  <User
+                    size={16}
+                    color="#9CA3AF"
+                    style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }}
+                  />
+                </div>
+              </div>
+
+              {/* Password Input */}
+              <div>
+                <label
+                  htmlFor="adminPassword"
+                  style={{
+                    display: 'block',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    color: '#374151',
+                    marginBottom: '0.4rem',
+                  }}
+                >
+                  Secret Password
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="adminPassword"
+                    type={showPassword ? 'text' : 'password'}
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="••••••••••"
+                    required
+                    disabled={loading}
+                    autoComplete="current-password"
+                    style={{
+                      width: '100%',
+                      padding: '0.65rem 2.4rem 0.65rem 2.4rem',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(17, 24, 39, 0.16)',
+                      fontSize: '0.875rem',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                    }}
+                  />
+                  <Lock
+                    size={16}
+                    color="#9CA3AF"
+                    style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '0.75rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: '#9CA3AF',
+                      padding: 0,
+                    }}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
               </div>
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !adminId || !adminPassword}
                 className="btn-primary"
-                style={{ width: '100%', padding: '0.75rem', fontSize: '0.95rem', marginTop: '0.5rem' }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  marginTop: '0.5rem',
+                  background: 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)',
+                }}
               >
                 {loading ? (
-                  <span>Sending Verification Code...</span>
+                  <span>Authenticating Administrator...</span>
                 ) : (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <span>{mode === 'register' ? 'Register & Send Code' : 'Send Magic OTP'}</span>
-                    <ArrowRight size={16} />
-                  </span>
+                  <>
+                    <KeyRound size={16} />
+                    <span>Enter Command Center</span>
+                  </>
                 )}
               </button>
             </form>
-          </div>
-        ) : (
-          /* View 2: Enter & Verify 6-Digit OTP */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* 6 Digit Inputs */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-              {otpCode.map((digit, idx) => (
-                <input
-                  key={idx}
-                  ref={(el) => {
-                    otpInputsRef.current[idx] = el;
-                  }}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOtpChange(idx, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(idx, e)}
-                  style={{
-                    width: '46px',
-                    height: '54px',
-                    textAlign: 'center',
-                    fontSize: '1.45rem',
-                    fontWeight: 800,
-                    borderRadius: '10px',
-                    border: digit ? '2px solid #DC2626' : '1px solid rgba(17, 24, 39, 0.2)',
-                    background: digit ? '#FFF1F2' : '#ffffff',
-                    color: '#111827',
-                    outline: 'none',
-                    transition: 'all 0.15s ease',
-                  }}
-                />
-              ))}
-            </div>
+          )}
+        </div>
 
-            <button
-              type="button"
-              onClick={() => verifyCode(otpCode.join(''))}
-              disabled={verifying || otpCode.includes('')}
-              className="btn-primary"
-              style={{ width: '100%', padding: '0.75rem', fontSize: '0.95rem' }}
-            >
-              {verifying ? 'Verifying Code...' : 'Verify & Continue →'}
-            </button>
-
-            {/* Resend & Back controls */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: '#6B7280' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setOtpSent(false);
-                  setOtpCode(['', '', '', '', '', '']);
-                }}
-                style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', padding: 0 }}
-              >
-                ← Change Email
-              </button>
-
-              <button
-                type="button"
-                disabled={cooldown > 0}
-                onClick={handleSendOtp}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: cooldown > 0 ? '#9CA3AF' : '#DC2626',
-                  fontWeight: 700,
-                  cursor: cooldown > 0 ? 'default' : 'pointer',
-                  padding: 0,
-                }}
-              >
-                {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend Code'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Direct Workspace Bypass */}
-        <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(17, 24, 39, 0.08)', paddingTop: '1.25rem', textAlign: 'center' }}>
-          <Link
-            href="/app"
-            style={{
-              fontSize: '0.825rem',
-              color: '#DC2626',
-              fontWeight: 700,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-            }}
-          >
-            <Compass size={14} />
-            <span>Direct Access: Launch Tester Flight Workspace →</span>
-          </Link>
+        {/* Security Note Footer */}
+        <div style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.75rem', color: '#6B7280' }}>
+          <span>Protected by SHA-256 OTP Code Verification & Gmail SMTP Transport.</span>
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B7280' }}>
+          Loading Access Portal...
+        </div>
+      }
+    >
+      <AuthForm />
+    </React.Suspense>
   );
 }
