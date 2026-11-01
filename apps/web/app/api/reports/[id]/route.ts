@@ -72,7 +72,7 @@ export async function PATCH(
         id: crypto.randomUUID(),
         action: 'REPORT_UPDATED',
         target_id: id,
-        details: parsed.data,
+        details: { ...parsed.data, actor_email: 'admin@silentqa.local' },
         timestamp: new Date().toISOString(),
       });
     } catch {}
@@ -119,6 +119,7 @@ export async function DELETE(
         id: crypto.randomUUID(),
         action: 'REPORT_DELETED',
         target_id: id,
+        details: { actor_email: 'admin@silentqa.local' },
         timestamp: new Date().toISOString(),
       });
     } catch {}

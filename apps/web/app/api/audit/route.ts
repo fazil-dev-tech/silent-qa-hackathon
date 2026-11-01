@@ -16,9 +16,14 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    const mappedLogs = (logs || []).map((l) => ({
+      ...l,
+      actor_email: l.details?.actor_email || l.details?.tester_name || l.actor_id || 'admin@silentqa.local',
+    }));
+
     return NextResponse.json({
       success: true,
-      logs: logs || [],
+      logs: mappedLogs,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message }, { status: 500 });

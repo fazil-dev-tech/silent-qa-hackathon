@@ -59,7 +59,7 @@ export async function POST(
           id: crypto.randomUUID(),
           action: 'REPORT_DISPATCHED_EMAIL',
           target_id: id,
-          details: { recipient: recipientEmail },
+          details: { recipient: recipientEmail, actor_email: 'admin@silentqa.local' },
           timestamp: new Date().toISOString(),
         });
       } catch {}
