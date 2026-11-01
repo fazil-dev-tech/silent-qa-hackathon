@@ -1,7 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Sparkles,
+  Terminal,
+  Send,
+  Play,
+  RotateCcw,
+  CheckCircle2,
+  AlertOctagon,
+  Copy,
+  Share2,
+  FileText,
+  Clock,
+  Layers,
+  Activity,
+} from 'lucide-react';
+import LiveTelemetryFeed from '@/components/live-telemetry-feed';
+import EventTimeline from '@/components/event-timeline';
+import ExportModal from '@/components/export-modal';
 
 interface ReportItem {
   id: string;
@@ -12,6 +31,7 @@ interface ReportItem {
   actual: string;
   root_cause: string;
   confidence: string;
+  evidence: any[];
   evidence_ids: string[];
   playwright_script?: string;
   status: string;
@@ -29,11 +49,20 @@ export default function TesterWorkspacePage() {
   const [sendingEmail, setSendingEmail] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
-  // Load real reports directly from API / Supabase
+  // Reproduction probe state
+  const [runningProbe, setRunningProbe] = useState(false);
+  const [probeResult, setProbeResult] = useState<any | null>(null);
+
+  // Export modal state
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+
+  // Active view tab in review editor
+  const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'playwright'>('overview');
+
+  // Load real reports directly from Supabase API
   async function fetchReports() {
     setLoading(true);
     try {
-      // Ingest test or query recent reports from API
       const res = await fetch('/api/reports/recent');
       if (res.ok) {
         const data = await res.json();
@@ -43,7 +72,7 @@ export default function TesterWorkspacePage() {
         }
       }
     } catch {
-      // fallback
+      //
     } finally {
       setLoading(false);
     }
@@ -53,10 +82,11 @@ export default function TesterWorkspacePage() {
     fetchReports();
   }, []);
 
-  // Submit a live complaint through the full production pipeline (Ingest -> Map -> LLM -> Report)
+  // Submit live complaint through full production pipeline (Ingest -> Map -> LLM -> Report)
   async function handleSimulateAndFlag() {
     setSubmitting(true);
     setActionMessage(null);
+    setProbeResult(null);
 
     try {
       const sessionId = crypto.randomUUID();
@@ -129,7 +159,7 @@ export default function TesterWorkspacePage() {
         throw new Error('Failed to ingest telemetry into Supabase');
       }
 
-      // Step B: Submit complaint and trigger AI synthesis
+      // Step B: Submit complaint & trigger AI causal mapper
       const complaintRes = await fetch('/api/complaints', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -156,7 +186,33 @@ export default function TesterWorkspacePage() {
     }
   }
 
-  // Approve and dispatch HTML email via Nodemailer Gmail SMTP
+  // Run in-browser automated reproduction probe
+  async function handleRunProbe(reportId: string) {
+    setRunningProbe(true);
+    setProbeResult(null);
+    try {
+      const res = await fetch('/api/reproduce', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ report_id: reportId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setProbeResult(data);
+        if (selectedReport) {
+          setSelectedReport({ ...selectedReport, status: data.reproduced ? 'verified' : selectedReport.status });
+        }
+      } else {
+        throw new Error(data.error || 'Probe run failed');
+      }
+    } catch (err: any) {
+      setProbeResult({ error: err?.message, reproduced: false });
+    } finally {
+      setRunningProbe(false);
+    }
+  }
+
+  // Approve and dispatch HTML email via Gmail SMTP
   async function handleApproveAndSend(reportId: string) {
     setSendingEmail(true);
     setActionMessage(null);
@@ -186,30 +242,35 @@ export default function TesterWorkspacePage() {
   }
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-      {/* Header */}
+    <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      {/* Workspace Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.85rem', fontWeight: 900, color: '#111827', letterSpacing: '-0.025em' }}>
             Tester Flight Workspace
           </h1>
           <p style={{ color: '#4B5563', fontSize: '0.9rem' }}>
-            Inspect live browser telemetry, verify AI-synthesized defect reports, and dispatch to engineering via Gmail SMTP.
+            Live browser telemetry streams, AI causal synthesis, in-browser Playwright reproduction probes, and Gmail delivery.
           </p>
         </div>
 
-        <button
-          onClick={fetchReports}
-          className="btn-secondary"
-          disabled={loading}
-          style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}
-        >
-          {loading ? 'Refreshing...' : '🔄 Refresh Live Reports'}
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <button
+            onClick={fetchReports}
+            className="btn-secondary"
+            disabled={loading}
+            style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+          >
+            <RotateCcw size={14} className={loading ? 'animate-spin' : ''} />
+            <span>{loading ? 'Refreshing...' : 'Refresh Reports'}</span>
+          </button>
+        </div>
       </div>
 
       {actionMessage && (
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
           style={{
             padding: '0.85rem 1.25rem',
             borderRadius: '10px',
@@ -222,25 +283,31 @@ export default function TesterWorkspacePage() {
           }}
         >
           {actionMessage}
-        </div>
+        </motion.div>
       )}
 
-      {/* Grid: Simulator & Report View */}
-      <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: '2rem' }}>
-        {/* Left Column: Complaint Simulator & Report List */}
+      {/* Main Grid: Left Stream & Right Review Workspace */}
+      <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '2rem', alignItems: 'start' }}>
+        {/* Left Column: Live Stream & Simulator */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Quick Trigger Tool */}
+          {/* Live Telemetry Stream Widget */}
+          <LiveTelemetryFeed />
+
+          {/* 1-Click Telemetry & Flag Simulator */}
           <div className="glass-panel" style={{ padding: '1.25rem' }}>
-            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: '#111827' }}>
-              ⚡ 1-Click Telemetry & Flag Simulator
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem' }}>
+              <Sparkles size={16} color="#DC2626" />
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#111827' }}>
+                1-Click Flight & Flag Simulator
+              </h3>
+            </div>
             <p style={{ fontSize: '0.8rem', color: '#6B7280', marginBottom: '1rem' }}>
-              Simulates flight telemetry from an active session and submits a 1-line complaint directly to the real OpenRouter pipeline.
+              Simulates live in-browser telemetry and triggers the OpenRouter causal synthesis engine.
             </p>
 
             <div style={{ marginBottom: '0.75rem' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4B5563', marginBottom: '0.25rem' }}>
-                Tester Complaint Note:
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#4B5563', marginBottom: '0.25rem' }}>
+                Complaint Note:
               </label>
               <textarea
                 value={testNote}
@@ -248,7 +315,7 @@ export default function TesterWorkspacePage() {
                 rows={2}
                 style={{
                   width: '100%',
-                  padding: '0.5rem',
+                  padding: '0.55rem',
                   borderRadius: '8px',
                   border: '1px solid rgba(17, 24, 39, 0.12)',
                   fontSize: '0.85rem',
@@ -259,8 +326,8 @@ export default function TesterWorkspacePage() {
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4B5563', marginBottom: '0.25rem' }}>
-                Target Selector:
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#4B5563', marginBottom: '0.25rem' }}>
+                Element Selector:
               </label>
               <input
                 type="text"
@@ -268,7 +335,7 @@ export default function TesterWorkspacePage() {
                 onChange={(e) => setPickedSelector(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '0.5rem',
+                  padding: '0.55rem',
                   borderRadius: '8px',
                   border: '1px solid rgba(17, 24, 39, 0.12)',
                   fontSize: '0.85rem',
@@ -282,16 +349,17 @@ export default function TesterWorkspacePage() {
               onClick={handleSimulateAndFlag}
               disabled={submitting}
               className="btn-primary"
-              style={{ width: '100%', padding: '0.65rem' }}
+              style={{ width: '100%', padding: '0.65rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
             >
-              {submitting ? 'Synthesizing with AI...' : 'Run Live Pipeline →'}
+              <Terminal size={14} />
+              <span>{submitting ? 'Synthesizing Report...' : 'Simulate & Flag Bug →'}</span>
             </button>
           </div>
 
-          {/* Reports History */}
+          {/* Database Reports List */}
           <div className="glass-panel" style={{ padding: '1.25rem' }}>
-            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: '#111827' }}>
-              📋 Database Reports ({reports.length})
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.75rem', color: '#111827' }}>
+              Database Reports ({reports.length})
             </h3>
 
             {reports.length === 0 ? (
@@ -299,11 +367,14 @@ export default function TesterWorkspacePage() {
                 No reports found yet. Click the button above to synthesize a live report!
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '420px', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '380px', overflowY: 'auto' }}>
                 {reports.map((r) => (
                   <div
                     key={r.id}
-                    onClick={() => setSelectedReport(r)}
+                    onClick={() => {
+                      setSelectedReport(r);
+                      setProbeResult(null);
+                    }}
                     style={{
                       padding: '0.75rem',
                       borderRadius: '8px',
@@ -315,7 +386,7 @@ export default function TesterWorkspacePage() {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                       <span className={`badge-severity severity-${r.severity}`}>{r.severity}</span>
-                      <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
+                      <span style={{ fontSize: '0.75rem', color: r.status === 'verified' ? '#16A34A' : '#6B7280', fontWeight: 700 }}>
                         {r.status.toUpperCase()}
                       </span>
                     </div>
@@ -333,6 +404,7 @@ export default function TesterWorkspacePage() {
         <div>
           {selectedReport ? (
             <div className="glass-panel" style={{ padding: '2rem' }}>
+              {/* Header Bar */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
@@ -343,80 +415,211 @@ export default function TesterWorkspacePage() {
                         fontWeight: 700,
                         padding: '0.2rem 0.6rem',
                         borderRadius: '9999px',
-                        background: selectedReport.status === 'sent' ? '#DCFCE7' : '#FEF3C7',
-                        color: selectedReport.status === 'sent' ? '#166534' : '#B45309',
+                        background:
+                          selectedReport.status === 'verified'
+                            ? '#DCFCE7'
+                            : selectedReport.status === 'sent'
+                            ? '#EFF6FF'
+                            : '#FEF3C7',
+                        color:
+                          selectedReport.status === 'verified'
+                            ? '#166534'
+                            : selectedReport.status === 'sent'
+                            ? '#1D4ED8'
+                            : '#B45309',
                       }}
                     >
-                      {selectedReport.status === 'sent' ? '✓ SENT TO ENG' : 'STATUS: ' + selectedReport.status.toUpperCase()}
+                      {selectedReport.status === 'verified' ? '✓ REPRODUCED & VERIFIED' : selectedReport.status.toUpperCase()}
                     </span>
-                    {selectedReport.ai_fallback ? (
-                      <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>Deterministic Fallback</span>
-                    ) : (
-                      <span style={{ fontSize: '0.75rem', color: '#DC2626', fontWeight: 600 }}>★ OpenRouter AI Synthesized</span>
+                    {!selectedReport.ai_fallback && (
+                      <span style={{ fontSize: '0.75rem', color: '#DC2626', fontWeight: 700 }}>
+                        ★ OpenRouter Nemotron-3
+                      </span>
                     )}
                   </div>
-                  <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#111827' }}>
+                  <h2 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#111827' }}>
                     {selectedReport.title}
                   </h2>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {/* Actions Toolbar */}
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => handleRunProbe(selectedReport.id)}
+                    disabled={runningProbe}
+                    className="btn-secondary"
+                    style={{ fontSize: '0.825rem', padding: '0.55rem 0.95rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                  >
+                    <Play size={13} color="#2563EB" />
+                    <span>{runningProbe ? 'Running Probe...' : '▶ Run Reproduction Probe'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => setExportModalOpen(true)}
+                    className="btn-secondary"
+                    style={{ fontSize: '0.825rem', padding: '0.55rem 0.95rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                  >
+                    <Share2 size={13} />
+                    <span>Export</span>
+                  </button>
+
                   <button
                     onClick={() => handleApproveAndSend(selectedReport.id)}
                     disabled={sendingEmail}
                     className="btn-primary"
-                    style={{ fontSize: '0.85rem', padding: '0.6rem 1.15rem' }}
+                    style={{ fontSize: '0.825rem', padding: '0.55rem 1rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                   >
-                    {sendingEmail ? 'Delivering via SMTP...' : '✉ Approve & Deliver via Gmail'}
+                    <Send size={13} />
+                    <span>{sendingEmail ? 'Delivering...' : 'Approve & Send to Gmail'}</span>
                   </button>
                 </div>
               </div>
 
-              {/* Grid: Expected vs Actual */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ padding: '1rem', background: '#F0FDF4', borderRadius: '10px', border: '1px solid #BBF7D0' }}>
-                  <h4 style={{ fontSize: '0.8rem', fontWeight: 700, color: '#166534', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
-                    Expected Behavior
-                  </h4>
-                  <p style={{ fontSize: '0.9rem', color: '#14532D' }}>{selectedReport.expected}</p>
-                </div>
-
-                <div style={{ padding: '1rem', background: '#FEF2F2', borderRadius: '10px', border: '1px solid #FECACA' }}>
-                  <h4 style={{ fontSize: '0.8rem', fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
-                    Actual Behavior
-                  </h4>
-                  <p style={{ fontSize: '0.9rem', color: '#7F1D1D' }}>{selectedReport.actual}</p>
-                </div>
-              </div>
-
-              {/* Root Cause Hypothesis */}
-              {selectedReport.root_cause && (
-                <div style={{ padding: '1rem', background: '#FFFBEB', borderRadius: '10px', border: '1px solid #FDE68A', marginBottom: '1.5rem' }}>
-                  <h4 style={{ fontSize: '0.8rem', fontWeight: 700, color: '#92400E', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
-                    Root Cause Hypothesis
-                  </h4>
-                  <p style={{ fontSize: '0.9rem', color: '#78350F' }}>{selectedReport.root_cause}</p>
+              {/* Reproduction Probe Verdict Output */}
+              {probeResult && (
+                <div
+                  style={{
+                    padding: '1rem',
+                    borderRadius: '10px',
+                    marginBottom: '1.5rem',
+                    background: probeResult.reproduced ? '#F0FDF4' : '#FEF2F2',
+                    border: probeResult.reproduced ? '1px solid #86EFAC' : '1px solid #FECACA',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                    {probeResult.reproduced ? (
+                      <CheckCircle2 size={16} color="#16A34A" />
+                    ) : (
+                      <AlertOctagon size={16} color="#DC2626" />
+                    )}
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: probeResult.reproduced ? '#166534' : '#991B1B' }}>
+                      Reproduction Verdict: {probeResult.reproduced ? 'REPRODUCED & CONFIRMED' : 'PROBE EXECUTED'}
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: '#6B7280', marginLeft: 'auto' }}>
+                      Probe latency: {probeResult.execution_time_ms}ms
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.85rem', color: probeResult.reproduced ? '#14532D' : '#7F1D1D', marginBottom: '0.5rem' }}>
+                    {probeResult.verdict}
+                  </p>
+                  {probeResult.logs && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontFamily: 'monospace', fontSize: '0.725rem', color: '#374151' }}>
+                      {probeResult.logs.map((l: any, i: number) => (
+                        <div key={i}>• {l.message}</div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Reproduction Steps */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#111827', marginBottom: '0.5rem' }}>
-                  Verified Steps to Reproduce:
-                </h4>
-                <ol style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.9rem', color: '#374151' }}>
-                  {selectedReport.steps?.map((s, idx) => (
-                    <li key={idx}>{s}</li>
-                  ))}
-                </ol>
+              {/* View Selector Tabs */}
+              <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid rgba(17, 24, 39, 0.08)', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
+                <button
+                  onClick={() => setActiveTab('overview')}
+                  style={{
+                    padding: '0.45rem 1rem',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: activeTab === 'overview' ? '#DC2626' : 'transparent',
+                    color: activeTab === 'overview' ? '#ffffff' : '#4B5563',
+                  }}
+                >
+                  Overview & Findings
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('timeline')}
+                  style={{
+                    padding: '0.45rem 1rem',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: activeTab === 'timeline' ? '#DC2626' : 'transparent',
+                    color: activeTab === 'timeline' ? '#ffffff' : '#4B5563',
+                  }}
+                >
+                  Interactive Event Timeline ({Array.isArray(selectedReport.evidence) ? selectedReport.evidence.length : 0})
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('playwright')}
+                  style={{
+                    padding: '0.45rem 1rem',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: activeTab === 'playwright' ? '#DC2626' : 'transparent',
+                    color: activeTab === 'playwright' ? '#ffffff' : '#4B5563',
+                  }}
+                >
+                  🎭 Playwright Script
+                </button>
               </div>
 
-              {/* Playwright Script Synthesizer */}
-              {selectedReport.playwright_script && (
-                <div style={{ marginBottom: '1.5rem' }}>
+              {/* Tab 1: Overview */}
+              {activeTab === 'overview' && (
+                <div>
+                  {/* Expected vs Actual */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <div style={{ padding: '1rem', background: '#F0FDF4', borderRadius: '10px', border: '1px solid #BBF7D0' }}>
+                      <h4 style={{ fontSize: '0.775rem', fontWeight: 700, color: '#166534', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                        Expected Behavior
+                      </h4>
+                      <p style={{ fontSize: '0.9rem', color: '#14532D', lineHeight: 1.5 }}>{selectedReport.expected}</p>
+                    </div>
+
+                    <div style={{ padding: '1rem', background: '#FEF2F2', borderRadius: '10px', border: '1px solid #FECACA' }}>
+                      <h4 style={{ fontSize: '0.775rem', fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                        Actual Behavior
+                      </h4>
+                      <p style={{ fontSize: '0.9rem', color: '#7F1D1D', lineHeight: 1.5 }}>{selectedReport.actual}</p>
+                    </div>
+                  </div>
+
+                  {/* Root Cause Hypothesis */}
+                  {selectedReport.root_cause && (
+                    <div style={{ padding: '1rem', background: '#FFFBEB', borderRadius: '10px', border: '1px solid #FDE68A', marginBottom: '1.5rem' }}>
+                      <h4 style={{ fontSize: '0.775rem', fontWeight: 700, color: '#92400E', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                        AI Root Cause Hypothesis
+                      </h4>
+                      <p style={{ fontSize: '0.9rem', color: '#78350F', lineHeight: 1.5 }}>{selectedReport.root_cause}</p>
+                    </div>
+                  )}
+
+                  {/* Reproduction Steps */}
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#111827', marginBottom: '0.5rem' }}>
+                      Verified Steps to Reproduce:
+                    </h4>
+                    <ol style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.9rem', color: '#374151' }}>
+                      {selectedReport.steps?.map((s, idx) => (
+                        <li key={idx}>{s}</li>
+                      ))}
+                    </ol>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: Interactive Timeline */}
+              {activeTab === 'timeline' && (
+                <div>
+                  <EventTimeline events={selectedReport.evidence || []} />
+                </div>
+              )}
+
+              {/* Tab 3: Playwright Script */}
+              {activeTab === 'playwright' && (
+                <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#111827' }}>
-                      🎭 Synthesized Playwright Reproduction Test:
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#111827' }}>
+                      Synthesized Playwright Reproduction Test:
                     </h4>
                     <button
                       onClick={() => {
@@ -433,44 +636,19 @@ export default function TesterWorkspacePage() {
                   </div>
                   <pre
                     style={{
-                      background: '#1E293B',
+                      background: '#0F172A',
                       color: '#E2E8F0',
-                      padding: '1rem',
-                      borderRadius: '8px',
+                      padding: '1.25rem',
+                      borderRadius: '10px',
                       overflowX: 'auto',
-                      fontSize: '0.8rem',
-                      lineHeight: 1.45,
+                      fontSize: '0.85rem',
+                      lineHeight: 1.5,
                     }}
                   >
-                    <code>{selectedReport.playwright_script}</code>
+                    <code>{selectedReport.playwright_script || '// No Playwright script generated'}</code>
                   </pre>
                 </div>
               )}
-
-              {/* Evidence IDs Cross-Reference */}
-              <div>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#111827', marginBottom: '0.5rem' }}>
-                  Causal Evidence Cross-References ({selectedReport.evidence_ids?.length || 0} events)
-                </h4>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                  {selectedReport.evidence_ids?.map((id) => (
-                    <span
-                      key={id}
-                      style={{
-                        fontSize: '0.75rem',
-                        fontFamily: 'monospace',
-                        background: 'rgba(17, 24, 39, 0.05)',
-                        border: '1px solid rgba(17, 24, 39, 0.1)',
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '6px',
-                        color: '#4B5563',
-                      }}
-                    >
-                      {id}
-                    </span>
-                  ))}
-                </div>
-              </div>
             </div>
           ) : (
             <div
@@ -486,7 +664,7 @@ export default function TesterWorkspacePage() {
               }}
             >
               <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔬</div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#111827', marginBottom: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#111827', marginBottom: '0.5rem' }}>
                 Select a Defect Report to Review
               </h3>
               <p style={{ maxWidth: '450px', fontSize: '0.9rem' }}>
@@ -496,6 +674,13 @@ export default function TesterWorkspacePage() {
           )}
         </div>
       </div>
+
+      {/* Export Modal */}
+      <ExportModal
+        report={selectedReport}
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+      />
     </div>
   );
 }
