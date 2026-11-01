@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Silent QA Flag</title>
+  <style>
+    :root {
+      --bg: #FFF8F8;
+      --glass: rgba(255, 255, 255, 0.85);
+      --red-600: #DC2626;
+      --red-500: #EF4444;
+      --ink: #111827;
+      --ink-2: #4B5563;
+      --shadow: 0 8px 24px rgba(220, 38, 38, 0.1);
+    }
+
+    body {
+      width: 320px;
+      margin: 0;
+      padding: 1.25rem;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--ink);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .title {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .title span {
+      color: var(--red-600);
+    }
+
+    .badge {
+      background: rgba(22, 163, 74, 0.1);
+      color: #16A34A;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+    }
+
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ink-2);
+      margin-bottom: 0.4rem;
+    }
+
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid rgba(17, 24, 39, 0.12);
+      border-radius: 8px;
+      padding: 0.6rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 60px;
+      margin-bottom: 0.75rem;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--red-600);
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    button {
+      flex: 1;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--red-600);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: var(--red-500);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid rgba(17, 24, 39, 0.15);
+    }
+
+    .status {
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--ink-2);
+      text-align: center;
+      min-height: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title"><span>●</span> Silent QA</div>
+    <div class="badge">Recording</div>
+  </div>
+
+  <div class="card">
+    <label for="complaint-note">Flag an issue in one sentence:</label>
+    <textarea id="complaint-note" placeholder="Example: problem in cart button, count jumps to 2"></textarea>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="btn-submit">Flag Bug</button>
+    </div>
+
+    <div class="status" id="status-text"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

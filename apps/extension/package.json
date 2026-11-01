@@ -1,0 +1,9 @@
+{
+  "name": "@silent-qa/extension",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Silent QA Chrome Extension (Manifest V3)",
+  "scripts": {
+    "build": "node build.js"
+  }
+}
