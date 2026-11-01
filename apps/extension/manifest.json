@@ -31,6 +31,7 @@
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "Silent QA Flag"
-  }
+  },
+  "options_page": "options/options.html"
 }
 

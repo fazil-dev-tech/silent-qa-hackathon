@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Silent QA — Extension Settings & Preferences</title>
+  <style>
+    :root {
+      --bg: #FFF8F8;
+      --card: #FFFFFF;
+      --accent: #DC2626;
+      --accent-hover: #B91C1C;
+      --ink: #111827;
+      --ink-secondary: #4B5563;
+      --border: rgba(17, 24, 39, 0.12);
+    }
+
+    body {
+      max-width: 680px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 1.65rem;
+      font-weight: 900;
+      letter-spacing: -0.025em;
+      margin: 0 0 0.35rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    p {
+      color: var(--ink-secondary);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+    }
+
+    .card-desc {
+      font-size: 0.8rem;
+      color: var(--ink-secondary);
+      margin-bottom: 1rem;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.825rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      outline: none;
+      font-family: inherit;
+    }
+
+    input[type="text"]:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    button {
+      padding: 0.65rem 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: #FFFFFF;
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
+
+    .status-msg {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><span>●</span> Silent QA Extension Preferences</h1>
+    <p>Configure carrier-grade in-browser telemetry ingestion, buffer capacity, and privacy scrubbing.</p>
+  </div>
+
+  <form id="settings-form">
+    <!-- Server & API Ingestion -->
+    <div class="card">
+      <div class="card-title">Backend Connection & Carrier API</div>
+      <div class="card-desc">Specify the target Next.js API endpoint where flight recorder telemetry batches are dispatched.</div>
+
+      <div class="field">
+        <label for="api-endpoint">Ingest Endpoint URL:</label>
+        <input type="text" id="api-endpoint" value="http://localhost:3000/api/ingest" placeholder="http://localhost:3000/api/ingest" />
+      </div>
+
+      <div class="field">
+        <label for="project-token">Project Ingestion Token:</label>
+        <input type="text" id="project-token" value="sqa_live_demo_key_2026" />
+      </div>
+    </div>
+
+    <!-- Buffer & Streaming -->
+    <div class="card">
+      <div class="card-title">Telemetry Ring Buffer & Flush Rate</div>
+      <div class="card-desc">Tune the in-memory circular buffer capacity and periodic transmission frequency.</div>
+
+      <div class="field">
+        <label for="flush-interval">Flush Frequency (seconds):</label>
+        <select id="flush-interval">
+          <option value="2000">2 seconds (Ultra-Low Latency — Recommended)</option>
+          <option value="5000">5 seconds (Standard)</option>
+          <option value="10000">10 seconds (Throttled Bandwidth)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="buffer-capacity">FIFO Buffer Slots:</label>
+        <select id="buffer-capacity">
+          <option value="250">250 slots (Lightweight)</option>
+          <option value="500" selected>500 slots (Carrier Grade — Recommended)</option>
+          <option value="1000">1000 slots (Heavy Web Apps)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Privacy & Redaction -->
+    <div class="card">
+      <div class="card-title">Client-Side Privacy Scrubber</div>
+      <div class="card-desc">Sanitizes sensitive customer data before telemetry leaves the browser context.</div>
+
+      <div class="field">
+        <label for="pii-level">PII Scrubbing Policy:</label>
+        <select id="pii-level">
+          <option value="strict">Strict (Luhn CC + Tokens + PAN/Aadhaar + Email Redaction)</option>
+          <option value="standard">Standard (Tokens + Luhn CC)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn-secondary" id="btn-reset">Reset to Defaults</button>
+      <button type="submit" class="btn-primary" id="btn-save">Save Preferences</button>
+    </div>
+
+    <div class="status-msg" id="status-msg"></div>
+  </form>
+
+  <script src="options.js"></script>
+</body>
+</html>
