@@ -22,6 +22,11 @@ import {
   Search,
   Download,
   ExternalLink,
+  ShieldAlert,
+  Radio,
+  Cpu,
+  Laptop,
+  CheckCircle,
 } from 'lucide-react';
 import LiveTelemetryFeed from '@/components/live-telemetry-feed';
 import EventTimeline from '@/components/event-timeline';
@@ -46,185 +51,20 @@ interface ReportItem {
   created_at: string;
 }
 
-const PRESET_SCENARIOS = [
-  {
-    id: 'cart-race',
-    label: 'Cart Race Condition',
-    note: 'problem in cart button, count jumps to 2',
-    selector: 'button#add-to-cart',
-    getEvents: (sessionId: string, baseTs: number, selector: string) => [
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 50,
-        type: 'click',
-        severity: 'info',
-        selector,
-        text: 'Add to Cart',
-      },
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 40,
-        type: 'network',
-        severity: 'info',
-        url: '/api/cart/add',
-        method: 'POST',
-        status: 200,
-        shape: { itemId: 'number', qty: 'number' },
-      },
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 32,
-        type: 'network',
-        severity: 'info',
-        url: '/api/cart/add',
-        method: 'POST',
-        status: 200,
-        shape: { itemId: 'number', qty: 'number' },
-      },
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 10,
-        type: 'dom',
-        severity: 'info',
-        selector: '#cart-counter',
-        text: 'text_update: 2',
-      },
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 5,
-        type: 'signal',
-        severity: 'warn',
-        text: 'duplicate_request: POST /api/cart/add fired twice within 8ms',
-        selector,
-      },
-    ],
-  },
-  {
-    id: 'checkout-500',
-    label: 'Checkout 500 Crash',
-    note: 'clicked checkout and screen froze with unhandled server error',
-    selector: 'button#submit-order',
-    getEvents: (sessionId: string, baseTs: number, selector: string) => [
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 80,
-        type: 'click',
-        severity: 'info',
-        selector,
-        text: 'Complete Order',
-      },
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 60,
-        type: 'network',
-        severity: 'error',
-        url: '/api/checkout/process',
-        method: 'POST',
-        status: 500,
-        shape: { error: 'string', code: 'number' },
-      },
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 20,
-        type: 'console',
-        severity: 'error',
-        text: 'Unhandled Server Error: 500 Internal Server Error at /api/checkout/process',
-      },
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 5,
-        type: 'signal',
-        severity: 'error',
-        text: 'critical_api_failure: /api/checkout/process returned 500 without error boundary',
-        selector,
-      },
-    ],
-  },
-  {
-    id: 'auth-rage',
-    label: 'Expired Token Rage Click',
-    note: 'save profile button does nothing when clicked repeatedly',
-    selector: 'button.save-settings-btn',
-    getEvents: (sessionId: string, baseTs: number, selector: string) => [
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 120,
-        type: 'click',
-        severity: 'info',
-        selector,
-        text: 'Save Changes',
-      },
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 90,
-        type: 'click',
-        severity: 'info',
-        selector,
-        text: 'Save Changes',
-      },
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 60,
-        type: 'click',
-        severity: 'info',
-        selector,
-        text: 'Save Changes',
-      },
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 40,
-        type: 'network',
-        severity: 'error',
-        url: '/api/profile/update',
-        method: 'PUT',
-        status: 401,
-        shape: { message: 'string' },
-      },
-      {
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        ts: baseTs - 10,
-        type: 'signal',
-        severity: 'warn',
-        text: 'rage_click: 3 rapid clicks detected on button.save-settings-btn within 120ms',
-        selector,
-      },
-    ],
-  },
-];
-
 export default function TesterWorkspacePage() {
+  const [authChecked, setAuthChecked] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [selectedReport, setSelectedReport] = useState<ReportItem | null>(null);
   const [loading, setLoading] = useState(false);
-  const [testNote, setTestNote] = useState('problem in cart button, count jumps to 2');
-  const [pickedSelector, setPickedSelector] = useState('button#add-to-cart');
-  const [selectedScenario, setSelectedScenario] = useState<string>('cart-race');
+
+  // Manual telemetry test flag input (for real tester notes, no fake presets)
+  const [testNote, setTestNote] = useState('');
+  const [pickedSelector, setPickedSelector] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
-
-  function handleSelectPreset(presetId: string) {
-    setSelectedScenario(presetId);
-    const found = PRESET_SCENARIOS.find((p) => p.id === presetId);
-    if (found) {
-      setTestNote(found.note);
-      setPickedSelector(found.selector);
-    }
-  }
 
   // Reproduction probe state
   const [runningProbe, setRunningProbe] = useState(false);
@@ -240,55 +80,48 @@ export default function TesterWorkspacePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
   const [testerFilter, setTesterFilter] = useState<string>('all');
-  const distinctTesters = Array.from(new Set(reports.map((r) => r.tester_name).filter(Boolean))) as string[];
   const [copiedScript, setCopiedScript] = useState(false);
   const [copiedCmd, setCopiedCmd] = useState(false);
 
-  function handleDownloadScript(report: ReportItem) {
-    if (!report.playwright_script) return;
-    const blob = new Blob([report.playwright_script], { type: 'text/typescript' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `reproduce-${report.id.slice(0, 8)}.spec.ts`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+  // 1. Strict Authentication Guard - redirect if not logged in
+  useEffect(() => {
+    async function verifyAuth() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (!res.ok) {
+          window.location.replace('/login?redirect=/app');
+          return;
+        }
+        const data = await res.json();
+        if (!data.authenticated || !data.user) {
+          window.location.replace('/login?redirect=/app');
+          return;
+        }
+        setCurrentUser(data.user);
+        setAuthChecked(true);
+        fetchReports();
+      } catch {
+        window.location.replace('/login?redirect=/app');
+      }
+    }
+    verifyAuth();
+  }, []);
 
-  function handleCopyScript(script: string) {
-    navigator.clipboard.writeText(script);
-    setCopiedScript(true);
-    setTimeout(() => setCopiedScript(false), 2000);
-  }
-
-  function handleCopyCommand(cmd: string) {
-    navigator.clipboard.writeText(cmd);
-    setCopiedCmd(true);
-    setTimeout(() => setCopiedCmd(false), 2000);
-  }
-
-  const filteredReports = reports.filter((r) => {
-    const matchesQuery =
-      searchQuery === '' ||
-      r.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.root_cause?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSeverity = severityFilter === 'all' || r.severity === severityFilter;
-    const matchesTester = testerFilter === 'all' || r.tester_name === testerFilter;
-    return matchesQuery && matchesSeverity && matchesTester;
-  });
-
-  // Load real reports directly from Supabase API
+  // 2. Load genuine reports directly from Supabase API
   async function fetchReports() {
     setLoading(true);
     try {
       const res = await fetch('/api/reports/recent');
       if (res.ok) {
         const data = await res.json();
-        setReports(data.reports || []);
-        if (data.reports?.length > 0 && !selectedReport) {
-          setSelectedReport(data.reports[0]);
+        const reportList: ReportItem[] = data.reports || [];
+        setReports(reportList);
+        if (reportList.length > 0) {
+          setSelectedReport((prev) => {
+            if (!prev) return reportList[0];
+            const match = reportList.find((r) => r.id === prev.id);
+            return match || reportList[0];
+          });
         }
       }
     } catch {
@@ -298,12 +131,13 @@ export default function TesterWorkspacePage() {
     }
   }
 
-  useEffect(() => {
-    fetchReports();
-  }, []);
+  // 3. Submit real tester complaint note & synthesize defect report
+  async function handleFlagCustomDefect() {
+    if (!testNote.trim()) {
+      setActionMessage('Please enter a description of the defect observed during your test flight.');
+      return;
+    }
 
-  // Submit live complaint through full production pipeline (Ingest -> Map -> LLM -> Report)
-  async function handleSimulateAndFlag() {
     setSubmitting(true);
     setActionMessage(null);
     setProbeResult(null);
@@ -312,41 +146,25 @@ export default function TesterWorkspacePage() {
       const sessionId = crypto.randomUUID();
       const baseTs = Date.now();
 
-      // Step A: Ingest real telemetry batch into Supabase
-      const activePreset = PRESET_SCENARIOS.find((p) => p.id === selectedScenario);
-      const eventsBatch = activePreset
-        ? activePreset.getEvents(sessionId, baseTs, pickedSelector)
-        : PRESET_SCENARIOS[0].getEvents(sessionId, baseTs, pickedSelector);
-
-      const ingestRes = await fetch('/api/ingest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          project_token: 'sqa_live_demo_key_2026',
-          session_id: sessionId,
-          events: eventsBatch,
-        }),
-      });
-
-      if (!ingestRes.ok) {
-        throw new Error('Failed to ingest telemetry into Supabase');
-      }
-
-      // Step B: Submit complaint & trigger AI causal mapper
+      // Submit complaint & trigger OpenRouter AI causal synthesis
       const complaintRes = await fetch('/api/complaints', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_id: sessionId,
-          note: testNote,
-          picked_selector: pickedSelector || undefined,
+          note: testNote.trim(),
+          picked_selector: pickedSelector.trim() || undefined,
+          tester_name: currentUser?.name || 'QA Engineer',
+          device_tag: 'Station-01 (Active Workstation)',
           submitted_at: baseTs,
         }),
       });
 
       const complaintData = await complaintRes.json();
       if (complaintRes.ok && complaintData.report) {
-        setActionMessage('✓ Live defect report synthesized and persisted to Supabase PostgreSQL!');
+        setActionMessage('✓ Defect report synthesized by Nemotron AI and saved to database!');
+        setTestNote('');
+        setPickedSelector('');
         setSelectedReport(complaintData.report);
         setReports((prev) => [complaintData.report, ...prev]);
       } else {
@@ -359,7 +177,7 @@ export default function TesterWorkspacePage() {
     }
   }
 
-  // Run in-browser automated reproduction probe
+  // 4. Run automated Playwright reproduction probe
   async function handleRunProbe(reportId: string) {
     setRunningProbe(true);
     setProbeResult(null);
@@ -385,7 +203,7 @@ export default function TesterWorkspacePage() {
     }
   }
 
-  // Approve and dispatch HTML email via Gmail SMTP
+  // 5. Approve and deliver email via Gmail SMTP
   async function handleApproveAndSend(reportId: string) {
     setSendingEmail(true);
     setActionMessage(null);
@@ -414,7 +232,7 @@ export default function TesterWorkspacePage() {
     }
   }
 
-  // Delete report permanently
+  // 6. Delete report permanently
   async function handleDeleteReport(reportId: string) {
     if (!confirm('Permanently delete this defect report from Supabase?')) return;
     try {
@@ -435,15 +253,95 @@ export default function TesterWorkspacePage() {
     }
   }
 
+  function handleDownloadScript(report: ReportItem) {
+    if (!report.playwright_script) return;
+    const blob = new Blob([report.playwright_script], { type: 'text/typescript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reproduce-${report.id.slice(0, 8)}.spec.ts`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function handleCopyScript(script: string) {
+    navigator.clipboard.writeText(script);
+    setCopiedScript(true);
+    setTimeout(() => setCopiedScript(false), 2000);
+  }
+
+  function handleCopyCommand(cmd: string) {
+    navigator.clipboard.writeText(cmd);
+    setCopiedCmd(true);
+    setTimeout(() => setCopiedCmd(false), 2000);
+  }
+
+  const distinctTesters = Array.from(new Set(reports.map((r) => r.tester_name).filter(Boolean))) as string[];
+
+  const filteredReports = reports.filter((r) => {
+    const matchesQuery =
+      searchQuery === '' ||
+      r.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.root_cause?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSeverity = severityFilter === 'all' || r.severity === severityFilter;
+    const matchesTester = testerFilter === 'all' || r.tester_name === testerFilter;
+    return matchesQuery && matchesSeverity && matchesTester;
+  });
+
+  // Render loading state while checking session
+  if (!authChecked) {
+    return (
+      <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div
+            className="animate-spin"
+            style={{
+              width: 34,
+              height: 34,
+              border: '3px solid #DC2626',
+              borderTopColor: 'transparent',
+              borderRadius: '50%',
+              margin: '0 auto 1.25rem',
+            }}
+          />
+          <p style={{ color: '#4B5563', fontSize: '0.925rem', fontWeight: 600 }}>
+            Verifying secure flight session...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       {/* Workspace Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.85rem', fontWeight: 900, color: '#111827', letterSpacing: '-0.025em' }}>
-            Tester Flight Workspace
-          </h1>
-          <p style={{ color: '#4B5563', fontSize: '0.9rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+            <h1 style={{ fontSize: '1.85rem', fontWeight: 900, color: '#111827', letterSpacing: '-0.025em' }}>
+              Tester Flight Workspace
+            </h1>
+            <span
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                color: '#166534',
+                background: '#DCFCE7',
+                border: '1px solid #86EFAC',
+                padding: '0.15rem 0.55rem',
+                borderRadius: '9999px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16A34A' }} />
+              Live Telemetry Active
+            </span>
+          </div>
+          <p style={{ color: '#4B5563', fontSize: '0.88rem' }}>
             Live browser telemetry streams, AI causal synthesis, in-browser Playwright reproduction probes, and Gmail delivery.
           </p>
         </div>
@@ -453,9 +351,9 @@ export default function TesterWorkspacePage() {
             onClick={fetchReports}
             className="btn-secondary"
             disabled={loading}
-            style={{ fontSize: '0.85rem', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+            style={{ fontSize: '0.825rem', padding: '0.45rem 0.9rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
           >
-            <RotateCcw size={14} className={loading ? 'animate-spin' : ''} />
+            <RotateCcw size={13} className={loading ? 'animate-spin' : ''} />
             <span>{loading ? 'Refreshing...' : 'Refresh Reports'}</span>
           </button>
         </div>
@@ -482,100 +380,90 @@ export default function TesterWorkspacePage() {
 
       {/* Main Grid: Left Stream & Right Review Workspace */}
       <div className="workspace-grid">
-        {/* Left Column: Live Stream & Simulator */}
+        {/* Left Column: Live Stream & Extension Flight Uplink */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* Live Telemetry Stream Widget */}
           <LiveTelemetryFeed />
 
-          {/* 1-Click Telemetry & Flag Simulator */}
+          {/* Extension Flight Uplink & On-Demand Telemetry Analyzer */}
           <div className="glass-panel" style={{ padding: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem' }}>
-              <Sparkles size={16} color="#DC2626" />
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#111827' }}>
-                1-Click Flight & Flag Simulator
-              </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Laptop size={16} color="#DC2626" />
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#111827' }}>
+                  Flight Recorder Uplink
+                </h3>
+              </div>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#047857', background: '#ECFDF5', padding: '0.15rem 0.45rem', borderRadius: '4px', border: '1px solid #A7F3D0' }}>
+                EXTENSION READY
+              </span>
             </div>
-            <p style={{ fontSize: '0.8rem', color: '#6B7280', marginBottom: '1rem' }}>
-              Simulates live in-browser telemetry and triggers the OpenRouter causal synthesis engine.
+
+            <p style={{ fontSize: '0.78rem', color: '#6B7280', marginBottom: '0.85rem', lineHeight: 1.4 }}>
+              The Silent QA Flight Recorder extension automatically captures clicks, network failures, and DOM anomalies on your active tabs. You can also flag a specific observation below.
             </p>
 
-            {/* Scenario Preset Selector */}
-            <div style={{ marginBottom: '0.85rem' }}>
-              <label style={{ display: 'block', fontSize: '0.725rem', fontWeight: 800, color: '#6B7280', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
-                Scenario Preset:
-              </label>
-              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                {PRESET_SCENARIOS.map((preset) => (
-                  <button
-                    key={preset.id}
-                    onClick={() => handleSelectPreset(preset.id)}
-                    type="button"
-                    style={{
-                      padding: '0.25rem 0.55rem',
-                      borderRadius: '6px',
-                      fontSize: '0.725rem',
-                      fontWeight: 700,
-                      border: selectedScenario === preset.id ? '1px solid #DC2626' : '1px solid rgba(17, 24, 39, 0.1)',
-                      background: selectedScenario === preset.id ? '#FFF1F2' : '#ffffff',
-                      color: selectedScenario === preset.id ? '#DC2626' : '#4B5563',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '0.75rem' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#4B5563', marginBottom: '0.25rem' }}>
-                Complaint Note:
+            <div style={{ marginBottom: '0.65rem' }}>
+              <label style={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, color: '#374151', marginBottom: '0.25rem' }}>
+                Observed Defect / Complaint Note:
               </label>
               <textarea
                 value={testNote}
                 onChange={(e) => setTestNote(e.target.value)}
+                placeholder="e.g. Save Draft button not responding to multiple clicks / returns 500"
                 rows={2}
                 style={{
                   width: '100%',
                   padding: '0.55rem',
                   borderRadius: '8px',
-                  border: '1px solid rgba(17, 24, 39, 0.12)',
-                  fontSize: '0.85rem',
+                  border: '1px solid rgba(17, 24, 39, 0.14)',
+                  fontSize: '0.82rem',
                   fontFamily: 'inherit',
                   outline: 'none',
+                  background: '#FFFFFF',
                 }}
               />
             </div>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#4B5563', marginBottom: '0.25rem' }}>
-                Element Selector:
+            <div style={{ marginBottom: '0.85rem' }}>
+              <label style={{ display: 'block', fontSize: '0.725rem', fontWeight: 700, color: '#374151', marginBottom: '0.25rem' }}>
+                Target Selector (Optional):
               </label>
               <input
                 type="text"
                 value={pickedSelector}
                 onChange={(e) => setPickedSelector(e.target.value)}
+                placeholder="e.g. button#save-draft or .checkout-action"
                 style={{
                   width: '100%',
-                  padding: '0.55rem',
+                  padding: '0.5rem 0.6rem',
                   borderRadius: '8px',
-                  border: '1px solid rgba(17, 24, 39, 0.12)',
-                  fontSize: '0.85rem',
+                  border: '1px solid rgba(17, 24, 39, 0.14)',
+                  fontSize: '0.82rem',
                   fontFamily: 'inherit',
                   outline: 'none',
+                  background: '#FFFFFF',
                 }}
               />
             </div>
 
             <button
-              onClick={handleSimulateAndFlag}
+              onClick={handleFlagCustomDefect}
               disabled={submitting}
               className="btn-primary"
-              style={{ width: '100%', padding: '0.65rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+              style={{
+                width: '100%',
+                padding: '0.6rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem',
+                fontSize: '0.825rem',
+                fontWeight: 700,
+              }}
             >
-              <Terminal size={14} />
-              <span>{submitting ? 'Synthesizing Report...' : 'Simulate & Flag Bug →'}</span>
+              <Sparkles size={14} />
+              <span>{submitting ? 'Synthesizing with Nemotron AI...' : 'Synthesize Defect Report →'}</span>
             </button>
           </div>
 
@@ -583,7 +471,7 @@ export default function TesterWorkspacePage() {
           <div className="glass-panel" style={{ padding: '1.25rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
               <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#111827' }}>
-                Database Reports ({filteredReports.length}/{reports.length})
+                Tested Defect Reports ({filteredReports.length}/{reports.length})
               </h3>
             </div>
 
@@ -592,7 +480,7 @@ export default function TesterWorkspacePage() {
               <Search size={13} style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
               <input
                 type="text"
-                placeholder="Search reports by title or root cause..."
+                placeholder="Search real reports by title or root cause..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
@@ -608,7 +496,7 @@ export default function TesterWorkspacePage() {
             </div>
 
             {/* Severity Filter Pills */}
-            <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '0.65rem', flexWrap: 'wrap' }}>
               {(['all', 'critical', 'high', 'medium', 'low'] as const).map((sev) => (
                 <button
                   key={sev}
@@ -630,9 +518,49 @@ export default function TesterWorkspacePage() {
               ))}
             </div>
 
+            {/* Multi-Tester Station Attribution Chips */}
+            {distinctTesters.length > 1 && (
+              <div style={{ display: 'flex', gap: '0.3rem', marginBottom: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.68rem', color: '#6B7280', fontWeight: 600 }}>Tester:</span>
+                <button
+                  onClick={() => setTesterFilter('all')}
+                  style={{
+                    padding: '0.15rem 0.45rem',
+                    borderRadius: '4px',
+                    fontSize: '0.68rem',
+                    fontWeight: 600,
+                    border: testerFilter === 'all' ? '1px solid #111827' : '1px solid rgba(17, 24, 39, 0.1)',
+                    background: testerFilter === 'all' ? '#111827' : '#ffffff',
+                    color: testerFilter === 'all' ? '#ffffff' : '#4B5563',
+                    cursor: 'pointer',
+                  }}
+                >
+                  All Fleet
+                </button>
+                {distinctTesters.map((tName) => (
+                  <button
+                    key={tName}
+                    onClick={() => setTesterFilter(tName)}
+                    style={{
+                      padding: '0.15rem 0.45rem',
+                      borderRadius: '4px',
+                      fontSize: '0.68rem',
+                      fontWeight: 600,
+                      border: testerFilter === tName ? '1px solid #DC2626' : '1px solid rgba(17, 24, 39, 0.1)',
+                      background: testerFilter === tName ? '#FEE2E2' : '#ffffff',
+                      color: testerFilter === tName ? '#DC2626' : '#4B5563',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    👤 {tName}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {reports.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '1.5rem', color: '#9CA3AF', fontSize: '0.85rem' }}>
-                No reports found yet. Click the button above to synthesize a live report!
+                No reports found yet. Connect the extension or flag an observation above to generate a report.
               </div>
             ) : filteredReports.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '1.25rem', color: '#9CA3AF', fontSize: '0.825rem' }}>
@@ -641,6 +569,7 @@ export default function TesterWorkspacePage() {
                   onClick={() => {
                     setSearchQuery('');
                     setSeverityFilter('all');
+                    setTesterFilter('all');
                   }}
                   style={{ display: 'block', margin: '0.5rem auto 0', color: '#DC2626', background: 'none', border: 'none', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer' }}
                 >
@@ -667,11 +596,11 @@ export default function TesterWorkspacePage() {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                       <span className={`badge-severity severity-${r.severity}`}>{r.severity}</span>
-                      <span style={{ fontSize: '0.75rem', color: r.status === 'verified' ? '#16A34A' : '#6B7280', fontWeight: 700 }}>
-                        {r.status.toUpperCase()}
+                      <span style={{ fontSize: '0.72rem', color: r.status === 'verified' ? '#16A34A' : r.status === 'sent' ? '#2563EB' : '#D97706', fontWeight: 700 }}>
+                        {r.status === 'verified' ? '✓ REPRODUCED' : r.status.toUpperCase()}
                       </span>
                     </div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#111827', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#111827', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                       {r.title}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: '#6B7280', marginTop: '0.25rem' }}>
@@ -723,13 +652,15 @@ export default function TesterWorkspacePage() {
                       </span>
                     )}
                   </div>
-                  <h2 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#111827' }}>
+                  <h2 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#111827', letterSpacing: '-0.015em' }}>
                     {selectedReport.title}
                   </h2>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.35rem', fontSize: '0.8rem', color: '#6B7280' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.4rem', fontSize: '0.8rem', color: '#6B7280' }}>
                     <span>Reported by: <strong style={{ color: '#111827' }}>{selectedReport.tester_name || 'QA Tester'}</strong></span>
                     <span>•</span>
                     <span>Station: <strong style={{ color: '#111827' }}>{selectedReport.device_tag || 'Station-01'}</strong></span>
+                    <span>•</span>
+                    <span>Created: <strong style={{ color: '#111827' }}>{new Date(selectedReport.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong></span>
                   </div>
                 </div>
 
@@ -1042,10 +973,10 @@ export default function TesterWorkspacePage() {
             >
               <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔬</div>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#111827', marginBottom: '0.5rem' }}>
-                Select a Defect Report to Review
+                Select a Tested Defect Report
               </h3>
               <p style={{ maxWidth: '450px', fontSize: '0.9rem' }}>
-                Choose a report from the database history on the left, or use the 1-Click Simulator to synthesize a new defect report right now.
+                Choose a real report from the database history on the left to review its AI findings, Playwright reproduction script, and evidence timeline.
               </p>
             </div>
           )}

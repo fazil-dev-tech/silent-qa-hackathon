@@ -38,7 +38,11 @@ export default function LiveTelemetryFeed() {
         .limit(15);
 
       if (data) {
-        setEvents(data);
+        const clean = data.filter((e: any) => {
+          if (e.url && (e.url.includes('/api/auth/me') || e.url.includes('/api/reports/recent'))) return false;
+          return true;
+        });
+        setEvents(clean);
       }
     } catch {
       //
@@ -67,6 +71,7 @@ export default function LiveTelemetryFeed() {
           { event: 'INSERT', schema: 'public', table: 'events' },
           (payload: any) => {
             const newEvt = payload.new as LiveEvent;
+            if (newEvt.url && (newEvt.url.includes('/api/auth/me') || newEvt.url.includes('/api/reports/recent'))) return;
             setEvents((prev) => {
               if (prev.some((e) => e.id === newEvt.id)) return prev;
               return [newEvt, ...prev.slice(0, 24)];

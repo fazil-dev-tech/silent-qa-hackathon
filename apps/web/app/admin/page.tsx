@@ -129,9 +129,30 @@ export default function AdminDashboardPage() {
   }
 
   useEffect(() => {
-    loadData();
-    loadUsers();
-    loadAnalytics();
+    async function verifyAdminAuth() {
+      try {
+        const authRes = await fetch('/api/auth/me');
+        if (!authRes.ok) {
+          window.location.replace('/login?redirect=/admin');
+          return;
+        }
+        const authData = await authRes.json();
+        if (!authData.authenticated || !authData.user) {
+          window.location.replace('/login?redirect=/admin');
+          return;
+        }
+        if (authData.user.role !== 'admin') {
+          window.location.replace('/app');
+          return;
+        }
+        loadData();
+        loadUsers();
+        loadAnalytics();
+      } catch {
+        window.location.replace('/login?redirect=/admin');
+      }
+    }
+    verifyAdminAuth();
   }, []);
 
   const totalReports = reports.length;

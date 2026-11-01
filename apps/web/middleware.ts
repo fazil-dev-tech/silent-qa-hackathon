@@ -6,7 +6,7 @@ export function middleware(req: NextRequest) {
   const sessionCookie = req.cookies.get('sqa_session');
 
   let session: { role?: string; email?: string; name?: string } | null = null;
-  if (sessionCookie?.value) {
+  if (sessionCookie?.value && sessionCookie.value.trim() !== '') {
     try {
       session = JSON.parse(sessionCookie.value);
     } catch {
@@ -14,7 +14,7 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  const isAuthenticated = Boolean(session);
+  const isAuthenticated = Boolean(session && (session.email || session.name || session.role));
   const isAdmin = session?.role === 'admin';
 
   // 1. Tool and Dashboard Route Protection

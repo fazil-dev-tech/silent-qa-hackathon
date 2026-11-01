@@ -88,9 +88,20 @@ export default function ReportDetailPage() {
   }
 
   useEffect(() => {
-    if (!id) return;
-    async function loadReport() {
+    async function verifyAuthAndLoad() {
       try {
+        const authRes = await fetch('/api/auth/me');
+        if (!authRes.ok) {
+          window.location.replace(`/login?redirect=/app/report/${id}`);
+          return;
+        }
+        const authData = await authRes.json();
+        if (!authData.authenticated || !authData.user) {
+          window.location.replace(`/login?redirect=/app/report/${id}`);
+          return;
+        }
+
+        if (!id) return;
         // Direct individual report fetch
         const res = await fetch(`/api/reports/${id}`);
         if (res.ok) {
@@ -119,7 +130,7 @@ export default function ReportDetailPage() {
         setLoading(false);
       }
     }
-    loadReport();
+    verifyAuthAndLoad();
   }, [id]);
 
   async function handleDeleteReport() {

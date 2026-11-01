@@ -9,11 +9,13 @@ export async function POST() {
       message: 'Signed out successfully',
     });
 
+    res.cookies.delete('sqa_session');
     res.cookies.set({
       name: 'sqa_session',
       value: '',
       path: '/',
       maxAge: 0,
+      expires: new Date(0),
       httpOnly: true,
       sameSite: 'lax',
     });
@@ -23,4 +25,3 @@ export async function POST() {
     return NextResponse.json({ error: 'Failed to sign out' }, { status: 500 });
   }
 }
-

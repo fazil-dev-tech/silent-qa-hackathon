@@ -49,9 +49,9 @@ export default function NavigationBar() {
     try {
       await fetch('/api/auth/signout', { method: 'POST' });
       setUser(null);
-      router.push('/login');
+      window.location.href = '/login';
     } catch {
-      //
+      window.location.href = '/login';
     } finally {
       setSigningOut(false);
     }
