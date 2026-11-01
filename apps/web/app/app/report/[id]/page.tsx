@@ -214,7 +214,17 @@ export default function ReportDetailPage() {
   }
 
   return (
-    <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#FFF8F8',
+        backgroundImage:
+          'radial-gradient(at 0% 0%, rgba(220, 38, 38, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.04) 0px, transparent 40%)',
+        padding: '2.5rem 1.5rem',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      }}
+    >
+      <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
       <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link
           href="/app"
@@ -654,175 +664,8 @@ export default function ReportDetailPage() {
             </pre>
           </div>
         )}
-
-        {/* Root Cause Hypothesis */}
-        {report.root_cause && (
-          <div style={{ padding: '1.25rem', background: '#FFFBEB', borderRadius: '12px', border: '1px solid #FDE68A', marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#92400E', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-              AI Causal Hypothesis (OpenRouter Reasoning)
-            </h3>
-            <p style={{ fontSize: '0.95rem', color: '#78350F', lineHeight: 1.5 }}>{report.root_cause}</p>
-          </div>
-        )}
-
-        {/* Interactive Steps to Reproduce */}
-        <div style={{ marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>
-              Steps to Reproduce ({completedSteps.length}/{report.steps?.length || 0} Verified)
-            </h3>
-            {report.steps && report.steps.length > 0 && (
-              <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
-                Click steps to check off during manual reproduction
-              </span>
-            )}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {report.steps?.map((step: string, idx: number) => {
-              const isDone = completedSteps.includes(idx);
-              return (
-                <div
-                  key={idx}
-                  onClick={() => handleToggleStep(idx)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '8px',
-                    background: isDone ? '#F0FDF4' : '#FFFFFF',
-                    border: isDone ? '1px solid #86EFAC' : '1px solid rgba(17, 24, 39, 0.08)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      border: isDone ? 'none' : '2px solid #D1D5DB',
-                      background: isDone ? '#16A34A' : 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {isDone && <Check size={12} color="#FFFFFF" />}
-                  </div>
-                  <span
-                    style={{
-                      fontSize: '0.925rem',
-                      color: isDone ? '#166534' : '#374151',
-                      textDecoration: isDone ? 'line-through' : 'none',
-                      fontWeight: isDone ? 600 : 500,
-                    }}
-                  >
-                    {idx + 1}. {step}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Playwright Script */}
-        {report.playwright_script && (
-          <div style={{ marginBottom: '2.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Terminal size={18} color="#DC2626" />
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>
-                  Synthesized Playwright Reproduction Test
-                </h3>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <button
-                  onClick={handleDownloadScript}
-                  className="btn-secondary"
-                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                >
-                  <Download size={13} />
-                  <span>Download (.spec.ts)</span>
-                </button>
-
-                <button
-                  onClick={handleCopyScript}
-                  className="btn-secondary"
-                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                >
-                  {copiedScript ? <Check size={14} color="#16A34A" /> : <Copy size={14} />}
-                  <span>{copiedScript ? 'Copied!' : 'Copy Script'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Terminal Execution Snippet */}
-            <div
-              style={{
-                background: '#1E293B',
-                border: '1px solid #334155',
-                borderRadius: '8px',
-                padding: '0.65rem 1rem',
-                marginBottom: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '0.75rem',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
-                <span style={{ color: '#F43F5E', fontWeight: 800, fontSize: '0.8rem', userSelect: 'none' }}>$</span>
-                <code style={{ color: '#F1F5F9', fontSize: '0.8rem', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  npx playwright test tests/reproduce-{id ? id.slice(0, 8) : 'test'}.spec.ts --headed
-                </code>
-              </div>
-
-              <button
-                onClick={() =>
-                  handleCopyCommand(
-                    `npx playwright test tests/reproduce-${id ? id.slice(0, 8) : 'test'}.spec.ts --headed`
-                  )
-                }
-                style={{
-                  background: '#0F172A',
-                  border: '1px solid #475569',
-                  color: '#94A3B8',
-                  padding: '0.25rem 0.55rem',
-                  borderRadius: '4px',
-                  fontSize: '0.725rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {copiedCmd ? <Check size={11} color="#10B981" /> : <Copy size={11} />}
-                <span>{copiedCmd ? 'Copied' : 'Copy Command'}</span>
-              </button>
-            </div>
-
-            <pre
-              style={{
-                background: '#0F172A',
-                color: '#E2E8F0',
-                padding: '1.25rem',
-                borderRadius: '12px',
-                overflowX: 'auto',
-                fontSize: '0.85rem',
-                lineHeight: 1.5,
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-              }}
-            >
-              <code>{report.playwright_script}</code>
-            </pre>
-          </div>
-        )}
-
       </div>
+    </div>
 
       {/* Export Modal */}
       <ExportModal

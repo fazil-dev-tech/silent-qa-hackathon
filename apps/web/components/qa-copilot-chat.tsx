@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Layers,
   MessageSquare,
+  Award,
 } from 'lucide-react';
 
 interface ChatMessage {
@@ -40,7 +41,7 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
       id: 'welcome',
       role: 'assistant',
       content:
-        'Hello! I am your **Silent QA Copilot**. I have live access to your Supabase defect reports and telemetry flight recorder.\n\nAsk me about any component defect (e.g., *"What is the problem in the checkout button?"* or *"How do I fix the duplicate request in code?"*).',
+        'Hello! I am your **Silent QA Copilot** — powered by OpenRouter Nemotron-3 and live Supabase PostgreSQL telemetry.\n\nAsk me about defect enhancement criteria, root cause analysis, or code fixes (e.g. *"Why is the checkout button failing with 500?"* or *"Explain how the defect description was enhanced"*).',
       timestamp: Date.now(),
     },
   ]);
@@ -124,7 +125,7 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
       {
         id: 'reset',
         role: 'assistant',
-        content: 'Chat cleared. How can I assist you with your defect reports or telemetry analysis?',
+        content: 'Chat cleared. How can I assist you with your defect specifications or telemetry analysis?',
         timestamp: Date.now(),
       },
     ]);
@@ -152,7 +153,7 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
             color: '#FFFFFF',
             padding: '0.75rem 1.25rem',
             borderRadius: '9999px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
             boxShadow: '0 8px 25px rgba(220, 38, 38, 0.35)',
             cursor: 'pointer',
             fontWeight: 800,
@@ -170,13 +171,13 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
                 background: '#4ADE80',
                 boxShadow: '0 0 6px #4ADE80',
               }}
-              title="Context loaded from active report"
+              title="Active Defect Context Loaded"
             />
           )}
         </motion.button>
       )}
 
-      {/* Slide-in Chat Drawer / Modal */}
+      {/* Slide-in Chat Drawer / Modal in Light Theme Glassmorphism */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -188,14 +189,15 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
               position: 'fixed',
               bottom: isExpanded ? '20px' : '24px',
               right: isExpanded ? '20px' : '24px',
-              width: isExpanded ? 'calc(100vw - 40px)' : '460px',
-              maxWidth: isExpanded ? '900px' : '460px',
-              height: isExpanded ? 'calc(100vh - 40px)' : '620px',
+              width: isExpanded ? 'calc(100vw - 40px)' : '480px',
+              maxWidth: isExpanded ? '920px' : '480px',
+              height: isExpanded ? 'calc(100vh - 40px)' : '640px',
               maxHeight: 'calc(100vh - 40px)',
-              background: '#0F172A',
-              border: '1.5px solid rgba(220, 38, 38, 0.3)',
-              borderRadius: '16px',
-              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(220, 38, 38, 0.15)',
+              background: 'rgba(255, 255, 255, 0.97)',
+              backdropFilter: 'blur(28px)',
+              border: '1.5px solid rgba(220, 38, 38, 0.2)',
+              borderRadius: '20px',
+              boxShadow: '0 25px 65px -12px rgba(0, 0, 0, 0.18), 0 0 35px rgba(220, 38, 38, 0.08)',
               zIndex: 1000,
               display: 'flex',
               flexDirection: 'column',
@@ -206,50 +208,51 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
             {/* Header */}
             <div
               style={{
-                padding: '0.85rem 1.25rem',
-                background: '#1E293B',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                padding: '0.95rem 1.25rem',
+                background: 'linear-gradient(135deg, rgba(255, 241, 242, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%)',
+                borderBottom: '1px solid rgba(220, 38, 38, 0.12)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                 <div
                   style={{
-                    width: '30px',
-                    height: '30px',
-                    borderRadius: '8px',
-                    background: '#DC2626',
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '10px',
+                    background: 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: '#fff',
+                    boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)',
                   }}
                 >
-                  <Bot size={17} />
+                  <Bot size={18} />
                 </div>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <h3 style={{ fontSize: '0.925rem', fontWeight: 800, color: '#F8FAFC' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <h3 style={{ fontSize: '0.95rem', fontWeight: 900, color: '#111827', margin: 0 }}>
                       Silent QA Copilot
                     </h3>
                     <span
                       style={{
                         fontSize: '0.625rem',
                         fontWeight: 800,
-                        color: '#4ADE80',
-                        background: 'rgba(74, 222, 128, 0.12)',
-                        border: '1px solid rgba(74, 222, 128, 0.3)',
-                        padding: '0.1rem 0.35rem',
+                        color: '#15803D',
+                        background: '#DCFCE7',
+                        border: '1px solid #86EFAC',
+                        padding: '0.1rem 0.4rem',
                         borderRadius: '4px',
                       }}
                     >
-                      SUPABASE LIVE
+                      LIVE SUPABASE
                     </span>
                   </div>
-                  <p style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
-                    OpenRouter Nemotron-3 • Deep Causal Analysis
+                  <p style={{ fontSize: '0.72rem', color: '#6B7280', margin: '0.1rem 0 0' }}>
+                    Nemotron-3 Causal AI • Defect Enhancement &amp; Root Cause
                   </p>
                 </div>
               </div>
@@ -260,12 +263,16 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
                   onClick={handleClearChat}
                   title="Clear conversation"
                   style={{
-                    background: 'none',
+                    background: '#F3F4F6',
                     border: 'none',
-                    color: '#94A3B8',
+                    color: '#4B5563',
                     cursor: 'pointer',
-                    padding: '0.3rem',
-                    borderRadius: '4px',
+                    padding: '0.35rem',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   <Trash2 size={14} />
@@ -274,12 +281,16 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
                   onClick={() => setIsExpanded(!isExpanded)}
                   title={isExpanded ? 'Restore' : 'Expand'}
                   style={{
-                    background: 'none',
+                    background: '#F3F4F6',
                     border: 'none',
-                    color: '#94A3B8',
+                    color: '#4B5563',
                     cursor: 'pointer',
-                    padding: '0.3rem',
-                    borderRadius: '4px',
+                    padding: '0.35rem',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   {isExpanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
@@ -288,12 +299,16 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
                   onClick={() => setIsOpen(false)}
                   title="Close Copilot"
                   style={{
-                    background: 'none',
+                    background: '#FEE2E2',
                     border: 'none',
-                    color: '#94A3B8',
+                    color: '#DC2626',
                     cursor: 'pointer',
-                    padding: '0.3rem',
-                    borderRadius: '4px',
+                    padding: '0.35rem',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   <X size={16} />
@@ -305,24 +320,24 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
             {activeReport && (
               <div
                 style={{
-                  background: '#0B1120',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                  padding: '0.4rem 1.25rem',
+                  background: '#F0F9FF',
+                  borderBottom: '1px solid #BAE6FD',
+                  padding: '0.45rem 1.25rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.4rem',
-                  fontSize: '0.725rem',
-                  color: '#38BDF8',
+                  gap: '0.45rem',
+                  fontSize: '0.75rem',
+                  color: '#0369A1',
                   overflow: 'hidden',
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
                 }}
               >
-                <span>🎯 Active Defect:</span>
-                <strong style={{ color: '#F1F5F9', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <span style={{ fontWeight: 800 }}>🎯 Active Defect:</span>
+                <strong style={{ color: '#0C4A6E', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {activeReport.title}
                 </strong>
-                <span style={{ color: '#64748B', marginLeft: 'auto', flexShrink: 0 }}>
+                <span style={{ color: '#0284C7', marginLeft: 'auto', flexShrink: 0, fontWeight: 700 }}>
                   ({activeReport.severity?.toUpperCase()})
                 </span>
               </div>
@@ -332,19 +347,20 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
             <div
               style={{
                 display: 'flex',
-                gap: '0.35rem',
+                gap: '0.4rem',
                 overflowX: 'auto',
-                padding: '0.55rem 1rem',
-                background: '#131D31',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                padding: '0.6rem 1rem',
+                background: '#FFFFFF',
+                borderBottom: '1px solid rgba(17, 24, 39, 0.06)',
                 whiteSpace: 'nowrap',
               }}
             >
               {[
-                'What is the problem in the tested button?',
-                'Explain root cause hypothesis',
+                'Explain how this defect was enhanced',
+                'What is the root cause hypothesis?',
                 'How do I fix this in code?',
                 'Show reproduction steps',
+                'Explain 85%+ quality criteria',
               ].map((p, idx) => (
                 <button
                   key={idx}
@@ -352,12 +368,12 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
                   disabled={loading}
                   style={{
                     flexShrink: 0,
-                    background: '#1E293B',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    background: '#F9FAFB',
+                    border: '1px solid #E5E7EB',
                     borderRadius: '9999px',
-                    padding: '0.2rem 0.65rem',
-                    color: '#CBD5E1',
-                    fontSize: '0.72rem',
+                    padding: '0.25rem 0.75rem',
+                    color: '#374151',
+                    fontSize: '0.725rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
@@ -377,7 +393,7 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '1rem',
-                background: '#0B1120',
+                background: '#FFF8F8',
               }}
             >
               {messages.map((m) => {
@@ -394,23 +410,27 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
                     <div
                       style={{
                         maxWidth: '88%',
-                        padding: '0.75rem 1rem',
-                        borderRadius: isUser ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
-                        background: isUser ? '#DC2626' : '#1E293B',
-                        color: isUser ? '#FFFFFF' : '#E2E8F0',
-                        fontSize: '0.84rem',
-                        lineHeight: 1.5,
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-                        border: isUser ? 'none' : '1px solid rgba(255, 255, 255, 0.08)',
+                        padding: '0.85rem 1.15rem',
+                        borderRadius: isUser ? '16px 16px 2px 16px' : '16px 16px 16px 2px',
+                        background: isUser
+                          ? 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)'
+                          : 'rgba(255, 255, 255, 0.98)',
+                        color: isUser ? '#FFFFFF' : '#1F2937',
+                        fontSize: '0.85rem',
+                        lineHeight: 1.55,
+                        boxShadow: isUser
+                          ? '0 4px 14px rgba(220, 38, 38, 0.25)'
+                          : '0 2px 10px rgba(0, 0, 0, 0.04)',
+                        border: isUser ? 'none' : '1px solid rgba(220, 38, 38, 0.12)',
                       }}
                     >
-                      <RenderFormattedMessage content={m.content} />
+                      <RenderFormattedMessage content={m.content} isUser={isUser} />
                     </div>
                     <span
                       style={{
                         fontSize: '0.625rem',
-                        color: '#64748B',
-                        marginTop: '0.25rem',
+                        color: '#9CA3AF',
+                        marginTop: '0.3rem',
                         padding: '0 0.25rem',
                       }}
                     >
@@ -421,9 +441,18 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
               })}
 
               {loading && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94A3B8', fontSize: '0.8rem', padding: '0.5rem' }}>
-                  <div className="animate-spin" style={{ width: 14, height: 14, border: '2px solid #DC2626', borderTopColor: 'transparent', borderRadius: '50%' }} />
-                  <span>Nemotron AI is querying Supabase and synthesizing answer...</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#6B7280', fontSize: '0.8rem', padding: '0.5rem' }}>
+                  <div
+                    className="animate-spin"
+                    style={{
+                      width: 14,
+                      height: 14,
+                      border: '2px solid #DC2626',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                    }}
+                  />
+                  <span>Nemotron AI is analyzing Supabase telemetry and synthesizing answer...</span>
                 </div>
               )}
               <div ref={messagesEndRef} />
@@ -432,11 +461,11 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
             {/* Input Bar */}
             <div
               style={{
-                padding: '0.75rem 1rem',
-                background: '#1E293B',
-                borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                padding: '0.85rem 1.15rem',
+                background: '#FFFFFF',
+                borderTop: '1px solid rgba(220, 38, 38, 0.12)',
                 display: 'flex',
-                gap: '0.5rem',
+                gap: '0.6rem',
                 alignItems: 'center',
               }}
             >
@@ -450,15 +479,15 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
                     handleSendMessage();
                   }
                 }}
-                placeholder="Ask Copilot about any button, error, or fix..."
+                placeholder="Ask Copilot about any defect, button, or code fix..."
                 style={{
                   flex: 1,
-                  background: '#0F172A',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  borderRadius: '8px',
-                  padding: '0.6rem 0.85rem',
-                  color: '#F8FAFC',
-                  fontSize: '0.84rem',
+                  background: '#F9FAFB',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: '10px',
+                  padding: '0.65rem 0.95rem',
+                  color: '#111827',
+                  fontSize: '0.85rem',
                   outline: 'none',
                 }}
               />
@@ -467,22 +496,23 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
                 onClick={() => handleSendMessage()}
                 disabled={loading || !inputMessage.trim()}
                 style={{
-                  background: '#DC2626',
+                  background: 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)',
                   color: '#fff',
                   border: 'none',
-                  borderRadius: '8px',
-                  width: '38px',
-                  height: '38px',
+                  borderRadius: '10px',
+                  width: '40px',
+                  height: '40px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: loading || !inputMessage.trim() ? 'not-allowed' : 'pointer',
                   opacity: loading || !inputMessage.trim() ? 0.5 : 1,
+                  boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
                   transition: 'all 0.15s ease',
                   flexShrink: 0,
                 }}
               >
-                <Send size={15} />
+                <Send size={16} />
               </button>
             </div>
           </motion.div>
@@ -493,7 +523,7 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
 }
 
 // Simple Markdown / Code renderer for Chat messages
-function RenderFormattedMessage({ content }: { content: string }) {
+function RenderFormattedMessage({ content, isUser }: { content: string; isUser?: boolean }) {
   const parts = content.split(/(```[\s\S]*?```)/g);
 
   return (
@@ -507,7 +537,7 @@ function RenderFormattedMessage({ content }: { content: string }) {
           return <CodeBlock key={index} code={code} lang={lang} />;
         }
 
-        // Normal formatted text
+        // Bold text parser
         return (
           <span key={index} style={{ whiteSpace: 'pre-wrap' }}>
             {part}
@@ -530,9 +560,9 @@ function CodeBlock({ code, lang }: { code: string; lang: string }) {
   return (
     <div
       style={{
-        margin: '0.5rem 0',
-        background: '#040711',
-        borderRadius: '8px',
+        margin: '0.65rem 0',
+        background: '#0F172A',
+        borderRadius: '10px',
         border: '1px solid rgba(255, 255, 255, 0.1)',
         overflow: 'hidden',
       }}
@@ -542,10 +572,10 @@ function CodeBlock({ code, lang }: { code: string; lang: string }) {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: '0.3rem 0.65rem',
-          background: '#0F172A',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-          fontSize: '0.68rem',
+          padding: '0.35rem 0.75rem',
+          background: '#1E293B',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          fontSize: '0.7rem',
           color: '#94A3B8',
           fontFamily: 'monospace',
         }}
@@ -560,23 +590,23 @@ function CodeBlock({ code, lang }: { code: string; lang: string }) {
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.2rem',
-            fontSize: '0.68rem',
+            gap: '0.25rem',
+            fontSize: '0.7rem',
           }}
         >
-          {copied ? <Check size={11} color="#4ADE80" /> : <Copy size={11} />}
+          {copied ? <Check size={12} color="#4ADE80" /> : <Copy size={12} />}
           <span>{copied ? 'Copied' : 'Copy'}</span>
         </button>
       </div>
       <pre
         style={{
-          padding: '0.65rem',
+          padding: '0.85rem',
           margin: 0,
-          fontFamily: 'monospace',
-          fontSize: '0.78rem',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+          fontSize: '0.8rem',
           color: '#E2E8F0',
           overflowX: 'auto',
-          lineHeight: 1.45,
+          lineHeight: 1.5,
         }}
       >
         <code>{code}</code>
@@ -584,4 +614,3 @@ function CodeBlock({ code, lang }: { code: string; lang: string }) {
     </div>
   );
 }
-
