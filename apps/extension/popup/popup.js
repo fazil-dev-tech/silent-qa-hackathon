@@ -22,8 +22,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentPickedSelector = '';
   let currentRecentEventId = '';
   let isRecordingEnabled = true;
-  let activeTesterName = 'Engineer #1';
+  let activeTesterName = 'Eng #1';
   let activeDeviceTag = 'Station-01';
+
+  function updateStatus(msg, color) {
+    if (!statusText) return;
+    if (msg) {
+      statusText.textContent = msg;
+      statusText.style.color = color || '#4B5563';
+      statusText.classList.add('has-content');
+    } else {
+      statusText.textContent = '';
+      statusText.classList.remove('has-content');
+    }
+  }
 
   // 1. Identify active tab host
   try {
@@ -45,12 +57,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     isRecordingEnabled = enabled;
     if (enabled) {
       toggleRecordingBtn.className = 'rec-toggle';
-      recStatusText.textContent = 'RECORDING: ON';
+      recStatusText.textContent = 'Active Recording';
       toggleRecordingBtn.title = 'Recording is ACTIVE. Click to pause telemetry capture.';
       pausedBanner.style.display = 'none';
     } else {
       toggleRecordingBtn.className = 'rec-toggle is-paused';
-      recStatusText.textContent = 'RECORDING: PAUSED';
+      recStatusText.textContent = 'Paused';
       toggleRecordingBtn.title = 'Recording is PAUSED. Click to resume telemetry capture.';
       pausedBanner.style.display = 'flex';
     }
@@ -107,15 +119,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       sessionDisplay.textContent = activeSessionId.slice(0, 13) + '...';
 
       // Tester & Device Attribution
-      activeTesterName = stored.tester_name || 'Engineer #1';
+      activeTesterName = stored.tester_name || 'Eng #1';
       activeDeviceTag = stored.device_tag || 'Station-01';
       testerDisplay.textContent = activeTesterName;
-      stationDisplay.textContent = activeDeviceTag;
+      if (stationDisplay) {
+        stationDisplay.textContent = activeDeviceTag;
+      }
 
-      // Stats
+      // Stats - single line badge
       const captured = stored.sqa_stats?.captured || 0;
       const errors = stored.sqa_stats?.errors || 0;
-      recentCount.textContent = errors > 0 ? `${captured} ev (${errors} err)` : `${captured} ev`;
+      if (errors > 0) {
+        recentCount.textContent = `${captured} ev (${errors} err)`;
+      } else if (captured > 0) {
+        recentCount.textContent = `${captured} events`;
+      } else {
+        recentCount.textContent = '0 events';
+      }
 
       // Render Recent Interactions
       renderRecentInteractions(stored.sqa_recent_interactions || []);
@@ -126,12 +146,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderRecentInteractions(items) {
     if (!items || items.length === 0) {
       recentChipsContainer.innerHTML =
-        '<div class="recent-empty">No actions captured yet. Interacting with page populates this list.</div>';
+        '<div class="recent-empty">Interacting with the page records events in real time.</div>';
       return;
     }
 
     recentChipsContainer.innerHTML = '';
-    items.slice(0, 4).forEach((item) => {
+    items.slice(0, 3).forEach((item) => {
       const chip = document.createElement('div');
       chip.className = 'recent-chip';
 
@@ -234,7 +254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       window.close();
     } catch {
-      statusText.textContent = 'Could not activate picker on this page';
+      updateStatus('Could not activate picker on this page', '#DC2626');
     }
   });
 
@@ -242,14 +262,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   submitBtn.addEventListener('click', async () => {
     const note = noteInput.value.trim();
     if (!note) {
-      statusText.textContent = 'Please describe what looks wrong.';
-      statusText.style.color = '#DC2626';
+      updateStatus('Please describe what looks wrong.', '#DC2626');
       return;
     }
 
     submitBtn.disabled = true;
-    statusText.textContent = 'Synthesizing report via OpenRouter AI...';
-    statusText.style.color = '#4B5563';
+    updateStatus('Synthesizing report via OpenRouter AI...', '#4B5563');
 
     chrome.storage.local.get(['session_id', 'api_endpoint', 'tester_name', 'device_tag'], async (stored) => {
       let activeSessionId = stored.session_id;
@@ -276,8 +294,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const data = await response.json();
         if (response.ok && data.report) {
-          statusText.textContent = '✓ Defect synthesized! Opening report...';
-          statusText.style.color = '#16A34A';
+          updateStatus('✓ Defect synthesized! Opening report...', '#16A34A');
           noteInput.value = '';
           currentPickedSelector = '';
           currentRecentEventId = '';
@@ -288,12 +305,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             chrome.tabs.create({ url: `${baseApiUrl}/app/report/${data.report.id}` });
           }, 800);
         } else {
-          statusText.textContent = data?.error || 'Failed to submit flag.';
-          statusText.style.color = '#DC2626';
+          updateStatus(data?.error || 'Failed to submit flag.', '#DC2626');
         }
       } catch (err) {
-        statusText.textContent = `Cannot reach API at ${baseApiUrl}`;
-        statusText.style.color = '#DC2626';
+        updateStatus(`Cannot reach API at ${baseApiUrl}`, '#DC2626');
       } finally {
         submitBtn.disabled = false;
       }

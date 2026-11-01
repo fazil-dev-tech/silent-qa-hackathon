@@ -6,19 +6,23 @@
   <style>
     :root {
       --bg: #FFF8F8;
-      --card-bg: rgba(255, 255, 255, 0.98);
+      --card-bg: #FFFFFF;
       --red-600: #DC2626;
       --red-500: #EF4444;
+      --red-100: #FEE2E2;
       --red-50: #FEF2F2;
-      --green-600: #16A34A;
-      --green-50: #DCFCE7;
+      --green-700: #047857;
+      --green-600: #059669;
+      --green-100: #D1FAE5;
+      --green-50: #ECFDF5;
+      --amber-700: #B45309;
       --amber-600: #D97706;
-      --amber-50: #FEF3C7;
+      --amber-50: #FFFBEB;
       --ink: #111827;
       --ink-2: #4B5563;
       --ink-3: #9CA3AF;
-      --border: rgba(220, 38, 38, 0.15);
-      --shadow: 0 10px 28px rgba(220, 38, 38, 0.14);
+      --border: rgba(220, 38, 38, 0.14);
+      --shadow: 0 10px 26px rgba(220, 38, 38, 0.1);
     }
 
     * {
@@ -27,75 +31,94 @@
       padding: 0;
     }
 
-    body {
-      width: 360px;
-      padding: 1.15rem;
-      background: var(--bg);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: var(--ink);
+    *::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
     }
 
-    /* Header & ON/OFF Switch */
+    html, body {
+      width: 360px;
+      margin: 0;
+      padding: 0.8rem 0.9rem;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      color: var(--ink);
+      overflow: hidden;
+      scrollbar-width: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Brand Header */
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.65rem;
+      padding: 0 0.1rem;
     }
 
     .title {
-      font-size: 1.05rem;
+      font-size: 1.02rem;
       font-weight: 800;
       display: flex;
       align-items: center;
-      gap: 0.35rem;
-      letter-spacing: -0.01em;
+      gap: 0.4rem;
+      letter-spacing: -0.02em;
+      color: var(--ink);
     }
 
-    .title span {
-      color: var(--red-600);
+    .brand-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--red-600);
+      box-shadow: 0 0 6px rgba(220, 38, 38, 0.5);
     }
 
+    /* Master Toggle Pill */
     .rec-toggle {
       border: 1px solid #86EFAC;
       background: var(--green-50);
       color: #166534;
       font-size: 0.72rem;
-      font-weight: 800;
-      padding: 0.25rem 0.65rem;
+      font-weight: 700;
+      padding: 0.22rem 0.65rem;
       border-radius: 9999px;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 0.35rem;
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 2px 6px rgba(22, 163, 74, 0.15);
+      box-shadow: 0 1px 4px rgba(22, 163, 74, 0.12);
       user-select: none;
+      white-space: nowrap;
     }
 
     .rec-toggle:hover {
       transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(22, 163, 74, 0.25);
+      box-shadow: 0 2px 7px rgba(22, 163, 74, 0.22);
     }
 
     .rec-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--green-600);
-      animation: pulse-dot 2s infinite;
+      animation: pulse-dot 1.8s infinite;
+      flex-shrink: 0;
     }
 
     @keyframes pulse-dot {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.45; transform: scale(0.85); }
+      50% { opacity: 0.35; transform: scale(0.85); }
     }
 
     .rec-toggle.is-paused {
       background: var(--amber-50);
-      color: #92400E;
-      border-color: #FCD34D;
-      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.15);
+      color: var(--amber-700);
+      border-color: #FDE68A;
+      box-shadow: 0 1px 4px rgba(217, 119, 6, 0.12);
     }
 
     .rec-toggle.is-paused .rec-dot {
@@ -106,101 +129,150 @@
     /* Main Container Card */
     .card {
       background: var(--card-bg);
-      backdrop-filter: blur(20px);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 0.95rem;
+      padding: 0.85rem 0.9rem;
       box-shadow: var(--shadow);
     }
 
-    /* Paused Banner */
+    /* Paused Warning Banner */
     .paused-banner {
       background: var(--amber-50);
       border: 1px dashed var(--amber-600);
-      color: #92400E;
-      padding: 0.5rem 0.65rem;
-      border-radius: 8px;
-      font-size: 0.73rem;
+      color: var(--amber-700);
+      padding: 0.4rem 0.55rem;
+      border-radius: 7px;
+      font-size: 0.72rem;
       font-weight: 600;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.6rem;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
-    }
-
-    /* Strips */
-    .meta-strips {
-      display: flex;
-      flex-direction: column;
       gap: 0.35rem;
-      margin-bottom: 0.75rem;
+      line-height: 1.25;
     }
 
-    .site-strip {
-      font-size: 0.75rem;
-      color: var(--ink-2);
+    /* Unified Meta Strip (Host + Tester + Settings in 1 Clean Row) */
+    .meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
       padding: 0.35rem 0.55rem;
       background: #F9FAFB;
-      border-radius: 6px;
       border: 1px solid rgba(17, 24, 39, 0.08);
+      border-radius: 7px;
+      margin-bottom: 0.55rem;
+      font-size: 0.73rem;
+    }
+
+    .meta-host-box {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      min-width: 0;
+      flex: 1;
+      color: var(--ink-2);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .meta-host-box strong {
+      color: var(--ink);
+      font-weight: 700;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .tester-strip {
-      font-size: 0.73rem;
-      color: var(--ink-2);
-      padding: 0.3rem 0.55rem;
-      background: #FFF1F2;
-      border-radius: 6px;
-      border: 1px solid rgba(220, 38, 38, 0.12);
+    .meta-actions-box {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 0.35rem;
+      flex-shrink: 0;
     }
 
-    .link-btn {
+    .tester-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: #FFF1F2;
+      border: 1px solid rgba(220, 38, 38, 0.15);
+      border-radius: 9999px;
+      padding: 0.12rem 0.45rem;
+      font-size: 0.68rem;
+      color: var(--red-600);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .station-text {
+      color: var(--ink-3);
+      font-weight: 500;
+    }
+
+    .btn-icon-link {
       background: none;
       border: none;
-      color: var(--red-600);
-      font-size: 0.7rem;
-      font-weight: 700;
       cursor: pointer;
-      text-decoration: underline;
-      padding: 0;
+      color: var(--ink-2);
+      padding: 0.15rem;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
     }
 
-    /* Recent Interactions & Errors */
+    .btn-icon-link:hover {
+      color: var(--red-600);
+      background: #FEE2E2;
+    }
+
+    /* Recent Flight Log / Detected Issues Box */
     .recent-box {
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.55rem;
       border: 1px solid rgba(17, 24, 39, 0.08);
       background: #FAFAFA;
       border-radius: 8px;
-      padding: 0.5rem;
+      padding: 0.45rem 0.55rem;
     }
 
     .recent-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.4rem;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
     }
 
     .recent-heading {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.03em;
       color: var(--ink-2);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
+    /* Fixed Badge: Never Wraps, Always Single Horizontal Pill */
     .recent-count {
-      font-size: 0.68rem;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.12rem 0.45rem;
+      font-size: 0.67rem;
       font-weight: 700;
+      line-height: 1;
       color: var(--red-600);
       background: var(--red-50);
-      padding: 0.1rem 0.4rem;
       border-radius: 9999px;
       border: 1px solid rgba(220, 38, 38, 0.2);
     }
@@ -208,39 +280,40 @@
     .recent-chips {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
-      max-height: 120px;
+      gap: 0.3rem;
+      max-height: 85px;
       overflow-y: auto;
+      scrollbar-width: none;
     }
 
     .recent-chip {
       background: #FFFFFF;
       border: 1px solid rgba(17, 24, 39, 0.12);
       border-radius: 6px;
-      padding: 0.35rem 0.5rem;
+      padding: 0.25rem 0.45rem;
       cursor: pointer;
       transition: all 0.15s ease;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
-      font-size: 0.74rem;
+      gap: 0.35rem;
+      font-size: 0.72rem;
       text-align: left;
     }
 
     .recent-chip:hover {
       border-color: var(--red-600);
       background: #FFF5F5;
-      transform: translateX(2px);
+      transform: translateX(1px);
     }
 
     .recent-chip.is-selected {
       border-color: var(--green-600);
       background: var(--green-50);
-      box-shadow: 0 0 0 1.5px rgba(22, 163, 74, 0.25);
+      box-shadow: 0 0 0 1px var(--green-600);
     }
 
     .chip-icon {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       flex-shrink: 0;
     }
 
@@ -258,31 +331,32 @@
     }
 
     .chip-meta {
-      font-size: 0.66rem;
+      font-size: 0.64rem;
       color: var(--ink-3);
     }
 
     .recent-empty {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--ink-3);
-      padding: 0.4rem 0.2rem;
+      padding: 0.25rem 0.1rem;
       font-style: italic;
       text-align: center;
+      line-height: 1.3;
     }
 
     /* Bound Target Pill */
     .bound-target-pill {
-      background: #DCFCE7;
-      border: 1px solid #86EFAC;
+      background: #ECFDF5;
+      border: 1px solid #A7F3D0;
       border-radius: 6px;
-      padding: 0.35rem 0.55rem;
+      padding: 0.25rem 0.45rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.6rem;
-      font-size: 0.74rem;
+      margin-bottom: 0.45rem;
+      font-size: 0.72rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      color: #166534;
+      color: #065F46;
     }
 
     .bound-text {
@@ -290,33 +364,39 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-right: 0.5rem;
+      margin-right: 0.4rem;
     }
 
     .btn-clear-target {
       background: none;
       border: none;
-      color: #166534;
+      color: #065F46;
       font-weight: 800;
       cursor: pointer;
       font-size: 0.75rem;
       padding: 0 0.2rem;
     }
 
-    /* Quick Phrases */
+    /* Single-Row Smooth Horizontal Scrollable Quick Phrases */
     .quick-phrases {
       display: flex;
-      flex-wrap: wrap;
+      align-items: center;
       gap: 0.3rem;
-      margin-bottom: 0.6rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      white-space: nowrap;
+      margin-bottom: 0.55rem;
+      padding-bottom: 2px;
     }
 
     .phrase-chip {
+      flex-shrink: 0;
+      white-space: nowrap;
       background: #F3F4F6;
       border: 1px solid rgba(17, 24, 39, 0.1);
-      border-radius: 4px;
-      padding: 0.2rem 0.45rem;
-      font-size: 0.69rem;
+      border-radius: 9999px;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.68rem;
       font-weight: 600;
       color: var(--ink-2);
       cursor: pointer;
@@ -327,47 +407,50 @@
       background: #FEE2E2;
       border-color: #F87171;
       color: var(--red-600);
+      transform: translateY(-1px);
     }
 
     /* Form Inputs */
     label {
       display: block;
-      font-size: 0.79rem;
-      font-weight: 800;
+      font-size: 0.76rem;
+      font-weight: 700;
       color: var(--ink);
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.3rem;
     }
 
     textarea {
       width: 100%;
-      border: 1px solid rgba(17, 24, 39, 0.18);
+      border: 1px solid rgba(17, 24, 39, 0.16);
       border-radius: 8px;
-      padding: 0.6rem;
-      font-size: 0.83rem;
+      padding: 0.5rem 0.6rem;
+      font-size: 0.8rem;
       font-family: inherit;
-      resize: vertical;
-      min-height: 60px;
-      margin-bottom: 0.7rem;
+      line-height: 1.35;
+      resize: none;
+      height: 54px;
+      margin-bottom: 0.55rem;
       outline: none;
       transition: border 0.15s ease, box-shadow 0.15s ease;
     }
 
     textarea:focus {
       border-color: var(--red-600);
-      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12);
     }
 
     /* Buttons */
     .btn-row {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.45rem;
     }
 
     button.btn-action {
       flex: 1;
-      padding: 0.6rem 0.8rem;
-      font-size: 0.83rem;
-      font-weight: 800;
+      height: 38px;
+      padding: 0 0.75rem;
+      font-size: 0.81rem;
+      font-weight: 700;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.15s ease;
@@ -375,18 +458,20 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.35rem;
+      gap: 0.3rem;
+      user-select: none;
     }
 
     .btn-primary {
       background: var(--red-600);
       color: #fff;
-      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+      box-shadow: 0 3px 10px rgba(220, 38, 38, 0.22);
     }
 
     .btn-primary:hover:not(:disabled) {
       background: var(--red-500);
       transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
     }
 
     .btn-primary:disabled {
@@ -395,7 +480,7 @@
     }
 
     .btn-secondary {
-      background: #fff;
+      background: #FFFFFF;
       color: var(--ink);
       border: 1px solid rgba(17, 24, 39, 0.18) !important;
     }
@@ -403,31 +488,40 @@
     .btn-secondary:hover {
       border-color: var(--red-600) !important;
       color: var(--red-600);
+      background: #FFF5F5;
     }
 
     /* Status Text */
     .status {
-      margin-top: 0.6rem;
-      font-size: 0.76rem;
-      color: var(--ink-2);
-      text-align: center;
-      min-height: 1.2rem;
+      font-size: 0.72rem;
       font-weight: 600;
+      text-align: center;
       line-height: 1.3;
+      padding: 0.35rem 0 0 0;
+      display: none;
     }
 
+    .status.has-content {
+      display: block;
+    }
+
+    /* Workspace Navigation Button */
     .btn-workspace {
       width: 100%;
-      margin-top: 0.6rem;
-      font-size: 0.78rem;
-      padding: 0.5rem;
+      height: 33px;
+      margin-top: 0.45rem;
+      font-size: 0.76rem;
       background: #F9FAFB;
       border: 1px solid rgba(17, 24, 39, 0.12);
-      border-radius: 6px;
+      border-radius: 7px;
       font-weight: 700;
       color: var(--ink);
       cursor: pointer;
       transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
     }
 
     .btn-workspace:hover {
@@ -436,15 +530,15 @@
       color: var(--red-600);
     }
 
-    /* Meta Footer */
+    /* Session Metadata Footer */
     .session-meta {
-      margin-top: 0.7rem;
+      margin-top: 0.5rem;
       border-top: 1px solid rgba(17, 24, 39, 0.08);
-      padding-top: 0.55rem;
+      padding-top: 0.4rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.68rem;
+      font-size: 0.67rem;
       color: var(--ink-3);
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     }
@@ -453,10 +547,13 @@
 <body>
   <!-- Header with Master Toggle -->
   <div class="header">
-    <div class="title"><span>●</span> Silent QA</div>
+    <div class="title">
+      <span class="brand-dot"></span>
+      <span>Silent QA</span>
+    </div>
     <button id="btn-toggle-recording" class="rec-toggle" type="button" title="Click to toggle telemetry recording ON/OFF">
       <span class="rec-dot"></span>
-      <span id="rec-status-text">RECORDING: ON</span>
+      <span id="rec-status-text">Active Recording</span>
     </button>
   </div>
 
@@ -467,25 +564,34 @@
       <span>Recording is paused. Telemetry capture is suspended.</span>
     </div>
 
-    <!-- Metadata Strips -->
-    <div class="meta-strips">
-      <div class="site-strip" id="site-strip">
-        Host: <strong id="site-host">Monitoring Active Tab</strong>
+    <!-- Unified Sleek Meta Bar: Host + Tester + Settings in 1 Clean Row -->
+    <div class="meta-bar">
+      <div class="meta-host-box">
+        <span>Host:</span>
+        <strong id="site-host">localhost:3000</strong>
       </div>
-      <div class="tester-strip">
-        <span>👤 <strong id="tester-display">Engineer #1</strong> (<span id="station-display">Station-01</span>)</span>
-        <button id="btn-open-options" class="link-btn" type="button">⚙ Settings</button>
+      <div class="meta-actions-box">
+        <div class="tester-badge" title="Active QA Engineer & Station">
+          <span>👤</span>
+          <span id="tester-display">Eng #1</span>
+          <span class="station-text" id="station-display" style="display:none;">Station-01</span>
+        </div>
+        <button id="btn-open-options" class="btn-icon-link" type="button" title="Open Fleet Settings & Workstation Config">
+          <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+          </svg>
+        </button>
       </div>
     </div>
 
-    <!-- Recent Interactions Quick Picker -->
+    <!-- Recent Actions & Detected Issues -->
     <div class="recent-box">
       <div class="recent-top">
-        <span class="recent-heading">⚡ Recent Actions & Detected Issues</span>
+        <span class="recent-heading">⚡ Recent Activity</span>
         <span class="recent-count" id="recent-count">0 events</span>
       </div>
       <div class="recent-chips" id="recent-chips">
-        <div class="recent-empty">No actions captured yet. Interacting with page populates this list.</div>
+        <div class="recent-empty">Interacting with the page records events in real time.</div>
       </div>
     </div>
 
@@ -496,7 +602,7 @@
       <button id="btn-clear-target" type="button" class="btn-clear-target" title="Clear selection">✕</button>
     </div>
 
-    <!-- Quick Phrase Shortcuts -->
+    <!-- Quick Phrase Shortcuts (Single-Row Horizontal Scroll) -->
     <div class="quick-phrases">
       <button type="button" class="phrase-chip" data-phrase="That button is not working / unresponsive">Unresponsive</button>
       <button type="button" class="phrase-chip" data-phrase="Clicking this triggered a 500 server error">500 Server Error</button>
