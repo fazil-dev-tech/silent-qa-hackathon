@@ -1,0 +1,35 @@
+name: Silent QA Monorepo CI
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build:
+    name: Build & Validate Workspaces
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install Monorepo Dependencies
+      run: npm install
+      
+    - name: Build All Workspaces (Shared, Extension, Web)
+      run: npm run build
+      env:
+        NEXT_PUBLIC_SUPABASE_URL: "https://vdifshqatwyaycxhtbua.supabase.co"
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkaWZzaHFhdHd5YXljeGh0YnVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2NDA4NzEsImV4cCI6MjEwODIxNjg3MX0.ulux5a3yNbtQAkJcF2gOc4R7zLfHth466OylypG1mMk"
