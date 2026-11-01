@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { DefectReportUpdateSchema } from '@silent-qa/shared';
 import { supabaseAdmin } from '@/lib/supabase';
 
@@ -65,6 +66,17 @@ export async function PATCH(
       );
     }
 
+    // Log audit
+    try {
+      await supabaseAdmin.from('audit_log').insert({
+        id: crypto.randomUUID(),
+        action: 'REPORT_UPDATED',
+        target_id: id,
+        details: parsed.data,
+        timestamp: new Date().toISOString(),
+      });
+    } catch {}
+
     return NextResponse.json({
       success: true,
       updated_id: id,
@@ -100,6 +112,16 @@ export async function DELETE(
         { status: 500 }
       );
     }
+
+    // Log audit
+    try {
+      await supabaseAdmin.from('audit_log').insert({
+        id: crypto.randomUUID(),
+        action: 'REPORT_DELETED',
+        target_id: id,
+        timestamp: new Date().toISOString(),
+      });
+    } catch {}
 
     return NextResponse.json({
       success: true,

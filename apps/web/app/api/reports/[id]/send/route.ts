@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { transport, renderReportEmailHtml } from '@/lib/mail';
 import { supabaseAdmin } from '@/lib/supabase';
 
@@ -51,6 +52,17 @@ export async function POST(
         status: 'delivered',
         sent_at: new Date().toISOString(),
       });
+
+      // Audit Log
+      try {
+        await supabaseAdmin.from('audit_log').insert({
+          id: crypto.randomUUID(),
+          action: 'REPORT_DISPATCHED_EMAIL',
+          target_id: id,
+          details: { recipient: recipientEmail },
+          timestamp: new Date().toISOString(),
+        });
+      } catch {}
     } catch (mailErr: any) {
       console.warn('[Mail Warning] SMTP delivery failed:', mailErr?.message);
       await supabaseAdmin.from('email_log').insert({

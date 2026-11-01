@@ -134,6 +134,19 @@ export async function POST(req: Request) {
       }
     }
 
+    // 8. Record audit log
+    try {
+      await supabaseAdmin.from('audit_log').insert({
+        id: crypto.randomUUID(),
+        action: 'REPORT_SYNTHESIZED',
+        target_id: reportId,
+        details: { title: fullReport.title, severity: fullReport.severity, is_fallback: isFallback },
+        timestamp: new Date().toISOString(),
+      });
+    } catch {
+      // Audit non-blocking
+    }
+
     return NextResponse.json({
       success: true,
       report: fullReport,

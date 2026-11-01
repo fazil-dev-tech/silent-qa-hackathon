@@ -12,12 +12,16 @@ import {
   CheckCircle2,
   AlertOctagon,
   Copy,
+  Check,
   Share2,
   FileText,
   Clock,
   Layers,
   Activity,
   Trash2,
+  Search,
+  Download,
+  ExternalLink,
 } from 'lucide-react';
 import LiveTelemetryFeed from '@/components/live-telemetry-feed';
 import EventTimeline from '@/components/event-timeline';
@@ -59,6 +63,46 @@ export default function TesterWorkspacePage() {
 
   // Active view tab in review editor
   const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'playwright'>('overview');
+
+  // Search & filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [severityFilter, setSeverityFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
+  const [copiedScript, setCopiedScript] = useState(false);
+  const [copiedCmd, setCopiedCmd] = useState(false);
+
+  function handleDownloadScript(report: ReportItem) {
+    if (!report.playwright_script) return;
+    const blob = new Blob([report.playwright_script], { type: 'text/typescript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reproduce-${report.id.slice(0, 8)}.spec.ts`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function handleCopyScript(script: string) {
+    navigator.clipboard.writeText(script);
+    setCopiedScript(true);
+    setTimeout(() => setCopiedScript(false), 2000);
+  }
+
+  function handleCopyCommand(cmd: string) {
+    navigator.clipboard.writeText(cmd);
+    setCopiedCmd(true);
+    setTimeout(() => setCopiedCmd(false), 2000);
+  }
+
+  const filteredReports = reports.filter((r) => {
+    const matchesQuery =
+      searchQuery === '' ||
+      r.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.root_cause?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSeverity = severityFilter === 'all' || r.severity === severityFilter;
+    return matchesQuery && matchesSeverity;
+  });
 
   // Load real reports directly from Supabase API
   async function fetchReports() {
@@ -380,17 +424,75 @@ export default function TesterWorkspacePage() {
 
           {/* Database Reports List */}
           <div className="glass-panel" style={{ padding: '1.25rem' }}>
-            <h3 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.75rem', color: '#111827' }}>
-              Database Reports ({reports.length})
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#111827' }}>
+                Database Reports ({filteredReports.length}/{reports.length})
+              </h3>
+            </div>
+
+            {/* Search Input */}
+            <div style={{ position: 'relative', marginBottom: '0.65rem' }}>
+              <Search size={13} style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+              <input
+                type="text"
+                placeholder="Search reports by title or root cause..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.45rem 0.65rem 0.45rem 1.85rem',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(17, 24, 39, 0.12)',
+                  fontSize: '0.785rem',
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            {/* Severity Filter Pills */}
+            <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+              {(['all', 'critical', 'high', 'medium', 'low'] as const).map((sev) => (
+                <button
+                  key={sev}
+                  onClick={() => setSeverityFilter(sev)}
+                  style={{
+                    padding: '0.2rem 0.55rem',
+                    borderRadius: '6px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    textTransform: 'capitalize',
+                    border: severityFilter === sev ? '1px solid #DC2626' : '1px solid rgba(17, 24, 39, 0.1)',
+                    background: severityFilter === sev ? '#FFF1F2' : '#ffffff',
+                    color: severityFilter === sev ? '#DC2626' : '#4B5563',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {sev}
+                </button>
+              ))}
+            </div>
 
             {reports.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '1.5rem', color: '#9CA3AF', fontSize: '0.85rem' }}>
                 No reports found yet. Click the button above to synthesize a live report!
               </div>
+            ) : filteredReports.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '1.25rem', color: '#9CA3AF', fontSize: '0.825rem' }}>
+                No reports match your filters.
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSeverityFilter('all');
+                  }}
+                  style={{ display: 'block', margin: '0.5rem auto 0', color: '#DC2626', background: 'none', border: 'none', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer' }}
+                >
+                  Clear Filters
+                </button>
+              </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '380px', overflowY: 'auto' }}>
-                {reports.map((r) => (
+                {filteredReports.map((r) => (
                   <div
                     key={r.id}
                     onClick={() => {
@@ -657,23 +759,90 @@ export default function TesterWorkspacePage() {
               {/* Tab 3: Playwright Script */}
               {activeTab === 'playwright' && (
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#111827' }}>
-                      Synthesized Playwright Reproduction Test:
-                    </h4>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Terminal size={16} color="#DC2626" />
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#111827' }}>
+                        Synthesized Playwright Reproduction Test
+                      </h4>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <button
+                        onClick={() => handleDownloadScript(selectedReport)}
+                        className="btn-secondary"
+                        style={{ fontSize: '0.785rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                      >
+                        <Download size={13} />
+                        <span>Download (.spec.ts)</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleCopyScript(selectedReport.playwright_script || '')}
+                        className="btn-secondary"
+                        style={{ fontSize: '0.785rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                      >
+                        {copiedScript ? <Check size={13} color="#16A34A" /> : <Copy size={13} />}
+                        <span>{copiedScript ? 'Copied!' : 'Copy Script'}</span>
+                      </button>
+
+                      <Link
+                        href={`/app/report/${selectedReport.id}`}
+                        className="btn-secondary"
+                        style={{ fontSize: '0.785rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#DC2626' }}
+                      >
+                        <ExternalLink size={13} />
+                        <span>Permalink</span>
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Terminal Execution Snippet */}
+                  <div
+                    style={{
+                      background: '#1E293B',
+                      border: '1px solid #334155',
+                      borderRadius: '8px',
+                      padding: '0.65rem 1rem',
+                      marginBottom: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '0.75rem',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                      <span style={{ color: '#F43F5E', fontWeight: 800, fontSize: '0.8rem', userSelect: 'none' }}>$</span>
+                      <code style={{ color: '#F1F5F9', fontSize: '0.8rem', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        npx playwright test tests/reproduce-{selectedReport.id.slice(0, 8)}.spec.ts --headed
+                      </code>
+                    </div>
+
                     <button
-                      onClick={() => {
-                        if (selectedReport.playwright_script) {
-                          navigator.clipboard.writeText(selectedReport.playwright_script);
-                          alert('Playwright test script copied to clipboard!');
-                        }
+                      onClick={() =>
+                        handleCopyCommand(
+                          `npx playwright test tests/reproduce-${selectedReport.id.slice(0, 8)}.spec.ts --headed`
+                        )
+                      }
+                      style={{
+                        background: '#0F172A',
+                        border: '1px solid #475569',
+                        color: '#94A3B8',
+                        padding: '0.25rem 0.55rem',
+                        borderRadius: '4px',
+                        fontSize: '0.725rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        whiteSpace: 'nowrap',
                       }}
-                      className="btn-secondary"
-                      style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}
                     >
-                      Copy Script
+                      {copiedCmd ? <Check size={11} color="#10B981" /> : <Copy size={11} />}
+                      <span>{copiedCmd ? 'Copied' : 'Copy Command'}</span>
                     </button>
                   </div>
+
                   <pre
                     style={{
                       background: '#0F172A',
@@ -683,6 +852,7 @@ export default function TesterWorkspacePage() {
                       overflowX: 'auto',
                       fontSize: '0.85rem',
                       lineHeight: 1.5,
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
                     }}
                   >
                     <code>{selectedReport.playwright_script || '// No Playwright script generated'}</code>

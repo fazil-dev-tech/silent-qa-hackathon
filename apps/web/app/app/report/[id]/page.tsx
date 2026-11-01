@@ -15,6 +15,7 @@ import {
   Sparkles,
   Terminal,
   Trash2,
+  Download,
 } from 'lucide-react';
 import EventTimeline from '@/components/event-timeline';
 import ExportModal from '@/components/export-modal';
@@ -37,8 +38,28 @@ export default function ReportDetailPage() {
   // Export modal state
   const [exportModalOpen, setExportModalOpen] = useState(false);
 
-  // Copy script feedback
+  // Copy feedback
   const [copiedScript, setCopiedScript] = useState(false);
+  const [copiedCmd, setCopiedCmd] = useState(false);
+
+  function handleDownloadScript() {
+    if (!report?.playwright_script) return;
+    const blob = new Blob([report.playwright_script], { type: 'text/typescript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reproduce-${id ? id.slice(0, 8) : 'test'}.spec.ts`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function handleCopyCommand(cmd: string) {
+    navigator.clipboard.writeText(cmd);
+    setCopiedCmd(true);
+    setTimeout(() => setCopiedCmd(false), 2000);
+  }
 
   useEffect(() => {
     if (!id) return;
@@ -369,7 +390,7 @@ export default function ReportDetailPage() {
         {/* Playwright Script */}
         {report.playwright_script && (
           <div style={{ marginBottom: '2.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <Terminal size={18} color="#DC2626" />
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>
@@ -377,15 +398,73 @@ export default function ReportDetailPage() {
                 </h3>
               </div>
 
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button
+                  onClick={handleDownloadScript}
+                  className="btn-secondary"
+                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                >
+                  <Download size={13} />
+                  <span>Download (.spec.ts)</span>
+                </button>
+
+                <button
+                  onClick={handleCopyScript}
+                  className="btn-secondary"
+                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                >
+                  {copiedScript ? <Check size={14} color="#16A34A" /> : <Copy size={14} />}
+                  <span>{copiedScript ? 'Copied!' : 'Copy Script'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Terminal Execution Snippet */}
+            <div
+              style={{
+                background: '#1E293B',
+                border: '1px solid #334155',
+                borderRadius: '8px',
+                padding: '0.65rem 1rem',
+                marginBottom: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '0.75rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                <span style={{ color: '#F43F5E', fontWeight: 800, fontSize: '0.8rem', userSelect: 'none' }}>$</span>
+                <code style={{ color: '#F1F5F9', fontSize: '0.8rem', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  npx playwright test tests/reproduce-{id ? id.slice(0, 8) : 'test'}.spec.ts --headed
+                </code>
+              </div>
+
               <button
-                onClick={handleCopyScript}
-                className="btn-secondary"
-                style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                onClick={() =>
+                  handleCopyCommand(
+                    `npx playwright test tests/reproduce-${id ? id.slice(0, 8) : 'test'}.spec.ts --headed`
+                  )
+                }
+                style={{
+                  background: '#0F172A',
+                  border: '1px solid #475569',
+                  color: '#94A3B8',
+                  padding: '0.25rem 0.55rem',
+                  borderRadius: '4px',
+                  fontSize: '0.725rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  whiteSpace: 'nowrap',
+                }}
               >
-                {copiedScript ? <Check size={14} color="#16A34A" /> : <Copy size={14} />}
-                <span>{copiedScript ? 'Copied!' : 'Copy Script'}</span>
+                {copiedCmd ? <Check size={11} color="#10B981" /> : <Copy size={11} />}
+                <span>{copiedCmd ? 'Copied' : 'Copy Command'}</span>
               </button>
             </div>
+
             <pre
               style={{
                 background: '#0F172A',
@@ -395,6 +474,7 @@ export default function ReportDetailPage() {
                 overflowX: 'auto',
                 fontSize: '0.85rem',
                 lineHeight: 1.5,
+                border: '1px solid rgba(255, 255, 255, 0.08)',
               }}
             >
               <code>{report.playwright_script}</code>
