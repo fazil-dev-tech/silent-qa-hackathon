@@ -239,21 +239,39 @@ export default function NavigationBar() {
               </span>
             </div>
 
-            <Link
-              href={isAdmin ? '/admin' : '/app'}
-              className="btn-primary"
-              style={{
-                padding: '0.45rem 1rem',
-                fontSize: '0.82rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.3rem',
-                textDecoration: 'none',
-              }}
-            >
-              <span>{isAdmin ? 'Admin Portal' : 'Workspace'}</span>
-              <ChevronRight size={14} />
-            </Link>
+            {isAdmin ? (
+              <Link
+                href={pathname === '/admin' ? '/app' : '/admin'}
+                className="btn-primary"
+                style={{
+                  padding: '0.45rem 1rem',
+                  fontSize: '0.82rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  textDecoration: 'none',
+                }}
+              >
+                <span>{pathname === '/admin' ? 'Tester Workspace' : 'Admin Console'}</span>
+                <ChevronRight size={14} />
+              </Link>
+            ) : pathname !== '/app' && !pathname?.startsWith('/app/report') ? (
+              <Link
+                href="/app"
+                className="btn-primary"
+                style={{
+                  padding: '0.45rem 1rem',
+                  fontSize: '0.82rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  textDecoration: 'none',
+                }}
+              >
+                <span>Workspace</span>
+                <ChevronRight size={14} />
+              </Link>
+            ) : null}
 
             <button
               onClick={handleSignOut}
