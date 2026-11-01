@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
           pickedLabel.style.display = 'block';
         }
       });
-      window.close(); // Close popup so user can click element in page
-    } catch (err) {
+      window.close();
+    } catch {
       statusText.textContent = 'Could not activate picker on this page';
     }
   });
@@ -38,34 +38,40 @@ document.addEventListener('DOMContentLoaded', () => {
     statusText.textContent = 'Mapping evidence & generating draft...';
     statusText.style.color = '#4B5563';
 
-    try {
-      const response = await fetch('http://localhost:3000/api/complaints', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_id: 'active_session',
-          note,
-          picked_selector: currentPickedSelector || undefined,
-          submitted_at: Date.now(),
-        }),
-      });
+    // Retrieve active session ID from chrome storage
+    chrome.storage.local.get(['session_id', 'api_endpoint'], async (stored) => {
+      const activeSessionId = stored.session_id || 'ses_' + Date.now();
+      const baseApiUrl = (stored.api_endpoint || 'http://localhost:3000/api/ingest').replace('/api/ingest', '');
 
-      const data = await response.json();
-      if (response.ok) {
-        statusText.textContent = '✓ Draft created! Open workspace to review.';
-        statusText.style.color = '#16A34A';
-        noteInput.value = '';
-        currentPickedSelector = '';
-        pickedLabel.style.display = 'none';
-      } else {
-        statusText.textContent = data?.error || 'Failed to submit flag.';
+      try {
+        const response = await fetch(`${baseApiUrl}/api/complaints`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: activeSessionId,
+            note,
+            picked_selector: currentPickedSelector || undefined,
+            submitted_at: Date.now(),
+          }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          statusText.textContent = '✓ Draft created in database! Open workspace to review.';
+          statusText.style.color = '#16A34A';
+          noteInput.value = '';
+          currentPickedSelector = '';
+          pickedLabel.style.display = 'none';
+        } else {
+          statusText.textContent = data?.error || 'Failed to submit flag.';
+          statusText.style.color = '#DC2626';
+        }
+      } catch {
+        statusText.textContent = `Cannot reach API at ${baseApiUrl}`;
         statusText.style.color = '#DC2626';
+      } finally {
+        submitBtn.disabled = false;
       }
-    } catch {
-      statusText.textContent = 'Cannot reach API at localhost:3000';
-      statusText.style.color = '#DC2626';
-    } finally {
-      submitBtn.disabled = false;
-    }
+    });
   });
 });

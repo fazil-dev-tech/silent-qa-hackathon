@@ -1,6 +1,6 @@
 // ====================================================================
 // SILENT QA: BACKGROUND SERVICE WORKER (worker.ts)
-// Resilient ring buffer, offline queue, alarm watchdog & batch dispatcher
+// Production ring buffer, offline queue, alarm watchdog & batch dispatcher
 // ====================================================================
 
 interface StoredEvent {
@@ -14,16 +14,31 @@ interface StoredEvent {
 
 const BUFFER_CAP = 500;
 const ringBuffer: StoredEvent[] = [];
+
+// Dynamic session & project state loaded from Chrome storage
 let sessionId = 'ses_' + Math.random().toString(36).slice(2, 10);
 let projectToken = 'sqa_live_demo_key_2026';
 let apiEndpoint = 'http://localhost:3000/api/ingest';
+
+// Hydrate from storage
+chrome.storage.local.get(['project_token', 'session_id', 'api_endpoint'], (res) => {
+  if (res.project_token) projectToken = res.project_token;
+  if (res.session_id) sessionId = res.session_id;
+  if (res.api_endpoint) apiEndpoint = res.api_endpoint;
+  else chrome.storage.local.set({ session_id: sessionId });
+});
+
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.project_token) projectToken = changes.project_token.newValue;
+  if (changes.session_id) sessionId = changes.session_id.newValue;
+  if (changes.api_endpoint) apiEndpoint = changes.api_endpoint.newValue;
+});
 
 // 1. Dual Keep-Alive: Port connections + Alarm watchdog
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name === 'sqa_stream') {
     port.onMessage.addListener((msg) => {
       if (msg.type === 'HEARTBEAT') {
-        // Resets Chrome's internal 30s worker termination timer
         port.postMessage({ type: 'HEARTBEAT_ACK', ts: Date.now() });
       } else if (msg.type === 'EVENT' && msg.payload) {
         pushEvent({
@@ -46,7 +61,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 // 2. Buffer Management
 function pushEvent(event: StoredEvent) {
   if (ringBuffer.length >= BUFFER_CAP) {
-    ringBuffer.shift(); // Evict oldest event
+    ringBuffer.shift(); // Evict oldest
   }
   ringBuffer.push(event);
 }
@@ -57,7 +72,7 @@ async function flushEvents() {
   if (isFlushing || ringBuffer.length === 0) return;
   isFlushing = true;
 
-  const batch = ringBuffer.splice(0, 50); // Take next 50 events
+  const batch = ringBuffer.splice(0, 50);
 
   try {
     const response = await fetch(apiEndpoint, {
@@ -89,4 +104,3 @@ async function flushEvents() {
 
 // Flush every 5 seconds
 setInterval(flushEvents, 5000);
-

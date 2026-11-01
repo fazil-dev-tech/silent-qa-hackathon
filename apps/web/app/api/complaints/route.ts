@@ -5,9 +5,9 @@ import {
   buildSignalSummary,
   generatePlaywrightReproductionScript,
 } from '@silent-qa/shared';
+import type { TelemetryEvent } from '@silent-qa/shared';
 import { generateDefectReport } from '@/lib/llm';
 import { supabaseAdmin } from '@/lib/supabase';
-import { memoryEventsStore } from '../ingest/route';
 
 export async function POST(req: Request) {
   try {
@@ -23,58 +23,107 @@ export async function POST(req: Request) {
 
     const { session_id, note, picked_selector, submitted_at } = parsed.data;
 
-    // 1. Adaptive Temporal Window: [submitted_at - 60s, submitted_at] (dynamic up to 300s)
-    const windowStart = submitted_at - 180000; // 3-minute adaptive window
-    const candidateEvents = memoryEventsStore.filter((e) => {
-      const eventTs = new Date(e.ts).getTime();
-      return eventTs >= windowStart && eventTs <= submitted_at + 5000;
+    // 1. Record Complaint in Supabase
+    const complaintId = crypto.randomUUID();
+    const windowStartIso = new Date(submitted_at - 180000).toISOString();
+    const windowEndIso = new Date(submitted_at + 5000).toISOString();
+
+    const { error: complaintErr } = await supabaseAdmin.from('complaints').insert({
+      id: complaintId,
+      session_id,
+      note,
+      picked_selector: picked_selector || null,
+      submitted_at: new Date(submitted_at).toISOString(),
+      window_start: windowStartIso,
+      window_end: windowEndIso,
     });
 
-    // 2. Rank events & build signal summary
+    if (complaintErr) {
+      console.warn('Complaint insert warning:', complaintErr.message);
+    }
+
+    // 2. Fetch Real Telemetry from Supabase Events Table
+    const { data: dbEvents, error: eventsErr } = await supabaseAdmin
+      .from('events')
+      .select('*')
+      .eq('session_id', session_id)
+      .gte('ts', windowStartIso)
+      .lte('ts', windowEndIso)
+      .order('ts', { ascending: false });
+
+    if (eventsErr) {
+      return NextResponse.json(
+        { error: 'Database event retrieval failed', details: eventsErr.message },
+        { status: 500 }
+      );
+    }
+
+    // Normalize events for mapper
+    const candidateEvents: TelemetryEvent[] = (dbEvents || []).map((e) => ({
+      id: e.id,
+      session_id: e.session_id,
+      ts: new Date(e.ts).getTime(),
+      type: e.type,
+      severity: e.severity,
+      url: e.url,
+      method: e.method,
+      status: e.status,
+      selector: e.selector,
+      text: e.text,
+      shape: e.shape,
+      fingerprint: e.fingerprint,
+    }));
+
+    // 3. Rank events and summarize signals
     const rankedEvents = rankEventsForMapper(candidateEvents, note, picked_selector, 25);
     const signalSummary = buildSignalSummary(rankedEvents);
 
-    // 3. AI synthesis with deterministic fallback
+    // 4. Generate AI defect report with deterministic fallback
     const { report: generatedReport, isFallback } = await generateDefectReport(
       note,
       rankedEvents,
       signalSummary
     );
 
-    // 4. Synthesize executable Playwright test script
+    // 5. Synthesize automated Playwright reproduction script
     const playwrightScript = generatePlaywrightReproductionScript(generatedReport, rankedEvents);
 
-    const reportId = 'rep_' + Math.random().toString(36).slice(2, 10);
+    const reportId = crypto.randomUUID();
     const fullReport = {
       id: reportId,
-      ...generatedReport,
+      complaint_id: complaintId,
+      title: generatedReport.title,
+      severity: generatedReport.severity,
+      steps: generatedReport.steps,
+      expected: generatedReport.expected,
+      actual: generatedReport.actual,
+      root_cause: generatedReport.root_cause_hypothesis,
+      confidence: generatedReport.confidence,
+      evidence: rankedEvents,
+      evidence_ids: rankedEvents.map((e) => e.id),
       playwright_script: playwrightScript,
       status: 'draft',
       ai_fallback: isFallback,
-      evidence_snapshot: rankedEvents,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
-    // 5. Persist to Supabase if configured
-    try {
-      await supabaseAdmin.from('reports').insert({
-        id: reportId,
-        title: fullReport.title,
-        severity: fullReport.severity,
-        steps: fullReport.steps,
-        expected: fullReport.expected,
-        actual: fullReport.actual,
-        root_cause: fullReport.root_cause_hypothesis,
-        confidence: fullReport.confidence,
-        evidence: rankedEvents,
-        evidence_ids: fullReport.evidence_ids,
-        playwright_script: playwrightScript,
-        status: 'draft',
-        ai_fallback: isFallback,
-      });
-    } catch {
-      // Continue gracefully
+    // 6. Persist Defect Report directly to Supabase
+    const { error: reportInsertErr } = await supabaseAdmin.from('reports').insert(fullReport);
+    if (reportInsertErr) {
+      return NextResponse.json(
+        { error: 'Failed to save defect report to database', details: reportInsertErr.message },
+        { status: 500 }
+      );
+    }
+
+    // 7. Save evidence linkages in report_events cross-reference table
+    if (rankedEvents.length > 0) {
+      const linkRows = rankedEvents.map((e) => ({
+        report_id: reportId,
+        event_id: e.id,
+      }));
+      await supabaseAdmin.from('report_events').insert(linkRows).catch(() => {});
     }
 
     return NextResponse.json({
@@ -88,4 +137,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

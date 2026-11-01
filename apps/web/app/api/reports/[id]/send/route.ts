@@ -11,30 +11,30 @@ export async function POST(
     const body = await req.json().catch(() => ({}));
     const recipientEmail = body.recipient || process.env.MAIL_TO || 'qa-team@silentqa.local';
 
-    // Fetch report from Supabase or generate approval confirmation
-    let reportData: any = body.report;
-    if (!reportData) {
-      const { data } = await supabaseAdmin.from('reports').select('*').eq('id', id).single();
-      reportData = data;
+    // 1. Strictly fetch the real report from Supabase (NO MOCKS)
+    const { data: reportData, error: fetchErr } = await supabaseAdmin
+      .from('reports')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchErr || !reportData) {
+      return NextResponse.json(
+        { error: 'Defect report not found in database', report_id: id },
+        { status: 404 }
+      );
     }
 
-    if (!reportData) {
-      reportData = {
-        id,
-        title: 'Defect Report ' + id,
-        severity: 'high',
-        steps: ['1. Reproduce user interaction', '2. Observe abnormal state jump'],
-        expected: 'Standard single execution',
-        actual: 'Observed anomaly',
-        root_cause_hypothesis: 'Duplicate event listener invocation',
-        confidence: 'high',
-      };
-    }
+    // 2. Mark report as approved and sent
+    await supabaseAdmin
+      .from('reports')
+      .update({ status: 'sent', updated_at: new Date().toISOString() })
+      .eq('id', id);
 
+    // 3. Render and deliver HTML email
     const publicUrl = `http://localhost:3000/app/report/${id}`;
     const emailHtml = renderReportEmailHtml(reportData, publicUrl);
 
-    // Send email via Nodemailer
     try {
       await transport.sendMail({
         from: process.env.MAIL_FROM || 'Silent QA <reports@silentqa.local>',
@@ -50,7 +50,13 @@ export async function POST(
         sent_at: new Date().toISOString(),
       });
     } catch (mailErr: any) {
-      console.warn('Mail send skipped (SMTP not configured):', mailErr?.message);
+      console.warn('[Mail Warning] SMTP delivery failed:', mailErr?.message);
+      await supabaseAdmin.from('email_log').insert({
+        report_id: id,
+        to_addresses: [recipientEmail],
+        status: 'failed',
+        error: mailErr?.message,
+      });
     }
 
     return NextResponse.json({
@@ -61,9 +67,8 @@ export async function POST(
     });
   } catch (err: any) {
     return NextResponse.json(
-      { error: 'Failed to send report email', message: err?.message },
+      { error: 'Failed to dispatch report', message: err?.message },
       { status: 500 }
     );
   }
 }
-
