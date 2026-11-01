@@ -3,6 +3,8 @@ import crypto from 'crypto';
 import { IngestBatchSchema, computeFingerprint } from '@silent-qa/shared';
 import { supabaseAdmin } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
   try {
     const json = await req.json();

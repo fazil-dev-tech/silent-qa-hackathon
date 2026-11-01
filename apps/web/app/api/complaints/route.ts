@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import {
   ComplaintSubmissionSchema,
   rankEventsForMapper,
@@ -8,6 +9,8 @@ import {
 import type { TelemetryEvent } from '@silent-qa/shared';
 import { generateDefectReport } from '@/lib/llm';
 import { supabaseAdmin } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
@@ -123,7 +126,11 @@ export async function POST(req: Request) {
         report_id: reportId,
         event_id: e.id,
       }));
-      await supabaseAdmin.from('report_events').insert(linkRows).catch(() => {});
+      try {
+        await supabaseAdmin.from('report_events').insert(linkRows);
+      } catch {
+        // Linkage errors should not fail complaint processing
+      }
     }
 
     return NextResponse.json({

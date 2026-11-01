@@ -8,7 +8,11 @@
   if ((window as any).__SILENT_QA_INJECTED__) return;
   (window as any).__SILENT_QA_INJECTED__ = true;
 
-  function relay(type: string, data: Record<string, unknown>, severity: 'info' | 'warn' | 'error' = 'info') {
+  function relay(
+    type: string,
+    data: Record<string, unknown>,
+    severity: 'info' | 'warn' | 'error' | 'critical' = 'info'
+  ) {
     window.postMessage(
       {
         source: 'SILENT_QA_MAIN',
