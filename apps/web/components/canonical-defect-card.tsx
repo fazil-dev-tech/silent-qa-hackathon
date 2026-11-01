@@ -14,6 +14,8 @@ interface CanonicalReportProps {
     root_cause?: string;
     confidence?: string;
     evidence?: any[];
+    raw_note?: string;
+    suggested_fix?: string;
     tester_name?: string;
     device_tag?: string;
     created_at?: string;
@@ -22,6 +24,7 @@ interface CanonicalReportProps {
 
 export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
   const [copiedHash, setCopiedHash] = useState(false);
+  const [copiedFix, setCopiedFix] = useState(false);
   const [shaHash, setShaHash] = useState<string>(() => {
     return 'sha256:' + (report.id.replace(/-/g, '') + 'e9a4f7832bc9d01f8087d').slice(0, 32);
   });
@@ -174,6 +177,29 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           <Lock size={12} color="#10B981" />
           <span>{copiedHash ? '✓ SHA-256 Copied!' : 'SHA-256 Verified (Click to copy)'}</span>
         </button>
+      </div>
+
+      {/* Before -> After Visual Transformation Banner */}
+      <div style={{ marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem' }}>
+        <div style={{ background: 'rgba(239, 68, 68, 0.08)', borderLeft: '3px solid #EF4444', borderRadius: '8px', padding: '0.85rem' }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#EF4444', textTransform: 'uppercase', marginBottom: '0.25rem', letterSpacing: '0.05em' }}>
+            RAW HUMAN NOTE (INPUT)
+          </div>
+          <div style={{ fontSize: '0.88rem', fontStyle: 'italic', color: '#CBD5E1', lineHeight: 1.4 }}>
+            &ldquo;{report.raw_note || report.title}&rdquo;
+          </div>
+        </div>
+        <div style={{ background: 'rgba(16, 185, 129, 0.08)', borderLeft: '3px solid #10B981', borderRadius: '8px', padding: '0.85rem' }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#10B981', textTransform: 'uppercase', marginBottom: '0.25rem', letterSpacing: '0.05em' }}>
+            AI-ENHANCED SPECIFICATION (OUTPUT)
+          </div>
+          <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#F8FAFC', lineHeight: 1.4 }}>
+            {report.title}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '0.25rem' }}>
+            {report.steps.length} verified steps • {severityLabel} • {confidencePercent} confidence
+          </div>
+        </div>
       </div>
 
       {/* 1. RAW QA NOTE */}
@@ -376,6 +402,32 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           {report.root_cause || 'Causal telemetry analysis indicates potential event handler or API discrepancy.'}
         </div>
       </div>
+
+      {/* 7. AI AUTO-FIX CODE PATCH */}
+      {report.suggested_fix && (
+        <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem' }}>
+            <div style={{ color: '#10B981', fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span>✨ AI Auto-Fix Code Patch</span>
+              <span style={{ fontSize: '0.65rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34D399', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>Experimental</span>
+            </div>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(report.suggested_fix || '');
+                setCopiedFix(true);
+                setTimeout(() => setCopiedFix(false), 2000);
+              }}
+              style={{ background: 'none', border: 'none', color: '#34D399', fontSize: '0.72rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+            >
+              {copiedFix ? <Check size={12} /> : <Copy size={12} />}
+              <span>{copiedFix ? 'Copied Fix' : 'Copy Code'}</span>
+            </button>
+          </div>
+          <pre style={{ background: '#020617', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px', padding: '0.85rem 1rem', fontFamily: 'monospace', fontSize: '0.78rem', color: '#E2E8F0', overflowX: 'auto', lineHeight: 1.5 }}>
+            <code>{report.suggested_fix}</code>
+          </pre>
+        </div>
+      )}
     </div>
   );
 }

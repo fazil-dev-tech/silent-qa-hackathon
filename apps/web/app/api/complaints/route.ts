@@ -184,7 +184,13 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      report: fullReport,
+      report: {
+        ...fullReport,
+        raw_note: note,
+        suggested_fix: generatedReport.suggested_fix,
+        tester_name: tester_name || 'Engineer #1',
+        device_tag: device_tag || 'Station-01',
+      },
     });
   } catch (err: any) {
     return NextResponse.json(

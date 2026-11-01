@@ -92,6 +92,7 @@ export interface DefectReport {
   evidence_ids: string[];
   evidence_snapshot?: TelemetryEvent[];
   suggested_checks?: string[];
+  suggested_fix?: string;
   playwright_script?: string;
   status: ReportStatus;
   ai_provider?: string;

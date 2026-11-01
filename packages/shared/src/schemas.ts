@@ -65,6 +65,7 @@ export const LLMReportOutputSchema = z.object({
   confidence: z.enum(['low', 'medium', 'high']),
   evidence_ids: z.array(z.string()).min(1),
   suggested_checks: z.array(z.string()).default([]),
+  suggested_fix: z.string().optional(),
 });
 
 export const DefectReportUpdateSchema = z.object({
