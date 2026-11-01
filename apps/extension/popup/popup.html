@@ -2,37 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Silent QA Flag</title>
+  <title>Silent QA Flight Recorder</title>
   <style>
     :root {
       --bg: #FFF8F8;
-      --glass: rgba(255, 255, 255, 0.85);
+      --glass: rgba(255, 255, 255, 0.95);
       --red-600: #DC2626;
       --red-500: #EF4444;
       --ink: #111827;
       --ink-2: #4B5563;
-      --shadow: 0 8px 24px rgba(220, 38, 38, 0.1);
+      --shadow: 0 8px 24px rgba(220, 38, 38, 0.12);
     }
 
     body {
-      width: 320px;
+      width: 340px;
       margin: 0;
       padding: 1.25rem;
       background: var(--bg);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: var(--ink);
+      box-sizing: border-box;
     }
 
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
+      margin-bottom: 0.85rem;
     }
 
     .title {
-      font-size: 1rem;
-      font-weight: 700;
+      font-size: 1.05rem;
+      font-weight: 800;
       display: flex;
       align-items: center;
       gap: 0.35rem;
@@ -43,27 +44,51 @@
     }
 
     .badge {
-      background: rgba(22, 163, 74, 0.1);
-      color: #16A34A;
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 0.2rem 0.5rem;
+      background: #DCFCE7;
+      color: #166534;
+      border: 1px solid #86EFAC;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
       border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #16A34A;
     }
 
     .card {
       background: var(--glass);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(220, 38, 38, 0.15);
       border-radius: 12px;
       padding: 1rem;
       box-shadow: var(--shadow);
     }
 
+    .site-strip {
+      font-size: 0.75rem;
+      color: var(--ink-2);
+      margin-bottom: 0.75rem;
+      padding: 0.35rem 0.5rem;
+      background: #F9FAFB;
+      border-radius: 6px;
+      border: 1px solid rgba(17, 24, 39, 0.06);
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
     label {
       display: block;
       font-size: 0.8rem;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--ink-2);
       margin-bottom: 0.4rem;
     }
@@ -71,13 +96,13 @@
     textarea {
       width: 100%;
       box-sizing: border-box;
-      border: 1px solid rgba(17, 24, 39, 0.12);
+      border: 1px solid rgba(17, 24, 39, 0.15);
       border-radius: 8px;
-      padding: 0.6rem;
+      padding: 0.65rem;
       font-size: 0.85rem;
       font-family: inherit;
       resize: vertical;
-      min-height: 60px;
+      min-height: 65px;
       margin-bottom: 0.75rem;
       outline: none;
     }
@@ -94,9 +119,9 @@
 
     button {
       flex: 1;
-      padding: 0.6rem 0.85rem;
+      padding: 0.65rem 0.85rem;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.15s ease;
@@ -120,35 +145,65 @@
       border: 1px solid rgba(17, 24, 39, 0.15);
     }
 
+    .btn-secondary:hover {
+      border-color: var(--red-600);
+      color: var(--red-600);
+    }
+
     .status {
       margin-top: 0.75rem;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--ink-2);
       text-align: center;
       min-height: 1.2rem;
+      font-weight: 600;
+    }
+
+    .session-meta {
+      margin-top: 0.75rem;
+      border-top: 1px solid rgba(17, 24, 39, 0.08);
+      padding-top: 0.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      color: #9CA3AF;
+      font-family: monospace;
     }
   </style>
 </head>
 <body>
   <div class="header">
     <div class="title"><span>●</span> Silent QA</div>
-    <div class="badge">Recording</div>
+    <div class="badge"><span class="badge-dot"></span> Active Recording</div>
   </div>
 
   <div class="card">
+    <div class="site-strip" id="site-strip">
+      Host: <strong id="site-host">Monitoring Active Tab</strong>
+    </div>
+
     <label for="complaint-note">Flag an issue in one sentence:</label>
-    <textarea id="complaint-note" placeholder="Example: problem in cart button, count jumps to 2"></textarea>
+    <textarea id="complaint-note" placeholder="Example: clicking checkout button causes 500 error"></textarea>
 
     <div class="btn-row">
       <button class="btn-secondary" id="btn-pick" type="button">🎯 Pick Element</button>
-      <button class="btn-primary" id="btn-submit" type="button">Flag Bug</button>
+      <button class="btn-primary" id="btn-submit" type="button">Flag Bug →</button>
     </div>
-    <div id="picked-label" style="font-size: 0.75rem; color: #DC2626; margin-top: 0.4rem; display: none;"></div>
+    <div id="picked-label" style="font-size: 0.75rem; color: #DC2626; margin-top: 0.4rem; display: none; font-family: monospace;"></div>
 
     <div class="status" id="status-text"></div>
+
+    <button id="btn-workspace" type="button" class="btn-secondary" style="width: 100%; margin-top: 0.6rem; font-size: 0.78rem; padding: 0.5rem;">
+      Open QA Flight Workspace ↗
+    </button>
+
+    <div class="session-meta">
+      <span>SESSION:</span>
+      <span id="session-display">Loading...</span>
+    </div>
   </div>
 
   <script src="popup.js"></script>
 </body>
 </html>
-

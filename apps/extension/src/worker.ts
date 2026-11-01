@@ -116,5 +116,5 @@ async function flushEvents() {
   }
 }
 
-// Flush every 5 seconds
-setInterval(flushEvents, 5000);
+// Flush every 2 seconds for low-latency realtime stream
+setInterval(flushEvents, 2000);

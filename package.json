@@ -5,14 +5,12 @@
   "description": "Silent QA: Browser flight recorder and AI defect report engine",
   "workspaces": [
     "packages/*",
-    "apps/*",
-    "demo-shop"
+    "apps/*"
   ],
   "scripts": {
     "build": "npm run --workspaces --if-present build",
     "test": "npm run --workspaces --if-present test",
-    "dev:web": "npm run --workspace=@silent-qa/web dev",
-    "dev:demo": "npm run --workspace=@silent-qa/demo-shop dev"
+    "dev:web": "npm run --workspace=@silent-qa/web dev"
   },
   "devDependencies": {
     "typescript": "^5.7.3"

@@ -32,9 +32,6 @@ const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 assert.ok(serviceRoleKey, 'Real SUPABASE_SERVICE_ROLE_KEY must be present in .env.local (NO MOCK KEYS)');
 const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-// 2. Start demo shop server
-import '../demo-shop/server.js';
-
 async function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -45,21 +42,11 @@ async function runRealDatabaseVerification() {
   console.log('Target Supabase DB: ' + supabaseUrl);
   console.log('================================================================');
 
-  // Step 1: Probe Demo Shop
-  console.log('\n[Step 1] Verifying Demo Shop at http://localhost:4000...');
-  await wait(500);
-
-  const shopHtml = await new Promise((resolve, reject) => {
-    http.get('http://localhost:4000', (res) => {
-      let data = '';
-      res.on('data', (c) => (data += c));
-      res.on('end', () => resolve(data));
-      res.on('error', reject);
-    });
-  });
-
-  assert.ok(shopHtml.includes('Aura Studio Wireless ANC'));
-  console.log('✓ Demo Shop active and serving test catalog.');
+  // Step 1: Probe Database Connection
+  console.log('\n[Step 1] Verifying Supabase PostgreSQL Cloud Database connectivity...');
+  const { data: dbCheck, error: dbCheckErr } = await supabase.from('projects').select('id, name').limit(1);
+  assert.strictEqual(dbCheckErr, null, 'Connected to Supabase PostgreSQL database');
+  console.log(`✓ Supabase connection verified: Project "${dbCheck[0]?.name}" live.`);
 
   // Step 2: Create a real Session in Supabase 'sessions' table
   console.log('\n[Step 2] Initializing real session in Supabase PostgreSQL...');
@@ -69,7 +56,7 @@ async function runRealDatabaseVerification() {
   const { error: sessionErr } = await supabase.from('sessions').insert({
     id: sessionId,
     project_id: projectId,
-    app_url: 'http://localhost:4000',
+    app_url: 'https://production-application.io',
     user_agent: 'Production-Browser-E2E-Agent',
   });
   assert.strictEqual(sessionErr, null, 'Real session created in Supabase sessions table');

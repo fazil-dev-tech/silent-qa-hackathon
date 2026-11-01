@@ -34,12 +34,17 @@ export async function POST(req: Request) {
 
     // 2. Ensure active session exists in database
     const projectId = project?.id || '33333333-3333-3333-3333-333333333333';
+    const clientAppUrl = events.find((e) => e.url && e.url.startsWith('http'))?.url ||
+      req.headers.get('origin') ||
+      req.headers.get('referer') ||
+      'https://production-app';
+
     await supabaseAdmin
       .from('sessions')
       .upsert({
         id: safeSessionId,
         project_id: projectId,
-        app_url: events[0]?.url || 'http://localhost:4000',
+        app_url: clientAppUrl,
         user_agent: req.headers.get('user-agent') || 'Browser-Agent',
       }, { onConflict: 'id' });
 

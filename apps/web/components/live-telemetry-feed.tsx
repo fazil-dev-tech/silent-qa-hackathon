@@ -50,31 +50,44 @@ export default function LiveTelemetryFeed() {
   useEffect(() => {
     fetchRecentEvents();
 
+    // Auto-sync polling every 3 seconds for guaranteed low-latency telemetry updates
+    const pollInterval = setInterval(() => {
+      fetchRecentEvents();
+    }, 3000);
+
     // Setup Supabase Realtime Channel
+    let client: any = null;
+    let channel: any = null;
     try {
-      const client = createClient(supabaseUrl, supabaseAnonKey);
-      const channel = client
+      client = createClient(supabaseUrl, supabaseAnonKey);
+      channel = client
         .channel('realtime_events_stream')
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'events' },
-          (payload) => {
+          (payload: any) => {
             const newEvt = payload.new as LiveEvent;
-            setEvents((prev) => [newEvt, ...prev.slice(0, 24)]);
+            setEvents((prev) => {
+              if (prev.some((e) => e.id === newEvt.id)) return prev;
+              return [newEvt, ...prev.slice(0, 24)];
+            });
           }
         )
-        .subscribe((status) => {
+        .subscribe((status: string) => {
           if (status === 'SUBSCRIBED') {
             setIsSubscribed(true);
           }
         });
-
-      return () => {
-        client.removeChannel(channel);
-      };
     } catch {
       //
     }
+
+    return () => {
+      clearInterval(pollInterval);
+      if (client && channel) {
+        client.removeChannel(channel);
+      }
+    };
   }, []);
 
   return (

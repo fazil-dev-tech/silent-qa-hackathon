@@ -1,15 +1,29 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { spawn } from 'child_process';
+import http from 'node:http';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.SUPABASE_URL || 'https://vdifshqatwyaycxhtbua.supabase.co';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.build_placeholder';
 
 test('Reproduction Probe: Confirms duplicate request reproduction on target app', async () => {
-  // Start Demo Shop test harness
-  const serverProcess = spawn('node', ['demo-shop/server.js'], { stdio: 'ignore' });
-  await new Promise((r) => setTimeout(r, 600));
+  // Start ephemeral test target server
+  let callCount = 0;
+  const targetServer = http.createServer((req, res) => {
+    if (req.method === 'POST') {
+      callCount++;
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, count: callCount }));
+      return;
+    }
+    res.writeHead(404);
+    res.end();
+  });
+
+  await new Promise((resolve) => targetServer.listen(0, '127.0.0.1', resolve));
+  const address = targetServer.address();
+  const targetPort = typeof address === 'object' && address ? address.port : 4000;
+  const probeUrl = `http://127.0.0.1:${targetPort}/api/action`;
 
   try {
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -27,8 +41,6 @@ test('Reproduction Probe: Confirms duplicate request reproduction on target app'
     const targetReport = reports[0];
     console.log(`Testing reproduction probe on report: ${targetReport.title} (${targetReport.id})`);
 
-    // Probe target endpoint directly (demo shop on port 4000)
-    const probeUrl = 'http://localhost:4000/api/cart/add';
     const bodyPayload = JSON.stringify({ itemId: 101, qty: 1, probe_ts: Date.now() });
 
     const [res1, res2] = await Promise.all([
@@ -46,6 +58,7 @@ test('Reproduction Probe: Confirms duplicate request reproduction on target app'
 
     assert.strictEqual(res1.status, 200, 'Probe call 1 must return HTTP 200');
     assert.strictEqual(res2.status, 200, 'Probe call 2 must return HTTP 200');
+    assert.strictEqual(callCount, 2, 'Both duplicate requests received');
 
     // Update status to verified in database
     const { error: updateErr } = await supabase
@@ -57,6 +70,7 @@ test('Reproduction Probe: Confirms duplicate request reproduction on target app'
 
     console.log(`✓ Reproduction confirmed: Dual requests succeeded without idempotency lock. Status updated to 'verified'.`);
   } finally {
-    serverProcess.kill();
+    targetServer.close();
   }
 });
+

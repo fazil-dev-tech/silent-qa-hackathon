@@ -31,16 +31,27 @@ export async function POST(req: Request) {
       type: 'info',
     });
 
-    const baseUrl = target_url || 'http://localhost:4000';
-    logs.push({
-      ts: Date.now(),
-      message: `Target endpoint resolved: ${baseUrl}`,
-      type: 'info',
-    });
-
     // 2. Parse evidence and find triggering requests
     const evidenceList: any[] = Array.isArray(report.evidence) ? report.evidence : [];
     const triggerNetCalls = evidenceList.filter((e) => e.type === 'network' && e.method && e.url);
+
+    let baseUrl = target_url;
+    if (!baseUrl) {
+      const fullUrlEvt = evidenceList.find((e) => e.url && e.url.startsWith('http'));
+      if (fullUrlEvt) {
+        try {
+          baseUrl = new URL(fullUrlEvt.url).origin;
+        } catch {
+          baseUrl = fullUrlEvt.url;
+        }
+      }
+    }
+
+    logs.push({
+      ts: Date.now(),
+      message: `Target origin resolved: ${baseUrl || 'Realtime Target Host'}`,
+      type: 'info',
+    });
 
     let reproduced = false;
     let detailVerdict = '';
@@ -48,7 +59,9 @@ export async function POST(req: Request) {
     if (triggerNetCalls.length >= 2) {
       // Duplicate request reproduction probe
       const firstCall = triggerNetCalls[0];
-      const targetEndpoint = `${baseUrl}${firstCall.url.startsWith('/') ? '' : '/'}${firstCall.url}`;
+      const targetEndpoint = firstCall.url.startsWith('http')
+        ? firstCall.url
+        : `${baseUrl || ''}${firstCall.url.startsWith('/') ? '' : '/'}${firstCall.url}`;
 
       logs.push({
         ts: Date.now(),
@@ -100,7 +113,7 @@ export async function POST(req: Request) {
       } catch (netErr: any) {
         logs.push({
           ts: Date.now(),
-          message: `Network probe could not reach ${targetEndpoint}: ${netErr?.message}. Ensure demo-shop or target app is running.`,
+          message: `Network probe could not reach ${targetEndpoint}: ${netErr?.message}. Ensure target application is reachable.`,
           type: 'warn',
         });
         detailVerdict = `Target probe unreachable (${netErr?.message}). Synthetic script verified offline.`;
