@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -14,17 +14,20 @@ import {
   AlertOctagon,
   Sparkles,
   Terminal,
+  Trash2,
 } from 'lucide-react';
 import EventTimeline from '@/components/event-timeline';
 import ExportModal from '@/components/export-modal';
 
 export default function ReportDetailPage() {
+  const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
   const [report, setReport] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   // Probe runner state
@@ -41,16 +44,28 @@ export default function ReportDetailPage() {
     if (!id) return;
     async function loadReport() {
       try {
-        const res = await fetch(`/api/reports/recent`);
+        // Direct individual report fetch
+        const res = await fetch(`/api/reports/${id}`);
         if (res.ok) {
           const data = await res.json();
-          const found = data.reports?.find((r: any) => r.id === id);
-          if (found) {
-            setReport(found);
-          } else {
-            setError('Defect report not found in database.');
+          if (data.report) {
+            setReport(data.report);
+            return;
           }
         }
+
+        // Fallback to recent reports
+        const recentRes = await fetch(`/api/reports/recent`);
+        if (recentRes.ok) {
+          const recentData = await recentRes.json();
+          const found = recentData.reports?.find((r: any) => r.id === id);
+          if (found) {
+            setReport(found);
+            return;
+          }
+        }
+
+        setError('Defect report not found in database.');
       } catch (err: any) {
         setError(err?.message || 'Failed to fetch report');
       } finally {
@@ -59,6 +74,28 @@ export default function ReportDetailPage() {
     }
     loadReport();
   }, [id]);
+
+  async function handleDeleteReport() {
+    if (!id) return;
+    if (!confirm('Are you sure you want to permanently delete this defect report from Supabase?')) {
+      return;
+    }
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/reports/${id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        router.push('/app');
+      } else {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to delete report');
+      }
+    } catch (err: any) {
+      setActionMessage(`Delete Error: ${err?.message}`);
+      setDeleting(false);
+    }
+  }
 
   async function handleApproveAndSend() {
     if (!id) return;
@@ -239,6 +276,23 @@ export default function ReportDetailPage() {
             >
               <Send size={13} />
               <span>{sendingEmail ? 'Delivering via SMTP...' : 'Approve & Send to Gmail'}</span>
+            </button>
+
+            <button
+              onClick={handleDeleteReport}
+              disabled={deleting}
+              className="btn-secondary"
+              style={{
+                fontSize: '0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                color: '#DC2626',
+                borderColor: 'rgba(220, 38, 38, 0.25)',
+              }}
+            >
+              <Trash2 size={13} />
+              <span>{deleting ? 'Deleting...' : 'Delete Defect'}</span>
             </button>
           </div>
         </div>

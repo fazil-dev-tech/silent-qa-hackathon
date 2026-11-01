@@ -303,3 +303,4 @@ export default function EventTimeline({ events }: EventTimelineProps) {
     </div>
   );
 }
+

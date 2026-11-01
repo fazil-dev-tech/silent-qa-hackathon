@@ -277,3 +277,4 @@ ${report.playwright_script || '// No script'}
     </div>
   );
 }
+

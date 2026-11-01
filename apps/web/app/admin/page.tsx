@@ -26,6 +26,7 @@ interface ReportItem {
   playwright_script?: string;
 }
 
+
 export default function AdminDashboardPage() {
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,6 +76,18 @@ export default function AdminDashboardPage() {
       setReports((prev) =>
         prev.map((r) => (r.id === reportId ? { ...r, status: newStatus } : r))
       );
+    } catch {
+      //
+    }
+  }
+
+  async function deleteReport(reportId: string) {
+    if (!confirm('Permanently delete this defect from Supabase?')) return;
+    try {
+      const res = await fetch(`/api/reports/${reportId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setReports((prev) => prev.filter((r) => r.id !== reportId));
+      }
     } catch {
       //
     }
@@ -193,14 +206,7 @@ export default function AdminDashboardPage() {
         Triage & Engineering Hand-off Board
       </h2>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '1.25rem',
-          alignItems: 'start',
-        }}
-      >
+      <div className="kanban-grid">
         {/* Column 1: Pending Review */}
         <div className="glass-panel" style={{ padding: '1.25rem', background: '#F8FAFC' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>

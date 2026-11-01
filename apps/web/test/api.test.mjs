@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { IngestBatchSchema, ComplaintSubmissionSchema } from '../../../packages/shared/src/schemas.ts';
+import { IngestBatchSchema, ComplaintSubmissionSchema, DefectReportUpdateSchema } from '../../../packages/shared/src/schemas.ts';
 import { rankEventsForMapper, buildSignalSummary } from '../../../packages/shared/src/signals.ts';
 import { generatePlaywrightReproductionScript } from '../../../packages/shared/src/playwright.ts';
 import { buildFallbackReport } from '../lib/llm.ts';
 import { renderReportEmailHtml } from '../lib/mail.ts';
+import { ensureUUID } from '../lib/supabase.ts';
 
 test('Phase 3 - API Ingest: Validates and enriches event batches', () => {
   const batch = {
@@ -122,3 +123,29 @@ test('Phase 3 - Mail: Renders responsive inline-styled HTML report email', () =>
   assert.ok(html.includes('ACTUAL OBSERVED'));
   assert.ok(html.includes('Open Full Report & Evidence'));
 });
+
+test('Phase 3 - Report Patch & UUID Schema: Validates updates and RFC-4122 compliance', () => {
+  // Test update schema
+  const validUpdate = {
+    status: 'verified',
+    severity: 'critical',
+  };
+  const parseResult = DefectReportUpdateSchema.safeParse(validUpdate);
+  assert.strictEqual(parseResult.success, true);
+
+  const invalidUpdate = {
+    status: 'invalid_status_xyz',
+  };
+  const invalidResult = DefectReportUpdateSchema.safeParse(invalidUpdate);
+  assert.strictEqual(invalidResult.success, false);
+
+  // Test RFC-4122 UUID normalization
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const standardUUID = '12345678-1234-4234-a234-123456789abc';
+  assert.strictEqual(ensureUUID(standardUUID), standardUUID);
+
+  const hashedUUID = ensureUUID('ses_custom_session_99');
+  assert.ok(uuidRegex.test(hashedUUID));
+  assert.strictEqual(ensureUUID('ses_custom_session_99'), hashedUUID, 'Deterministic hash');
+});
+

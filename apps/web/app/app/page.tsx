@@ -17,6 +17,7 @@ import {
   Clock,
   Layers,
   Activity,
+  Trash2,
 } from 'lucide-react';
 import LiveTelemetryFeed from '@/components/live-telemetry-feed';
 import EventTimeline from '@/components/event-timeline';
@@ -241,6 +242,27 @@ export default function TesterWorkspacePage() {
     }
   }
 
+  // Delete report permanently
+  async function handleDeleteReport(reportId: string) {
+    if (!confirm('Permanently delete this defect report from Supabase?')) return;
+    try {
+      const res = await fetch(`/api/reports/${reportId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setActionMessage('✓ Report deleted from database.');
+        setReports((prev) => prev.filter((r) => r.id !== reportId));
+        if (selectedReport?.id === reportId) {
+          const remaining = reports.filter((r) => r.id !== reportId);
+          setSelectedReport(remaining.length > 0 ? remaining[0] : null);
+        }
+      } else {
+        const data = await res.json();
+        throw new Error(data.error || 'Delete failed');
+      }
+    } catch (err: any) {
+      setActionMessage(`Delete Error: ${err?.message}`);
+    }
+  }
+
   return (
     <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       {/* Workspace Header */}
@@ -287,7 +309,7 @@ export default function TesterWorkspacePage() {
       )}
 
       {/* Main Grid: Left Stream & Right Review Workspace */}
-      <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '2rem', alignItems: 'start' }}>
+      <div className="workspace-grid">
         {/* Left Column: Live Stream & Simulator */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* Live Telemetry Stream Widget */}
@@ -471,6 +493,24 @@ export default function TesterWorkspacePage() {
                   >
                     <Send size={13} />
                     <span>{sendingEmail ? 'Delivering...' : 'Approve & Send to Gmail'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteReport(selectedReport.id)}
+                    className="btn-secondary"
+                    title="Delete report from database"
+                    style={{
+                      fontSize: '0.825rem',
+                      padding: '0.55rem 0.85rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      color: '#DC2626',
+                      borderColor: 'rgba(220, 38, 38, 0.25)',
+                    }}
+                  >
+                    <Trash2 size={13} />
+                    <span>Delete</span>
                   </button>
                 </div>
               </div>
