@@ -218,8 +218,25 @@ export default function EventTimeline({ events }: EventTimelineProps) {
                           HTTP {item.status}
                         </span>
                       )}
-                      {item.duration_ms !== undefined && (
-                        <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>({item.duration_ms}ms)</span>
+                      {((item.duration_ms !== undefined && item.duration_ms !== null) || (item.shape?.duration_ms !== undefined && item.shape?.duration_ms !== null)) && (
+                        <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
+                          ({item.duration_ms ?? item.shape?.duration_ms}ms)
+                        </span>
+                      )}
+                      {item.shape?.domSnapshot && (
+                        <span
+                          title="DOM snapshot captured at error moment"
+                          style={{
+                            fontSize: '0.7rem',
+                            padding: '0.1rem 0.35rem',
+                            borderRadius: '4px',
+                            background: '#FEE2E2',
+                            color: '#991B1B',
+                            fontWeight: 700,
+                          }}
+                        >
+                          📸 DOM Snapshot
+                        </span>
                       )}
                     </div>
                   )}

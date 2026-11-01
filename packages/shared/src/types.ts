@@ -6,6 +6,7 @@ export type EventType =
   | 'error'
   | 'warning'
   | 'signal'
+  | 'performance'
   | 'websocket_in'
   | 'websocket_out'
   | 'route_change'

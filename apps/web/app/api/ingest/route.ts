@@ -53,21 +53,36 @@ export async function POST(req: Request) {
         user_agent: enrichedAgent,
       }, { onConflict: 'id' });
 
-    // 3. Enrich events with computed fingerprints and valid timestamps
-    const enriched = events.map((e) => ({
-      id: ensureUUID(e.id),
-      session_id: safeSessionId,
-      type: e.type,
-      severity: e.severity,
-      url: e.url || null,
-      method: e.method || null,
-      status: e.status || null,
-      selector: e.selector || null,
-      text: e.text || null,
-      shape: e.shape || null,
-      fingerprint: computeFingerprint(e.method, e.url, e.shape as any),
-      ts: new Date(e.ts).toISOString(),
-    }));
+    // 3. Enrich events with computed fingerprints, shape metadata, and valid timestamps
+    const enriched = events.map((e) => {
+      const mergedShape: Record<string, unknown> = {
+        ...(typeof e.shape === 'object' && e.shape !== null ? e.shape : {}),
+      };
+
+      if (e.duration_ms !== undefined) mergedShape.duration_ms = e.duration_ms;
+      if ((e.metadata as any)?.duration_ms !== undefined) mergedShape.duration_ms = (e.metadata as any).duration_ms;
+      if ((e.metadata as any)?.domSnapshot) mergedShape.domSnapshot = (e.metadata as any).domSnapshot;
+      if ((e as any).domSnapshot) mergedShape.domSnapshot = (e as any).domSnapshot;
+      if ((e.metadata as any)?.relative_ms !== undefined) mergedShape.relative_ms = (e.metadata as any).relative_ms;
+      if ((e as any).relative_ms !== undefined) mergedShape.relative_ms = (e as any).relative_ms;
+      if ((e.metadata as any)?.coordinates) mergedShape.coordinates = (e.metadata as any).coordinates;
+      mergedShape.iso_timestamp = (e as any).iso_timestamp || new Date(e.ts).toISOString();
+
+      return {
+        id: ensureUUID(e.id),
+        session_id: safeSessionId,
+        type: e.type,
+        severity: e.severity || 'info',
+        url: e.url || null,
+        method: e.method || null,
+        status: e.status || null,
+        selector: e.selector || null,
+        text: e.text || null,
+        shape: mergedShape,
+        fingerprint: computeFingerprint(e.method, e.url, mergedShape as any),
+        ts: new Date(e.ts).toISOString(),
+      };
+    });
 
     // 4. Strict Database Write to Supabase partitioned events table
     const { error: insertErr } = await supabaseAdmin.from('events').insert(enriched);

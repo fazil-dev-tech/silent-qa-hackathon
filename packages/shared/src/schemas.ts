@@ -10,6 +10,7 @@ export const EventTypeSchema = z.enum([
   'error',
   'warning',
   'signal',
+  'performance',
   'websocket_in',
   'websocket_out',
   'route_change',

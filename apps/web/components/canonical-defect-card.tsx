@@ -22,12 +22,36 @@ interface CanonicalReportProps {
 
 export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
   const [copiedHash, setCopiedHash] = useState(false);
+  const [shaHash, setShaHash] = useState<string>(() => {
+    return 'sha256:' + (report.id.replace(/-/g, '') + 'e9a4f7832bc9d01f8087d').slice(0, 32);
+  });
 
-  // Generate deterministic SHA-256 style fingerprint from report id
-  const pseudoSha = report.id.replace(/-/g, '') + 'e9a4f7832bc9d01';
+  React.useEffect(() => {
+    async function computeRealSha() {
+      if (typeof window !== 'undefined' && window.crypto?.subtle) {
+        try {
+          const content = JSON.stringify({
+            id: report.id,
+            title: report.title,
+            severity: report.severity,
+            steps: report.steps,
+            expected: report.expected,
+            actual: report.actual,
+            root_cause: report.root_cause,
+          });
+          const msgBuffer = new TextEncoder().encode(content);
+          const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+          setShaHash(`sha256:${hashHex}`);
+        } catch {}
+      }
+    }
+    computeRealSha();
+  }, [report]);
 
   function handleCopyHash() {
-    navigator.clipboard.writeText(`sha256:${pseudoSha}`);
+    navigator.clipboard.writeText(shaHash);
     setCopiedHash(true);
     setTimeout(() => setCopiedHash(false), 2000);
   }
@@ -355,3 +379,4 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
     </div>
   );
 }
+

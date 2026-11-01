@@ -60,6 +60,49 @@
     } catch {}
   }
 
+  let sessionStartTs = Date.now();
+  try {
+    chrome.storage?.local?.get(['session_start_ts'], (res) => {
+      if (res?.session_start_ts) {
+        sessionStartTs = res.session_start_ts;
+      }
+    });
+  } catch {}
+
+  // PII Scrubbing Utility
+  function scrubPII(obj: any): any {
+    if (!obj) return obj;
+    if (typeof obj === 'string') {
+      return obj
+        .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[REDACTED_EMAIL]')
+        .replace(/\b(?:\d[ -]*?){13,16}\b/g, '[REDACTED_CC]')
+        .replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '[REDACTED_PHONE]');
+    }
+    if (typeof obj === 'object') {
+      const isArr = Array.isArray(obj);
+      const res: any = isArr ? [] : {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (typeof k === 'string' && /password|token|secret|apiKey|auth|cvv|pin/i.test(k)) {
+          res[k] = '[REDACTED_SECRET]';
+        } else {
+          res[k] = scrubPII(v);
+        }
+      }
+      return res;
+    }
+    return obj;
+  }
+
+  // Emergency DOM Snapshot on Critical Failures
+  function captureDomSnapshot(): string {
+    try {
+      const raw = document.body ? document.body.innerHTML.substring(0, 5000) : '';
+      return raw.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    } catch {
+      return '';
+    }
+  }
+
   // 1. Establish resilient port with worker (Keep-Alive loophole fix)
   function connectPort() {
     try {
@@ -85,11 +128,31 @@
 
   function sendToWorker(eventData: Record<string, unknown>) {
     if (!isRecordingEnabled) return; // 0 overhead when paused
+
+    // 1. Client-Side PII Scrubbing
+    const cleaned = scrubPII(eventData);
+
+    // 2. High-Precision Temporal Mapping
+    const now = typeof cleaned.ts === 'number' ? cleaned.ts : Date.now();
+    cleaned.ts = now;
+    cleaned.iso_timestamp = new Date(now).toISOString();
+    cleaned.relative_ms = Math.max(0, now - sessionStartTs);
+
+    // 3. Attach DOM Snapshot on Critical Server or JS Errors
+    if (cleaned.severity === 'critical' || (typeof cleaned.status === 'number' && cleaned.status >= 500)) {
+      const snapshot = captureDomSnapshot();
+      if (!cleaned.metadata) cleaned.metadata = {};
+      (cleaned.metadata as any).domSnapshot = snapshot;
+      if (cleaned.shape && typeof cleaned.shape === 'object') {
+        (cleaned.shape as any).domSnapshot = snapshot;
+      }
+    }
+
     try {
       if (port) {
-        port.postMessage({ type: 'EVENT', payload: eventData });
+        port.postMessage({ type: 'EVENT', payload: cleaned });
       } else {
-        chrome.runtime.sendMessage({ type: 'EVENT', payload: eventData });
+        chrome.runtime.sendMessage({ type: 'EVENT', payload: cleaned });
       }
     } catch {
       // In offline/suspended state, will recover on next tick
@@ -354,6 +417,69 @@
     subtree: true,
     characterData: true,
   });
+
+  // 5b. Web Vitals & Performance Telemetry (LCP, CLS, Long Tasks)
+  if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
+    try {
+      const perfObserver = new PerformanceObserver((list) => {
+        if (!isRecordingEnabled) return;
+        for (const entry of list.getEntries()) {
+          const now = Date.now();
+          if (entry.entryType === 'largest-contentful-paint') {
+            sendToWorker({
+              id: generateUUID(),
+              ts: now,
+              type: 'performance',
+              severity: 'info',
+              text: `LCP (Largest Contentful Paint): ${Math.round(entry.startTime)}ms`,
+              shape: {
+                metric: 'LCP',
+                value: Math.round(entry.startTime),
+                unit: 'ms',
+              },
+            });
+          } else if (entry.entryType === 'layout-shift' && !(entry as any).hadRecentInput) {
+            const shiftValue = (entry as any).value || 0;
+            if (shiftValue > 0.05) {
+              sendToWorker({
+                id: generateUUID(),
+                ts: now,
+                type: 'performance',
+                severity: shiftValue > 0.1 ? 'warn' : 'info',
+                text: `CLS (Cumulative Layout Shift): ${shiftValue.toFixed(4)}`,
+                shape: {
+                  metric: 'CLS',
+                  value: shiftValue.toFixed(4),
+                },
+              });
+            }
+          } else if (entry.entryType === 'longtask') {
+            const durationMs = Math.round(entry.duration);
+            if (durationMs > 50) {
+              sendToWorker({
+                id: generateUUID(),
+                ts: now,
+                type: 'performance',
+                severity: 'warn',
+                text: `Long Task detected: ${durationMs}ms`,
+                shape: {
+                  metric: 'Long Task',
+                  duration_ms: durationMs,
+                  start_ms: Math.round(entry.startTime),
+                },
+              });
+            }
+          }
+        }
+      });
+
+      perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+      perfObserver.observe({ type: 'layout-shift', buffered: true });
+      perfObserver.observe({ type: 'longtask', buffered: true });
+    } catch {
+      // Browser doesn't support some entry types
+    }
+  }
 
   // 6. Interactive Element Picker & State Listener
   chrome.runtime.onMessage?.addListener((request, sender, sendResponse) => {

@@ -168,3 +168,4 @@ ${recentEventsSummary || 'No recent events recorded.'}
     );
   }
 }
+

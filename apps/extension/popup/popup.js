@@ -71,6 +71,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   toggleRecordingBtn.addEventListener('click', () => {
     const nextState = !isRecordingEnabled;
     renderRecordingState(nextState);
+
+    // Sync worker session state
+    chrome.runtime.sendMessage({
+      type: nextState ? 'START_SESSION' : 'STOP_SESSION',
+      testerName: activeTesterName,
+      deviceTag: activeDeviceTag,
+    }, (res) => {
+      if (res?.sessionId) {
+        sessionDisplay.textContent = res.sessionId.slice(0, 13) + '...';
+      }
+    });
+
     chrome.storage.local.set({ sqa_recording_enabled: nextState });
 
     // Broadcast to active tab
@@ -83,6 +95,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   });
+
+  // Click session display to copy full session ID
+  if (sessionDisplay) {
+    sessionDisplay.style.cursor = 'pointer';
+    sessionDisplay.title = 'Click to copy full Session UUID';
+    sessionDisplay.addEventListener('click', () => {
+      chrome.storage.local.get(['session_id'], (res) => {
+        if (res?.session_id) {
+          navigator.clipboard.writeText(res.session_id);
+          const orig = sessionDisplay.textContent;
+          sessionDisplay.textContent = 'Copied!';
+          setTimeout(() => { sessionDisplay.textContent = orig; }, 1500);
+        }
+      });
+    });
+  }
 
   // 3. Hydrate storage (Session ID, Tester Identity, Recent Items, Stats)
   chrome.storage.local.get(
@@ -267,7 +295,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     submitBtn.disabled = true;
-    updateStatus('Synthesizing report via OpenRouter AI...', '#4B5563');
+    updateStatus('Flushing telemetry buffer & synthesizing report...', '#4B5563');
+
+    // Flush any pending events in memory buffer to API first
+    try {
+      await new Promise((resolve) => {
+        chrome.runtime.sendMessage({ type: 'FLUSH_NOW' }, () => resolve(true));
+        setTimeout(resolve, 250);
+      });
+    } catch {}
 
     chrome.storage.local.get(['session_id', 'api_endpoint', 'tester_name', 'device_tag'], async (stored) => {
       let activeSessionId = stored.session_id;

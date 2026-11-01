@@ -47,9 +47,29 @@
     const init = args[1] || {};
     const method = (init.method || 'GET').toUpperCase();
 
+    let requestBodySnippet: string | undefined = undefined;
+    try {
+      if (init.body) {
+        requestBodySnippet = typeof init.body === 'string'
+          ? init.body.slice(0, 400)
+          : '[Payload/FormData]';
+      }
+    } catch {}
+
     try {
       const response = await origFetch.apply(this, args);
       const duration = Math.round(performance.now() - start);
+
+      let responseSnippet: string | undefined = undefined;
+      if (response.status >= 400) {
+        try {
+          const clone = response.clone();
+          const txt = await clone.text();
+          responseSnippet = txt.slice(0, 400);
+        } catch {}
+      }
+
+      const severity = response.status >= 500 ? 'critical' : response.status >= 400 ? 'error' : 'info';
 
       relay(
         'network',
@@ -57,9 +77,19 @@
           url,
           method,
           status: response.status,
+          statusText: response.statusText,
           duration_ms: duration,
+          text: `${method} ${url} -> ${response.status} (${duration}ms)`,
+          shape: {
+            method,
+            url,
+            status: response.status,
+            duration_ms: duration,
+            request_body: requestBodySnippet,
+            response_body: responseSnippet,
+          },
         },
-        response.status >= 400 ? 'error' : 'info'
+        severity
       );
 
       return response;
@@ -72,9 +102,16 @@
           method,
           status: 0,
           duration_ms: duration,
-          text: err?.message || 'Network fetch error',
+          text: `Network fetch failed: ${err?.message || 'Connection refused'}`,
+          shape: {
+            method,
+            url,
+            status: 0,
+            duration_ms: duration,
+            error: err?.message || 'Network fetch error',
+          },
         },
-        'error'
+        'critical'
       );
       throw err;
     }
@@ -91,18 +128,44 @@
     return origOpen.apply(this, arguments as any);
   };
 
-  XMLHttpRequest.prototype.send = function () {
+  XMLHttpRequest.prototype.send = function (body?: any) {
+    if (body) {
+      try {
+        (this as any)._sqa_body = typeof body === 'string' ? body.slice(0, 400) : '[Binary/Payload]';
+      } catch {}
+    }
+
     this.addEventListener('loadend', () => {
       const duration = Math.round(performance.now() - ((this as any)._sqa_start || performance.now()));
+      const method = ((this as any)._sqa_method || 'GET').toUpperCase();
+      const url = (this as any)._sqa_url || 'unknown';
+      const severity = this.status >= 500 ? 'critical' : this.status >= 400 ? 'error' : 'info';
+
+      let responseSnippet: string | undefined = undefined;
+      if (this.status >= 400) {
+        try {
+          responseSnippet = (this.responseText || '').slice(0, 400);
+        } catch {}
+      }
+
       relay(
         'network',
         {
-          url: (this as any)._sqa_url,
-          method: ((this as any)._sqa_method || 'GET').toUpperCase(),
+          url,
+          method,
           status: this.status,
           duration_ms: duration,
+          text: `${method} ${url} -> ${this.status} (${duration}ms)`,
+          shape: {
+            method,
+            url,
+            status: this.status,
+            duration_ms: duration,
+            request_body: (this as any)._sqa_body,
+            response_body: responseSnippet,
+          },
         },
-        this.status >= 400 ? 'error' : 'info'
+        severity
       );
     });
     return origSend.apply(this, arguments as any);
@@ -133,19 +196,32 @@
     relay(
       'error',
       {
-        text: event.message,
+        text: `Uncaught Exception: ${event.message}`,
         url: event.filename,
         selector: `${event.lineno}:${event.colno}`,
+        shape: {
+          message: event.message,
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno,
+          stack: event.error?.stack || '',
+        },
       },
-      'error'
+      'critical'
     );
   });
 
   window.addEventListener('unhandledrejection', (event) => {
+    const errorMsg = event.reason?.message || String(event.reason);
     relay(
       'error',
       {
-        text: 'Unhandled Promise Rejection: ' + (event.reason?.message || String(event.reason)),
+        text: `Unhandled Promise Rejection: ${errorMsg}`,
+        shape: {
+          message: errorMsg,
+          stack: event.reason?.stack || '',
+          type: 'unhandledrejection',
+        },
       },
       'critical'
     );
@@ -154,10 +230,16 @@
   // 5. Console Error & Warning Interception
   const origError = console.error;
   console.error = function (...args) {
+    const msg = args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
     relay(
       'error',
       {
-        text: args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' '),
+        text: `console.error: ${msg.slice(0, 300)}`,
+        shape: {
+          level: 'error',
+          message: msg.slice(0, 500),
+          stack: new Error().stack || '',
+        },
       },
       'error'
     );
@@ -166,10 +248,15 @@
 
   const origWarn = console.warn;
   console.warn = function (...args) {
+    const msg = args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
     relay(
       'warning',
       {
-        text: args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' '),
+        text: `console.warn: ${msg.slice(0, 300)}`,
+        shape: {
+          level: 'warn',
+          message: msg.slice(0, 500),
+        },
       },
       'warn'
     );

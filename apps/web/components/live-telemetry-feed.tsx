@@ -20,6 +20,7 @@ interface LiveEvent {
   status?: number;
   selector?: string;
   text?: string;
+  shape?: Record<string, any>;
 }
 
 export default function LiveTelemetryFeed() {
@@ -141,7 +142,14 @@ export default function LiveTelemetryFeed() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', maxHeight: '280px', overflowY: 'auto' }}>
           {events.map((evt) => {
-            const isWarn = evt.severity === 'warn' || evt.severity === 'error' || evt.type === 'signal';
+            const isWarn = evt.severity === 'warn' || evt.severity === 'error' || evt.severity === 'critical' || evt.type === 'signal';
+            const durationMs = evt.shape?.duration_ms;
+            const hasSnapshot = !!evt.shape?.domSnapshot;
+            const d = typeof evt.ts === 'string' ? new Date(evt.ts) : new Date(Number(evt.ts));
+            const timeFormatted = !isNaN(d.getTime())
+              ? `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}.${String(d.getMilliseconds()).padStart(3, '0')}`
+              : typeof evt.ts === 'string' ? evt.ts.slice(11, 23) : 'now';
+
             return (
               <div
                 key={evt.id}
@@ -178,10 +186,40 @@ export default function LiveTelemetryFeed() {
                   >
                     {evt.url || evt.selector || evt.text || 'Event recorded'}
                   </span>
+                  {durationMs !== undefined && durationMs !== null && (
+                    <span
+                      style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        padding: '0.1rem 0.35rem',
+                        borderRadius: '4px',
+                        background: '#E0E7FF',
+                        color: '#3730A3',
+                        fontFamily: 'monospace',
+                      }}
+                    >
+                      {durationMs}ms
+                    </span>
+                  )}
+                  {hasSnapshot && (
+                    <span
+                      title="DOM Snapshot captured at failure instant"
+                      style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        padding: '0.1rem 0.35rem',
+                        borderRadius: '4px',
+                        background: '#FEE2E2',
+                        color: '#991B1B',
+                      }}
+                    >
+                      📸 DOM
+                    </span>
+                  )}
                 </div>
 
                 <span style={{ fontSize: '0.675rem', fontFamily: 'monospace', color: '#9CA3AF', flexShrink: 0 }}>
-                  {typeof evt.ts === 'string' ? evt.ts.slice(11, 19) : new Date(evt.ts).toISOString().slice(11, 19)}
+                  {timeFormatted}
                 </span>
               </div>
             );
