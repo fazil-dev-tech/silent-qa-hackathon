@@ -44,15 +44,185 @@ interface ReportItem {
   created_at: string;
 }
 
+const PRESET_SCENARIOS = [
+  {
+    id: 'cart-race',
+    label: 'Cart Race Condition',
+    note: 'problem in cart button, count jumps to 2',
+    selector: 'button#add-to-cart',
+    getEvents: (sessionId: string, baseTs: number, selector: string) => [
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 50,
+        type: 'click',
+        severity: 'info',
+        selector,
+        text: 'Add to Cart',
+      },
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 40,
+        type: 'network',
+        severity: 'info',
+        url: '/api/cart/add',
+        method: 'POST',
+        status: 200,
+        shape: { itemId: 'number', qty: 'number' },
+      },
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 32,
+        type: 'network',
+        severity: 'info',
+        url: '/api/cart/add',
+        method: 'POST',
+        status: 200,
+        shape: { itemId: 'number', qty: 'number' },
+      },
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 10,
+        type: 'dom',
+        severity: 'info',
+        selector: '#cart-counter',
+        text: 'text_update: 2',
+      },
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 5,
+        type: 'signal',
+        severity: 'warn',
+        text: 'duplicate_request: POST /api/cart/add fired twice within 8ms',
+        selector,
+      },
+    ],
+  },
+  {
+    id: 'checkout-500',
+    label: 'Checkout 500 Crash',
+    note: 'clicked checkout and screen froze with unhandled server error',
+    selector: 'button#submit-order',
+    getEvents: (sessionId: string, baseTs: number, selector: string) => [
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 80,
+        type: 'click',
+        severity: 'info',
+        selector,
+        text: 'Complete Order',
+      },
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 60,
+        type: 'network',
+        severity: 'error',
+        url: '/api/checkout/process',
+        method: 'POST',
+        status: 500,
+        shape: { error: 'string', code: 'number' },
+      },
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 20,
+        type: 'console',
+        severity: 'error',
+        text: 'Unhandled Server Error: 500 Internal Server Error at /api/checkout/process',
+      },
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 5,
+        type: 'signal',
+        severity: 'error',
+        text: 'critical_api_failure: /api/checkout/process returned 500 without error boundary',
+        selector,
+      },
+    ],
+  },
+  {
+    id: 'auth-rage',
+    label: 'Expired Token Rage Click',
+    note: 'save profile button does nothing when clicked repeatedly',
+    selector: 'button.save-settings-btn',
+    getEvents: (sessionId: string, baseTs: number, selector: string) => [
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 120,
+        type: 'click',
+        severity: 'info',
+        selector,
+        text: 'Save Changes',
+      },
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 90,
+        type: 'click',
+        severity: 'info',
+        selector,
+        text: 'Save Changes',
+      },
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 60,
+        type: 'click',
+        severity: 'info',
+        selector,
+        text: 'Save Changes',
+      },
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 40,
+        type: 'network',
+        severity: 'error',
+        url: '/api/profile/update',
+        method: 'PUT',
+        status: 401,
+        shape: { message: 'string' },
+      },
+      {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        ts: baseTs - 10,
+        type: 'signal',
+        severity: 'warn',
+        text: 'rage_click: 3 rapid clicks detected on button.save-settings-btn within 120ms',
+        selector,
+      },
+    ],
+  },
+];
+
 export default function TesterWorkspacePage() {
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [selectedReport, setSelectedReport] = useState<ReportItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [testNote, setTestNote] = useState('problem in cart button, count jumps to 2');
   const [pickedSelector, setPickedSelector] = useState('button#add-to-cart');
+  const [selectedScenario, setSelectedScenario] = useState<string>('cart-race');
   const [submitting, setSubmitting] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  function handleSelectPreset(presetId: string) {
+    setSelectedScenario(presetId);
+    const found = PRESET_SCENARIOS.find((p) => p.id === presetId);
+    if (found) {
+      setTestNote(found.note);
+      setPickedSelector(found.selector);
+    }
+  }
 
   // Reproduction probe state
   const [runningProbe, setRunningProbe] = useState(false);
@@ -138,57 +308,10 @@ export default function TesterWorkspacePage() {
       const baseTs = Date.now();
 
       // Step A: Ingest real telemetry batch into Supabase
-      const eventsBatch = [
-        {
-          id: crypto.randomUUID(),
-          session_id: sessionId,
-          ts: baseTs - 50,
-          type: 'click',
-          severity: 'info',
-          selector: pickedSelector,
-          text: 'Add to Cart',
-        },
-        {
-          id: crypto.randomUUID(),
-          session_id: sessionId,
-          ts: baseTs - 40,
-          type: 'network',
-          severity: 'info',
-          url: '/api/cart/add',
-          method: 'POST',
-          status: 200,
-          shape: { itemId: 'number', qty: 'number' },
-        },
-        {
-          id: crypto.randomUUID(),
-          session_id: sessionId,
-          ts: baseTs - 32,
-          type: 'network',
-          severity: 'info',
-          url: '/api/cart/add',
-          method: 'POST',
-          status: 200,
-          shape: { itemId: 'number', qty: 'number' },
-        },
-        {
-          id: crypto.randomUUID(),
-          session_id: sessionId,
-          ts: baseTs - 10,
-          type: 'dom',
-          severity: 'info',
-          selector: '#cart-counter',
-          text: 'text_update: 2',
-        },
-        {
-          id: crypto.randomUUID(),
-          session_id: sessionId,
-          ts: baseTs - 5,
-          type: 'signal',
-          severity: 'warn',
-          text: 'duplicate_request: POST /api/cart/add fired twice within 8ms',
-          selector: pickedSelector,
-        },
-      ];
+      const activePreset = PRESET_SCENARIOS.find((p) => p.id === selectedScenario);
+      const eventsBatch = activePreset
+        ? activePreset.getEvents(sessionId, baseTs, pickedSelector)
+        : PRESET_SCENARIOS[0].getEvents(sessionId, baseTs, pickedSelector);
 
       const ingestRes = await fetch('/api/ingest', {
         method: 'POST',
@@ -370,6 +493,35 @@ export default function TesterWorkspacePage() {
             <p style={{ fontSize: '0.8rem', color: '#6B7280', marginBottom: '1rem' }}>
               Simulates live in-browser telemetry and triggers the OpenRouter causal synthesis engine.
             </p>
+
+            {/* Scenario Preset Selector */}
+            <div style={{ marginBottom: '0.85rem' }}>
+              <label style={{ display: 'block', fontSize: '0.725rem', fontWeight: 800, color: '#6B7280', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
+                Scenario Preset:
+              </label>
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                {PRESET_SCENARIOS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => handleSelectPreset(preset.id)}
+                    type="button"
+                    style={{
+                      padding: '0.25rem 0.55rem',
+                      borderRadius: '6px',
+                      fontSize: '0.725rem',
+                      fontWeight: 700,
+                      border: selectedScenario === preset.id ? '1px solid #DC2626' : '1px solid rgba(17, 24, 39, 0.1)',
+                      background: selectedScenario === preset.id ? '#FFF1F2' : '#ffffff',
+                      color: selectedScenario === preset.id ? '#DC2626' : '#4B5563',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div style={{ marginBottom: '0.75rem' }}>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#4B5563', marginBottom: '0.25rem' }}>

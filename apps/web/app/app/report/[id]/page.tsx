@@ -42,6 +42,32 @@ export default function ReportDetailPage() {
   const [copiedScript, setCopiedScript] = useState(false);
   const [copiedCmd, setCopiedCmd] = useState(false);
 
+  // Verification checklist state
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+
+  function handleToggleStep(index: number) {
+    setCompletedSteps((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  }
+
+  async function handleUpdateStatus(newStatus: string) {
+    if (!id) return;
+    try {
+      const res = await fetch(`/api/reports/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        setReport((prev: any) => ({ ...prev, status: newStatus }));
+        setActionMessage(`✓ Defect status updated to ${newStatus.toUpperCase()}`);
+      }
+    } catch (err: any) {
+      setActionMessage(`Error updating status: ${err?.message}`);
+    }
+  }
+
   function handleDownloadScript() {
     if (!report?.playwright_script) return;
     const blob = new Blob([report.playwright_script], { type: 'text/typescript' });
@@ -375,16 +401,66 @@ export default function ReportDetailPage() {
           </div>
         )}
 
-        {/* Steps */}
+        {/* Interactive Steps to Reproduce */}
         <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', marginBottom: '0.75rem' }}>
-            Steps to Reproduce
-          </h3>
-          <ol style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.95rem', color: '#374151' }}>
-            {report.steps?.map((step: string, idx: number) => (
-              <li key={idx}>{step}</li>
-            ))}
-          </ol>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>
+              Steps to Reproduce ({completedSteps.length}/{report.steps?.length || 0} Verified)
+            </h3>
+            {report.steps && report.steps.length > 0 && (
+              <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
+                Click steps to check off during manual reproduction
+              </span>
+            )}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {report.steps?.map((step: string, idx: number) => {
+              const isDone = completedSteps.includes(idx);
+              return (
+                <div
+                  key={idx}
+                  onClick={() => handleToggleStep(idx)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '8px',
+                    background: isDone ? '#F0FDF4' : '#FFFFFF',
+                    border: isDone ? '1px solid #86EFAC' : '1px solid rgba(17, 24, 39, 0.08)',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      border: isDone ? 'none' : '2px solid #D1D5DB',
+                      background: isDone ? '#16A34A' : 'transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {isDone && <Check size={12} color="#FFFFFF" />}
+                  </div>
+                  <span
+                    style={{
+                      fontSize: '0.925rem',
+                      color: isDone ? '#166534' : '#374151',
+                      textDecoration: isDone ? 'line-through' : 'none',
+                      fontWeight: isDone ? 600 : 500,
+                    }}
+                  >
+                    {idx + 1}. {step}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Playwright Script */}
