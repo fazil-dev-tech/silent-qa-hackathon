@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import EventTimeline from '@/components/event-timeline';
 import ExportModal from '@/components/export-modal';
+import SendEmailModal from '@/components/send-email-modal';
 import CanonicalDefectCard from '@/components/canonical-defect-card';
 import QACopilotChat from '@/components/qa-copilot-chat';
 
@@ -29,7 +30,7 @@ export default function ReportDetailPage() {
   const [report, setReport] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sendingEmail, setSendingEmail] = useState(false);
+  const [sendEmailModalOpen, setSendEmailModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
@@ -44,8 +45,8 @@ export default function ReportDetailPage() {
   const [copiedScript, setCopiedScript] = useState(false);
   const [copiedCmd, setCopiedCmd] = useState(false);
 
-  // View mode toggle: Canonical Spec Card vs Interactive Studio
-  const [viewMode, setViewMode] = useState<'canonical' | 'studio'>('canonical');
+  // 4 Focused Tabs
+  const [activeTab, setActiveTab] = useState<'canonical' | 'overview' | 'timeline' | 'playwright'>('canonical');
 
   // Verification checklist state
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -157,30 +158,6 @@ export default function ReportDetailPage() {
     } catch (err: any) {
       setActionMessage(`Delete Error: ${err?.message}`);
       setDeleting(false);
-    }
-  }
-
-  async function handleApproveAndSend() {
-    if (!id) return;
-    setSendingEmail(true);
-    setActionMessage(null);
-    try {
-      const res = await fetch(`/api/reports/${id}/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipient: 'mohamedfazilpasha156@gmail.com' }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setActionMessage(`✓ Report approved and delivered to ${data.delivered_to} via Gmail SMTP!`);
-        setReport((prev: any) => ({ ...prev, status: 'sent' }));
-      } else {
-        throw new Error(data.error || 'Failed to deliver email');
-      }
-    } catch (err: any) {
-      setActionMessage(`Error: ${err?.message}`);
-    } finally {
-      setSendingEmail(false);
     }
   }
 
@@ -332,13 +309,21 @@ export default function ReportDetailPage() {
             </button>
 
             <button
-              onClick={handleApproveAndSend}
-              disabled={sendingEmail}
+              onClick={() => setExportModalOpen(true)}
+              className="btn-secondary"
+              style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+            >
+              <Share2 size={13} />
+              <span>Export</span>
+            </button>
+
+            <button
+              onClick={() => setSendEmailModalOpen(true)}
               className="btn-primary"
               style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
             >
               <Send size={13} />
-              <span>{sendingEmail ? 'Delivering via SMTP...' : 'Approve & Send to Gmail'}</span>
+              <span>Approve &amp; Send to Gmail</span>
             </button>
 
             <button
@@ -355,98 +340,320 @@ export default function ReportDetailPage() {
               }}
             >
               <Trash2 size={13} />
-              <span>{deleting ? 'Deleting...' : 'Delete Defect'}</span>
+              <span>{deleting ? 'Deleting...' : 'Delete'}</span>
             </button>
           </div>
         </div>
 
-        {/* View Mode Selector Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid rgba(17, 24, 39, 0.08)', paddingBottom: '0.75rem' }}>
+        {/* 4 Professional Navigation Tabs */}
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid rgba(17, 24, 39, 0.08)', paddingBottom: '0.75rem', flexWrap: 'wrap' }}>
           <button
-            onClick={() => setViewMode('canonical')}
+            onClick={() => setActiveTab('canonical')}
             style={{
               padding: '0.45rem 1rem',
               borderRadius: '8px',
               fontSize: '0.85rem',
               fontWeight: 700,
-              border: 'none',
+              border: activeTab === 'canonical' ? '1px solid #0284C7' : '1px solid transparent',
               cursor: 'pointer',
-              background: viewMode === 'canonical' ? '#0284C7' : 'transparent',
-              color: viewMode === 'canonical' ? '#ffffff' : '#4B5563',
-              boxShadow: viewMode === 'canonical' ? '0 0 12px rgba(2, 132, 199, 0.35)' : 'none',
+              background: activeTab === 'canonical' ? '#0284C7' : 'rgba(0, 0, 0, 0.04)',
+              color: activeTab === 'canonical' ? '#ffffff' : '#4B5563',
+              boxShadow: activeTab === 'canonical' ? '0 0 12px rgba(2, 132, 199, 0.35)' : 'none',
+              transition: 'all 0.15s ease',
             }}
           >
-            ⚡ Canonical Spec Card (Problem Statement View)
+            ⚡ Canonical Spec Card
           </button>
+
           <button
-            onClick={() => setViewMode('studio')}
+            onClick={() => setActiveTab('overview')}
             style={{
               padding: '0.45rem 1rem',
               borderRadius: '8px',
               fontSize: '0.85rem',
               fontWeight: 700,
-              border: 'none',
+              border: activeTab === 'overview' ? '1px solid #DC2626' : '1px solid transparent',
               cursor: 'pointer',
-              background: viewMode === 'studio' ? '#DC2626' : 'transparent',
-              color: viewMode === 'studio' ? '#ffffff' : '#4B5563',
+              background: activeTab === 'overview' ? '#DC2626' : 'rgba(0, 0, 0, 0.04)',
+              color: activeTab === 'overview' ? '#ffffff' : '#4B5563',
+              boxShadow: activeTab === 'overview' ? '0 0 12px rgba(220, 38, 38, 0.35)' : 'none',
+              transition: 'all 0.15s ease',
             }}
           >
-            Interactive Studio & Probe
+            Overview &amp; Findings
+          </button>
+
+          <button
+            onClick={() => setActiveTab('timeline')}
+            style={{
+              padding: '0.45rem 1rem',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              border: activeTab === 'timeline' ? '1px solid #059669' : '1px solid transparent',
+              cursor: 'pointer',
+              background: activeTab === 'timeline' ? '#059669' : 'rgba(0, 0, 0, 0.04)',
+              color: activeTab === 'timeline' ? '#ffffff' : '#4B5563',
+              boxShadow: activeTab === 'timeline' ? '0 0 12px rgba(5, 150, 105, 0.35)' : 'none',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            Interactive Event Timeline ({Array.isArray(report.evidence) ? report.evidence.length : 0})
+          </button>
+
+          <button
+            onClick={() => setActiveTab('playwright')}
+            style={{
+              padding: '0.45rem 1rem',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              border: activeTab === 'playwright' ? '1px solid #7C3AED' : '1px solid transparent',
+              cursor: 'pointer',
+              background: activeTab === 'playwright' ? '#7C3AED' : 'rgba(0, 0, 0, 0.04)',
+              color: activeTab === 'playwright' ? '#ffffff' : '#4B5563',
+              boxShadow: activeTab === 'playwright' ? '0 0 12px rgba(124, 58, 237, 0.35)' : 'none',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            🎭 Playwright Script
           </button>
         </div>
 
-        {viewMode === 'canonical' ? (
+        {/* Tab 1: Canonical Defect Card */}
+        {activeTab === 'canonical' && (
           <div style={{ marginBottom: '2rem' }}>
             <CanonicalDefectCard report={report} />
           </div>
-        ) : (
-          <>
-            {/* Reproduction Probe Result Banner */}
-        {probeResult && (
-          <div
-            style={{
-              padding: '1rem',
-              borderRadius: '10px',
-              marginBottom: '1.75rem',
-              background: probeResult.reproduced ? '#F0FDF4' : '#FEF2F2',
-              border: probeResult.reproduced ? '1px solid #86EFAC' : '1px solid #FECACA',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
-              {probeResult.reproduced ? (
-                <CheckCircle2 size={16} color="#16A34A" />
-              ) : (
-                <AlertOctagon size={16} color="#DC2626" />
-              )}
-              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: probeResult.reproduced ? '#166534' : '#991B1B' }}>
-                Verdict: {probeResult.reproduced ? 'REPRODUCED & VERIFIED IN REALTIME' : 'PROBE COMPLETE'}
-              </span>
-              <span style={{ fontSize: '0.75rem', color: '#6B7280', marginLeft: 'auto' }}>
-                Latency: {probeResult.execution_time_ms}ms
-              </span>
+        )}
+
+        {/* Tab 2: Overview & Findings */}
+        {activeTab === 'overview' && (
+          <div>
+            {probeResult && (
+              <div
+                style={{
+                  padding: '1rem',
+                  borderRadius: '10px',
+                  marginBottom: '1.75rem',
+                  background: probeResult.reproduced ? '#F0FDF4' : '#FEF2F2',
+                  border: probeResult.reproduced ? '1px solid #86EFAC' : '1px solid #FECACA',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                  {probeResult.reproduced ? (
+                    <CheckCircle2 size={16} color="#16A34A" />
+                  ) : (
+                    <AlertOctagon size={16} color="#DC2626" />
+                  )}
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: probeResult.reproduced ? '#166534' : '#991B1B' }}>
+                    Verdict: {probeResult.reproduced ? 'REPRODUCED & VERIFIED IN REALTIME' : 'PROBE COMPLETE'}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: '#6B7280', marginLeft: 'auto' }}>
+                    Latency: {probeResult.execution_time_ms}ms
+                  </span>
+                </div>
+                <p style={{ fontSize: '0.85rem', color: probeResult.reproduced ? '#14532D' : '#7F1D1D' }}>
+                  {probeResult.verdict}
+                </p>
+              </div>
+            )}
+
+            {/* Expected vs Actual */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '2rem' }}>
+              <div style={{ padding: '1.25rem', background: '#F0FDF4', borderRadius: '12px', border: '1px solid #BBF7D0' }}>
+                <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                  Expected Behavior
+                </h3>
+                <p style={{ fontSize: '0.95rem', color: '#14532D', lineHeight: 1.5 }}>{report.expected}</p>
+              </div>
+
+              <div style={{ padding: '1.25rem', background: '#FEF2F2', borderRadius: '12px', border: '1px solid #FECACA' }}>
+                <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#991B1B', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                  Actual Behavior
+                </h3>
+                <p style={{ fontSize: '0.95rem', color: '#7F1D1D', lineHeight: 1.5 }}>{report.actual}</p>
+              </div>
             </div>
-            <p style={{ fontSize: '0.85rem', color: probeResult.reproduced ? '#14532D' : '#7F1D1D' }}>
-              {probeResult.verdict}
-            </p>
+
+            {/* Root Cause Hypothesis */}
+            {report.root_cause && (
+              <div style={{ padding: '1.25rem', background: '#FFFBEB', borderRadius: '12px', border: '1px solid #FDE68A', marginBottom: '2rem' }}>
+                <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#92400E', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                  AI Causal Hypothesis (OpenRouter Reasoning)
+                </h3>
+                <p style={{ fontSize: '0.95rem', color: '#78350F', lineHeight: 1.5 }}>{report.root_cause}</p>
+              </div>
+            )}
+
+            {/* Interactive Steps to Reproduce */}
+            <div style={{ marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>
+                  Steps to Reproduce ({completedSteps.length}/{report.steps?.length || 0} Verified)
+                </h3>
+                {report.steps && report.steps.length > 0 && (
+                  <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
+                    Click steps to check off during manual reproduction
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {report.steps?.map((step: string, idx: number) => {
+                  const isDone = completedSteps.includes(idx);
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => handleToggleStep(idx)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        padding: '0.75rem 1rem',
+                        borderRadius: '8px',
+                        background: isDone ? '#F0FDF4' : '#FFFFFF',
+                        border: isDone ? '1px solid #86EFAC' : '1px solid rgba(17, 24, 39, 0.08)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '50%',
+                          border: isDone ? 'none' : '2px solid #D1D5DB',
+                          background: isDone ? '#16A34A' : 'transparent',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        {isDone && <Check size={12} color="#FFFFFF" />}
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '0.925rem',
+                          color: isDone ? '#166534' : '#374151',
+                          textDecoration: isDone ? 'line-through' : 'none',
+                          fontWeight: isDone ? 600 : 500,
+                        }}
+                      >
+                        {idx + 1}. {step}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Expected vs Actual */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '2rem' }}>
-          <div style={{ padding: '1.25rem', background: '#F0FDF4', borderRadius: '12px', border: '1px solid #BBF7D0' }}>
-            <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-              Expected Behavior
+        {/* Tab 3: Interactive Event Timeline */}
+        {activeTab === 'timeline' && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', marginBottom: '0.75rem' }}>
+              Flight Telemetry Timeline ({Array.isArray(report.evidence) ? report.evidence.length : 0} Events)
             </h3>
-            <p style={{ fontSize: '0.95rem', color: '#14532D', lineHeight: 1.5 }}>{report.expected}</p>
+            <EventTimeline events={report.evidence || []} />
           </div>
+        )}
 
-          <div style={{ padding: '1.25rem', background: '#FEF2F2', borderRadius: '12px', border: '1px solid #FECACA' }}>
-            <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#991B1B', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-              Actual Behavior
-            </h3>
-            <p style={{ fontSize: '0.95rem', color: '#7F1D1D', lineHeight: 1.5 }}>{report.actual}</p>
+        {/* Tab 4: Playwright Script */}
+        {activeTab === 'playwright' && (
+          <div style={{ marginBottom: '2.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Terminal size={18} color="#DC2626" />
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>
+                  Synthesized Playwright Reproduction Test
+                </h3>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button
+                  onClick={handleDownloadScript}
+                  className="btn-secondary"
+                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                >
+                  <Download size={13} />
+                  <span>Download (.spec.ts)</span>
+                </button>
+
+                <button
+                  onClick={handleCopyScript}
+                  className="btn-secondary"
+                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                >
+                  {copiedScript ? <Check size={14} color="#16A34A" /> : <Copy size={14} />}
+                  <span>{copiedScript ? 'Copied!' : 'Copy Script'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Terminal Execution Snippet */}
+            <div
+              style={{
+                background: '#1E293B',
+                border: '1px solid #334155',
+                borderRadius: '8px',
+                padding: '0.65rem 1rem',
+                marginBottom: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '0.75rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                <span style={{ color: '#F43F5E', fontWeight: 800, fontSize: '0.8rem', userSelect: 'none' }}>$</span>
+                <code style={{ color: '#F1F5F9', fontSize: '0.8rem', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  npx playwright test tests/reproduce-{id ? id.slice(0, 8) : 'test'}.spec.ts --headed
+                </code>
+              </div>
+
+              <button
+                onClick={() =>
+                  handleCopyCommand(
+                    `npx playwright test tests/reproduce-${id ? id.slice(0, 8) : 'test'}.spec.ts --headed`
+                  )
+                }
+                style={{
+                  background: '#0F172A',
+                  border: '1px solid #475569',
+                  color: '#94A3B8',
+                  padding: '0.25rem 0.55rem',
+                  borderRadius: '4px',
+                  fontSize: '0.725rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {copiedCmd ? <Check size={11} color="#10B981" /> : <Copy size={11} />}
+                <span>{copiedCmd ? 'Copied' : 'Copy Command'}</span>
+              </button>
+            </div>
+
+            <pre
+              style={{
+                background: '#0F172A',
+                color: '#E2E8F0',
+                padding: '1.25rem',
+                borderRadius: '12px',
+                overflowX: 'auto',
+                fontSize: '0.85rem',
+                lineHeight: 1.5,
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+              }}
+            >
+              <code>{report.playwright_script || '// No test script generated'}</code>
+            </pre>
           </div>
-        </div>
+        )}
 
         {/* Root Cause Hypothesis */}
         {report.root_cause && (
@@ -615,15 +822,6 @@ export default function ReportDetailPage() {
           </div>
         )}
 
-        {/* Interactive Event Timeline */}
-        <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', marginBottom: '0.75rem' }}>
-            Flight Telemetry Timeline ({Array.isArray(report.evidence) ? report.evidence.length : 0} Events)
-          </h3>
-          <EventTimeline events={report.evidence || []} />
-        </div>
-          </>
-        )}
       </div>
 
       {/* Export Modal */}
@@ -631,6 +829,17 @@ export default function ReportDetailPage() {
         report={report}
         isOpen={exportModalOpen}
         onClose={() => setExportModalOpen(false)}
+      />
+
+      {/* Send Email Modal with Recipient Input and Formatted HTML Preview */}
+      <SendEmailModal
+        report={report}
+        isOpen={sendEmailModalOpen}
+        onClose={() => setSendEmailModalOpen(false)}
+        onSentSuccess={(result) => {
+          setReport((prev: any) => ({ ...prev, status: 'sent' }));
+          setActionMessage(`✓ Defect report successfully dispatched to ${result.recipients?.join(', ')}`);
+        }}
       />
 
       {/* Floating QA Copilot Chat with Live Supabase & Telemetry Context */}

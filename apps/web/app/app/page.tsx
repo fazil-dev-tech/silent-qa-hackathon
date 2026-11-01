@@ -36,6 +36,7 @@ import {
 import LiveTelemetryFeed from '@/components/live-telemetry-feed';
 import EventTimeline from '@/components/event-timeline';
 import ExportModal from '@/components/export-modal';
+import SendEmailModal from '@/components/send-email-modal';
 import CanonicalDefectCard from '@/components/canonical-defect-card';
 import QACopilotChat from '@/components/qa-copilot-chat';
 
@@ -102,8 +103,63 @@ export default function TesterWorkspacePage() {
 
   // Export modal state
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [sendEmailModalOpen, setSendEmailModalOpen] = useState(false);
+  const [deletingReport, setDeletingReport] = useState(false);
+  const [activeReportTab, setActiveReportTab] = useState<'canonical' | 'overview' | 'timeline' | 'playwright'>('canonical');
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [copiedJira, setCopiedJira] = useState(false);
   const [copiedScript, setCopiedScript] = useState(false);
+  const [copiedCmd, setCopiedCmd] = useState(false);
+
+  function handleToggleStep(index: number) {
+    setCompletedSteps((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  }
+
+  function handleDownloadScript() {
+    if (!selectedReport?.playwright_script) return;
+    const blob = new Blob([selectedReport.playwright_script], { type: 'text/typescript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reproduce-${selectedReport.id.slice(0, 8)}.spec.ts`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function handleCopyCommand(cmd: string) {
+    navigator.clipboard.writeText(cmd);
+    setCopiedCmd(true);
+    setTimeout(() => setCopiedCmd(false), 2000);
+  }
+
+  async function handleDeleteReport(reportId: string) {
+    if (!confirm('Are you sure you want to permanently delete this defect report from Supabase?')) {
+      return;
+    }
+    setDeletingReport(true);
+    try {
+      const res = await fetch(`/api/reports/${reportId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setReports((prev) => prev.filter((r) => r.id !== reportId));
+        setSelectedReport((prev) => {
+          const remaining = reports.filter((r) => r.id !== reportId);
+          return remaining.length > 0 ? remaining[0] : null;
+        });
+        setActionMessage('✓ Defect report permanently deleted from database.');
+      } else {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to delete report');
+      }
+    } catch (err: any) {
+      setActionMessage(`Delete Error: ${err?.message}`);
+    } finally {
+      setDeletingReport(false);
+    }
+  }
 
   // 1. Strict Authentication Guard & Data Hydration
   useEffect(() => {
@@ -677,7 +733,7 @@ ${selectedReport.evidence?.length || 0} telemetry events correlated.
                     color: '#93C5FD',
                     padding: '0.45rem 0.85rem',
                     borderRadius: '8px',
-                    fontSize: '0.78rem',
+                    fontSize: '0.8rem',
                     fontWeight: 700,
                     cursor: runningProbe ? 'not-allowed' : 'pointer',
                     display: 'flex',
@@ -685,28 +741,8 @@ ${selectedReport.evidence?.length || 0} telemetry events correlated.
                     gap: '0.35rem',
                   }}
                 >
-                  <Play size={13} />
-                  <span>{runningProbe ? 'Running Probe...' : 'Run Playwright Probe'}</span>
-                </button>
-
-                <button
-                  onClick={handleCopyJira}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    color: '#E2E8F0',
-                    padding: '0.45rem 0.85rem',
-                    borderRadius: '8px',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                  }}
-                >
-                  {copiedJira ? <Check size={13} color="#10B981" /> : <Copy size={13} />}
-                  <span>{copiedJira ? 'Copied Jira Markdown' : 'Copy Jira Markdown'}</span>
+                  <Play size={13} color="#60A5FA" />
+                  <span>{runningProbe ? 'Running Probe...' : '▶ Run Reproduction Probe'}</span>
                 </button>
 
                 <button
@@ -717,7 +753,7 @@ ${selectedReport.evidence?.length || 0} telemetry events correlated.
                     color: '#E2E8F0',
                     padding: '0.45rem 0.85rem',
                     borderRadius: '8px',
-                    fontSize: '0.78rem',
+                    fontSize: '0.8rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                     display: 'flex',
@@ -727,6 +763,48 @@ ${selectedReport.evidence?.length || 0} telemetry events correlated.
                 >
                   <Share2 size={13} />
                   <span>Export</span>
+                </button>
+
+                <button
+                  onClick={() => setSendEmailModalOpen(true)}
+                  style={{
+                    background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: '#FFFFFF',
+                    padding: '0.45rem 1rem',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    boxShadow: '0 4px 14px rgba(220, 38, 38, 0.35)',
+                  }}
+                >
+                  <Send size={13} />
+                  <span>Approve &amp; Send to Gmail</span>
+                </button>
+
+                <button
+                  onClick={() => handleDeleteReport(selectedReport.id)}
+                  disabled={deletingReport}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.08)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#F87171',
+                    padding: '0.45rem 0.85rem',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    cursor: deletingReport ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                  }}
+                >
+                  <Trash2 size={13} />
+                  <span>{deletingReport ? 'Deleting...' : 'Delete Defect'}</span>
                 </button>
               </div>
             </div>
@@ -739,72 +817,356 @@ ${selectedReport.evidence?.length || 0} telemetry events correlated.
                   border: probeResult.reproduced ? '1px solid #10B981' : '1px solid #EF4444',
                   borderRadius: '10px',
                   padding: '1rem',
-                  marginBottom: '1rem',
+                  marginBottom: '1.25rem',
                   fontSize: '0.85rem',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, color: probeResult.reproduced ? '#34D399' : '#F87171' }}>
                   {probeResult.reproduced ? <CheckCircle size={16} /> : <AlertOctagon size={16} />}
                   <span>{probeResult.reproduced ? '✓ 100% Deterministic Reproduction Verified by In-Browser Probe' : 'Reproduction Probe Anomaly'}</span>
+                  <span style={{ fontSize: '0.75rem', color: '#94A3B8', marginLeft: 'auto' }}>
+                    Latency: {probeResult.execution_time_ms}ms
+                  </span>
                 </div>
                 <div style={{ color: '#CBD5E1', fontSize: '0.78rem', marginTop: '0.25rem' }}>
-                  {probeResult.output || 'Steps replayed against target endpoint matched expected crash fingerprint.'}
+                  {probeResult.verdict || probeResult.output || 'Steps replayed against target endpoint matched expected crash fingerprint.'}
                 </div>
               </div>
             )}
 
-            {/* The Canonical Defect Card */}
-            <CanonicalDefectCard
-              report={{
-                id: selectedReport.id,
-                title: selectedReport.title,
-                severity: selectedReport.severity,
-                steps: selectedReport.steps,
-                expected: selectedReport.expected,
-                actual: selectedReport.actual,
-                root_cause: selectedReport.root_cause,
-                confidence: selectedReport.confidence,
-                evidence: selectedReport.evidence,
-                raw_note: selectedReport.raw_note,
-                suggested_fix: selectedReport.suggested_fix,
-                tester_name: selectedReport.tester_name,
-                device_tag: selectedReport.device_tag,
-                created_at: selectedReport.created_at,
-              }}
-            />
-
-            {/* Progressive Disclosure: Inspect Telemetry Stream Accordion */}
-            <div style={{ marginTop: '1.25rem' }}>
+            {/* 4 Professional Navigation Tabs */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.65rem', flexWrap: 'wrap' }}>
               <button
-                onClick={() => setShowTelemetryDrawer(!showTelemetryDrawer)}
+                onClick={() => setActiveReportTab('canonical')}
                 style={{
-                  width: '100%',
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '10px',
-                  padding: '0.85rem 1.25rem',
-                  color: '#93C5FD',
-                  fontSize: '0.85rem',
+                  padding: '0.45rem 1rem',
+                  borderRadius: '8px',
+                  fontSize: '0.825rem',
                   fontWeight: 700,
+                  border: activeReportTab === 'canonical' ? '1px solid #0284C7' : '1px solid transparent',
                   cursor: 'pointer',
+                  background: activeReportTab === 'canonical' ? '#0284C7' : 'rgba(255, 255, 255, 0.04)',
+                  color: activeReportTab === 'canonical' ? '#FFFFFF' : '#94A3B8',
+                  boxShadow: activeReportTab === 'canonical' ? '0 0 14px rgba(2, 132, 199, 0.35)' : 'none',
                   display: 'flex',
-                  justifyContent: 'space-between',
                   alignItems: 'center',
+                  gap: '0.35rem',
+                  transition: 'all 0.15s ease',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Terminal size={16} />
-                  <span>Inspect Underlying Flight Telemetry Stream ({selectedReport.evidence?.length || 0} Events)</span>
-                </div>
-                {showTelemetryDrawer ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                <Sparkles size={13} />
+                <span>⚡ Canonical Spec Card</span>
               </button>
 
-              {showTelemetryDrawer && (
-                <div style={{ background: '#070B16', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '0 0 10px 10px', borderTop: 'none', padding: '1.25rem' }}>
-                  <EventTimeline events={selectedReport.evidence || []} />
-                </div>
-              )}
+              <button
+                onClick={() => setActiveReportTab('overview')}
+                style={{
+                  padding: '0.45rem 1rem',
+                  borderRadius: '8px',
+                  fontSize: '0.825rem',
+                  fontWeight: 700,
+                  border: activeReportTab === 'overview' ? '1px solid #DC2626' : '1px solid transparent',
+                  cursor: 'pointer',
+                  background: activeReportTab === 'overview' ? '#DC2626' : 'rgba(255, 255, 255, 0.04)',
+                  color: activeReportTab === 'overview' ? '#FFFFFF' : '#94A3B8',
+                  boxShadow: activeReportTab === 'overview' ? '0 0 14px rgba(220, 38, 38, 0.35)' : 'none',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                Overview &amp; Findings
+              </button>
+
+              <button
+                onClick={() => setActiveReportTab('timeline')}
+                style={{
+                  padding: '0.45rem 1rem',
+                  borderRadius: '8px',
+                  fontSize: '0.825rem',
+                  fontWeight: 700,
+                  border: activeReportTab === 'timeline' ? '1px solid #059669' : '1px solid transparent',
+                  cursor: 'pointer',
+                  background: activeReportTab === 'timeline' ? '#059669' : 'rgba(255, 255, 255, 0.04)',
+                  color: activeReportTab === 'timeline' ? '#FFFFFF' : '#94A3B8',
+                  boxShadow: activeReportTab === 'timeline' ? '0 0 14px rgba(5, 150, 105, 0.35)' : 'none',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                Interactive Event Timeline ({Array.isArray(selectedReport.evidence) ? selectedReport.evidence.length : 0})
+              </button>
+
+              <button
+                onClick={() => setActiveReportTab('playwright')}
+                style={{
+                  padding: '0.45rem 1rem',
+                  borderRadius: '8px',
+                  fontSize: '0.825rem',
+                  fontWeight: 700,
+                  border: activeReportTab === 'playwright' ? '1px solid #7C3AED' : '1px solid transparent',
+                  cursor: 'pointer',
+                  background: activeReportTab === 'playwright' ? '#7C3AED' : 'rgba(255, 255, 255, 0.04)',
+                  color: activeReportTab === 'playwright' ? '#FFFFFF' : '#94A3B8',
+                  boxShadow: activeReportTab === 'playwright' ? '0 0 14px rgba(124, 58, 237, 0.35)' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <Terminal size={13} />
+                <span>🎭 Playwright Script</span>
+              </button>
             </div>
+
+            {/* Tab 1: The Canonical Defect Card */}
+            {activeReportTab === 'canonical' && (
+              <CanonicalDefectCard
+                report={{
+                  id: selectedReport.id,
+                  title: selectedReport.title,
+                  severity: selectedReport.severity,
+                  steps: selectedReport.steps,
+                  expected: selectedReport.expected,
+                  actual: selectedReport.actual,
+                  root_cause: selectedReport.root_cause,
+                  confidence: selectedReport.confidence,
+                  evidence: selectedReport.evidence,
+                  raw_note: selectedReport.raw_note,
+                  suggested_fix: selectedReport.suggested_fix,
+                  tester_name: selectedReport.tester_name,
+                  device_tag: selectedReport.device_tag,
+                  created_at: selectedReport.created_at,
+                }}
+              />
+            )}
+
+            {/* Tab 2: Overview & Findings */}
+            {activeReportTab === 'overview' && (
+              <div style={{ background: '#070B16', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', padding: '1.75rem' }}>
+                {/* Expected vs Actual */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+                  <div style={{ padding: '1.25rem', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '10px', borderLeft: '3px solid #10B981' }}>
+                    <h4 style={{ fontSize: '0.72rem', fontWeight: 800, color: '#10B981', textTransform: 'uppercase', marginBottom: '0.45rem', letterSpacing: '0.06em' }}>
+                      EXPECTED BEHAVIOR
+                    </h4>
+                    <p style={{ fontSize: '0.9rem', color: '#F1F5F9', lineHeight: 1.5 }}>
+                      {selectedReport.expected}
+                    </p>
+                  </div>
+
+                  <div style={{ padding: '1.25rem', background: 'rgba(239, 68, 68, 0.08)', borderRadius: '10px', borderLeft: '3px solid #EF4444' }}>
+                    <h4 style={{ fontSize: '0.72rem', fontWeight: 800, color: '#EF4444', textTransform: 'uppercase', marginBottom: '0.45rem', letterSpacing: '0.06em' }}>
+                      ACTUAL OBSERVED BEHAVIOR
+                    </h4>
+                    <p style={{ fontSize: '0.9rem', color: '#F1F5F9', lineHeight: 1.5 }}>
+                      {selectedReport.actual}
+                    </p>
+                  </div>
+                </div>
+
+                {/* AI Causal Hypothesis */}
+                {selectedReport.root_cause && (
+                  <div style={{ padding: '1.25rem', background: 'rgba(245, 158, 11, 0.08)', borderRadius: '10px', borderLeft: '3px solid #F59E0B', marginBottom: '1.5rem' }}>
+                    <h4 style={{ fontSize: '0.72rem', fontWeight: 800, color: '#F59E0B', textTransform: 'uppercase', marginBottom: '0.45rem', letterSpacing: '0.06em' }}>
+                      AI ROOT CAUSE HYPOTHESIS ({selectedReport.confidence || 'HIGH'} CONFIDENCE)
+                    </h4>
+                    <p style={{ fontSize: '0.9rem', color: '#FDE68A', lineHeight: 1.5 }}>
+                      {selectedReport.root_cause}
+                    </p>
+                  </div>
+                )}
+
+                {/* Interactive Steps to Reproduce */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#FFFFFF' }}>
+                      Steps to Reproduce ({completedSteps.length}/{selectedReport.steps?.length || 0} Verified)
+                    </h4>
+                    <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
+                      Click steps to toggle verification status
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                    {selectedReport.steps?.map((step: string, idx: number) => {
+                      const isDone = completedSteps.includes(idx);
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => handleToggleStep(idx)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            padding: '0.75rem 1rem',
+                            borderRadius: '8px',
+                            background: isDone ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+                            border: isDone ? '1px solid #10B981' : '1px solid rgba(255, 255, 255, 0.08)',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: '18px',
+                              height: '18px',
+                              borderRadius: '50%',
+                              border: isDone ? 'none' : '1.5px solid #64748B',
+                              background: isDone ? '#10B981' : 'transparent',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {isDone && <Check size={11} color="#FFFFFF" />}
+                          </div>
+                          <span
+                            style={{
+                              fontSize: '0.88rem',
+                              color: isDone ? '#34D399' : '#CBD5E1',
+                              textDecoration: isDone ? 'line-through' : 'none',
+                              fontWeight: isDone ? 600 : 400,
+                            }}
+                          >
+                            <strong style={{ color: '#60A5FA', marginRight: '0.35rem' }}>{idx + 1}.</strong>
+                            {step.replace(/^\[Tester:[^\]]+\]\s*/, '')}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tab 3: Interactive Event Timeline */}
+            {activeReportTab === 'timeline' && (
+              <div style={{ background: '#070B16', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', padding: '1.25rem' }}>
+                <EventTimeline events={selectedReport.evidence || []} />
+              </div>
+            )}
+
+            {/* Tab 4: Playwright Script */}
+            {activeReportTab === 'playwright' && (
+              <div style={{ background: '#070B16', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', padding: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Terminal size={16} color="#EF4444" />
+                    <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+                      Synthesized Playwright Reproduction Test
+                    </h4>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button
+                      onClick={handleDownloadScript}
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        color: '#E2E8F0',
+                        padding: '0.35rem 0.75rem',
+                        borderRadius: '6px',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                      }}
+                    >
+                      <Download size={13} />
+                      <span>Download (.spec.ts)</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        if (!selectedReport?.playwright_script) return;
+                        navigator.clipboard.writeText(selectedReport.playwright_script);
+                        setCopiedScript(true);
+                        setTimeout(() => setCopiedScript(false), 2000);
+                      }}
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        color: '#E2E8F0',
+                        padding: '0.35rem 0.75rem',
+                        borderRadius: '6px',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                      }}
+                    >
+                      {copiedScript ? <Check size={13} color="#10B981" /> : <Copy size={13} />}
+                      <span>{copiedScript ? 'Copied!' : 'Copy Script'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Terminal CLI Snippet */}
+                <div
+                  style={{
+                    background: '#040711',
+                    border: '1px solid #1E293B',
+                    borderRadius: '8px',
+                    padding: '0.65rem 1rem',
+                    marginBottom: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.75rem',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                    <span style={{ color: '#EF4444', fontWeight: 800, fontSize: '0.8rem', userSelect: 'none' }}>$</span>
+                    <code style={{ color: '#F1F5F9', fontSize: '0.78rem', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      npx playwright test tests/reproduce-{selectedReport.id.slice(0, 8)}.spec.ts --headed
+                    </code>
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      handleCopyCommand(
+                        `npx playwright test tests/reproduce-${selectedReport.id.slice(0, 8)}.spec.ts --headed`
+                      )
+                    }
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#94A3B8',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: '4px',
+                      fontSize: '0.7rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {copiedCmd ? <Check size={11} color="#10B981" /> : <Copy size={11} />}
+                    <span>{copiedCmd ? 'Copied' : 'Copy'}</span>
+                  </button>
+                </div>
+
+                <pre
+                  style={{
+                    background: '#020617',
+                    color: '#E2E8F0',
+                    padding: '1.25rem',
+                    borderRadius: '10px',
+                    overflowX: 'auto',
+                    fontSize: '0.8rem',
+                    lineHeight: 1.5,
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  <code>{selectedReport.playwright_script || '// No test script generated'}</code>
+                </pre>
+              </div>
+            )}
           </section>
         )}
 
@@ -885,6 +1247,19 @@ ${selectedReport.evidence?.length || 0} telemetry events correlated.
           isOpen={exportModalOpen}
           onClose={() => setExportModalOpen(false)}
           report={selectedReport as any}
+        />
+      )}
+
+      {/* Send Email Modal with Recipient Input and Formatted HTML Preview */}
+      {selectedReport && (
+        <SendEmailModal
+          isOpen={sendEmailModalOpen}
+          onClose={() => setSendEmailModalOpen(false)}
+          report={selectedReport}
+          onSentSuccess={(result) => {
+            setSelectedReport((prev) => (prev ? { ...prev, status: 'sent' } : null));
+            setActionMessage(`✓ Defect report successfully dispatched to ${result.recipients?.join(', ')}`);
+          }}
         />
       )}
     </div>

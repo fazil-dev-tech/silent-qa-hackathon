@@ -16,7 +16,7 @@ export default function ProjectSettingsModal({ isOpen, onClose }: ProjectSetting
 
   const projectToken = 'sqa_live_demo_key_2026';
   const projectId = '33333333-3333-3333-3333-333333333333';
-  const apiEndpoint = 'http://localhost:3000/api/ingest';
+  const apiEndpoint = typeof window !== 'undefined' ? `${window.location.origin}/api/ingest` : (process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/api/ingest` : 'http://localhost:3000/api/ingest');
 
   const extensionConfigJson = JSON.stringify(
     {

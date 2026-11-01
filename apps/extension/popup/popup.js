@@ -263,8 +263,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  workspaceBtn.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'http://localhost:3000/app' });
+  workspaceBtn.addEventListener('click', async () => {
+    try {
+      const stored = await chrome.storage.sync.get(['api_endpoint']);
+      const base = (stored.api_endpoint || 'http://localhost:3000/api/ingest').replace(/\/api\/ingest\/?$/, '');
+      chrome.tabs.create({ url: `${base}/app` });
+    } catch {
+      chrome.tabs.create({ url: 'http://localhost:3000/app' });
+    }
   });
 
   // 6. Element Picker integration
