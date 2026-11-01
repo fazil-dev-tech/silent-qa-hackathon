@@ -90,7 +90,8 @@ export function extractBodyShape(payload: unknown, depth = 0): BodyShape | strin
         lowerKey.includes('auth') ||
         lowerKey.includes('card') ||
         lowerKey.includes('cvv') ||
-        lowerKey.includes('ssn')
+        lowerKey.includes('ssn') ||
+        lowerKey.includes('key')
       ) {
         shape[key] = '[MASKED_KEY]';
       } else {

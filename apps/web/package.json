@@ -2,13 +2,14 @@
   "name": "@silent-qa/web",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
   "dependencies": {
-    "@silent-qa/shared": "workspace:*",
+    "@silent-qa/shared": "*",
     "@supabase/supabase-js": "^2.48.1",
     "nodemailer": "^6.10.0",
     "zod": "^3.24.2"
@@ -19,3 +20,4 @@
     "typescript": "^5.7.3"
   }
 }
+

@@ -158,3 +158,4 @@ create policy "Allow service_role full access on complaints" on public.complaint
 create policy "Allow service_role full access on reports" on public.reports for all using (true) with check (true);
 create policy "Allow service_role full access on email_log" on public.email_log for all using (true) with check (true);
 create policy "Allow service_role full access on audit_log" on public.audit_log for all using (true) with check (true);
+

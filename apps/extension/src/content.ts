@@ -149,4 +149,34 @@
     subtree: true,
     characterData: true,
   });
+
+  // 6. Interactive Element Picker Listener
+  chrome.runtime.onMessage?.addListener((request, sender, sendResponse) => {
+    if (request.action === 'START_PICKER') {
+      let activeHoverEl: HTMLElement | null = null;
+
+      function onMouseOver(e: MouseEvent) {
+        if (activeHoverEl) activeHoverEl.style.outline = '';
+        activeHoverEl = e.target as HTMLElement;
+        if (activeHoverEl) activeHoverEl.style.outline = '2px dashed #DC2626';
+      }
+
+      function onClickPick(e: MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (activeHoverEl) activeHoverEl.style.outline = '';
+
+        document.removeEventListener('mouseover', onMouseOver, true);
+        document.removeEventListener('click', onClickPick, true);
+
+        const selector = getSelector((e.target as Element) || document.body);
+        sendResponse({ selector });
+      }
+
+      document.addEventListener('mouseover', onMouseOver, true);
+      document.addEventListener('click', onClickPick, true);
+      return true; // Keep channel open for async response
+    }
+  });
 })();
+

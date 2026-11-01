@@ -82,3 +82,4 @@ export function renderReportEmailHtml(report: DefectReport, publicUrl: string): 
 </body>
 </html>`;
 }
+

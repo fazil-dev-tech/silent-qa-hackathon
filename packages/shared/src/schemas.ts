@@ -70,3 +70,4 @@ export const DefectReportUpdateSchema = z.object({
     .optional(),
   assignee_id: z.string().uuid().nullable().optional(),
 });
+

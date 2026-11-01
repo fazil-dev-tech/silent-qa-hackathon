@@ -89,3 +89,4 @@ async function flushEvents() {
 
 // Flush every 5 seconds
 setInterval(flushEvents, 5000);
+

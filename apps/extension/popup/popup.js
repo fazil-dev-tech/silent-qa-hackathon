@@ -1,7 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
   const noteInput = document.getElementById('complaint-note');
   const submitBtn = document.getElementById('btn-submit');
+  const pickBtn = document.getElementById('btn-pick');
+  const pickedLabel = document.getElementById('picked-label');
   const statusText = document.getElementById('status-text');
+
+  let currentPickedSelector = '';
+
+  // Element Picker integration
+  pickBtn.addEventListener('click', async () => {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id) return;
+
+      chrome.tabs.sendMessage(tab.id, { action: 'START_PICKER' }, (response) => {
+        if (response?.selector) {
+          currentPickedSelector = response.selector;
+          pickedLabel.textContent = `Target: ${currentPickedSelector}`;
+          pickedLabel.style.display = 'block';
+        }
+      });
+      window.close(); // Close popup so user can click element in page
+    } catch (err) {
+      statusText.textContent = 'Could not activate picker on this page';
+    }
+  });
 
   submitBtn.addEventListener('click', async () => {
     const note = noteInput.value.trim();
@@ -22,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({
           session_id: 'active_session',
           note,
+          picked_selector: currentPickedSelector || undefined,
           submitted_at: Date.now(),
         }),
       });
@@ -31,6 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
         statusText.textContent = '✓ Draft created! Open workspace to review.';
         statusText.style.color = '#16A34A';
         noteInput.value = '';
+        currentPickedSelector = '';
+        pickedLabel.style.display = 'none';
       } else {
         statusText.textContent = data?.error || 'Failed to submit flag.';
         statusText.style.color = '#DC2626';

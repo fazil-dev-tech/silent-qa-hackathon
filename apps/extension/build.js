@@ -28,3 +28,4 @@ for (const file of files) {
   console.log(`✓ Built ${file} -> ${path.basename(outFile)}`);
 }
 console.log('✓ Extension build completed!');
+

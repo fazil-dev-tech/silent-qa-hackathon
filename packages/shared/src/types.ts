@@ -96,3 +96,4 @@ export interface SignalSummary {
   slow_request_count: number;
   numeric_change_count: number;
 }
+
