@@ -31,6 +31,8 @@ import {
 import LiveTelemetryFeed from '@/components/live-telemetry-feed';
 import EventTimeline from '@/components/event-timeline';
 import ExportModal from '@/components/export-modal';
+import CanonicalDefectCard from '@/components/canonical-defect-card';
+import QACopilotChat from '@/components/qa-copilot-chat';
 
 interface ReportItem {
   id: string;
@@ -45,6 +47,7 @@ interface ReportItem {
   evidence_ids: string[];
   playwright_script?: string;
   status: string;
+  session_id?: string;
   ai_fallback: boolean;
   tester_name?: string;
   device_tag?: string;
@@ -74,7 +77,7 @@ export default function TesterWorkspacePage() {
   const [exportModalOpen, setExportModalOpen] = useState(false);
 
   // Active view tab in review editor
-  const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'playwright'>('overview');
+  const [activeTab, setActiveTab] = useState<'canonical' | 'overview' | 'timeline' | 'playwright'>('canonical');
 
   // Search & filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -753,7 +756,24 @@ export default function TesterWorkspacePage() {
               )}
 
               {/* View Selector Tabs */}
-              <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid rgba(17, 24, 39, 0.08)', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid rgba(17, 24, 39, 0.08)', paddingBottom: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setActiveTab('canonical')}
+                  style={{
+                    padding: '0.45rem 1rem',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: activeTab === 'canonical' ? '#0284C7' : 'transparent',
+                    color: activeTab === 'canonical' ? '#ffffff' : '#4B5563',
+                    boxShadow: activeTab === 'canonical' ? '0 0 12px rgba(2, 132, 199, 0.35)' : 'none',
+                  }}
+                >
+                  ⚡ Canonical Spec Card
+                </button>
+
                 <button
                   onClick={() => setActiveTab('overview')}
                   style={{
@@ -802,6 +822,13 @@ export default function TesterWorkspacePage() {
                   🎭 Playwright Script
                 </button>
               </div>
+
+              {/* Tab 0: Canonical Spec Card (Exact Alignment with Problem Statement & User Image) */}
+              {activeTab === 'canonical' && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <CanonicalDefectCard report={selectedReport} />
+                </div>
+              )}
 
               {/* Tab 1: Overview */}
               {activeTab === 'overview' && (
@@ -988,6 +1015,12 @@ export default function TesterWorkspacePage() {
         report={selectedReport}
         isOpen={exportModalOpen}
         onClose={() => setExportModalOpen(false)}
+      />
+
+      {/* Floating QA Copilot Chat with Live Supabase & Telemetry Context */}
+      <QACopilotChat
+        activeReport={selectedReport}
+        sessionId={selectedReport?.session_id}
       />
     </div>
   );

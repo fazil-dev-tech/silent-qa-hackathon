@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import EventTimeline from '@/components/event-timeline';
 import ExportModal from '@/components/export-modal';
+import CanonicalDefectCard from '@/components/canonical-defect-card';
+import QACopilotChat from '@/components/qa-copilot-chat';
 
 export default function ReportDetailPage() {
   const router = useRouter();
@@ -41,6 +43,9 @@ export default function ReportDetailPage() {
   // Copy feedback
   const [copiedScript, setCopiedScript] = useState(false);
   const [copiedCmd, setCopiedCmd] = useState(false);
+
+  // View mode toggle: Canonical Spec Card vs Interactive Studio
+  const [viewMode, setViewMode] = useState<'canonical' | 'studio'>('canonical');
 
   // Verification checklist state
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -355,7 +360,48 @@ export default function ReportDetailPage() {
           </div>
         </div>
 
-        {/* Reproduction Probe Result Banner */}
+        {/* View Mode Selector Tabs */}
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid rgba(17, 24, 39, 0.08)', paddingBottom: '0.75rem' }}>
+          <button
+            onClick={() => setViewMode('canonical')}
+            style={{
+              padding: '0.45rem 1rem',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              border: 'none',
+              cursor: 'pointer',
+              background: viewMode === 'canonical' ? '#0284C7' : 'transparent',
+              color: viewMode === 'canonical' ? '#ffffff' : '#4B5563',
+              boxShadow: viewMode === 'canonical' ? '0 0 12px rgba(2, 132, 199, 0.35)' : 'none',
+            }}
+          >
+            ⚡ Canonical Spec Card (Problem Statement View)
+          </button>
+          <button
+            onClick={() => setViewMode('studio')}
+            style={{
+              padding: '0.45rem 1rem',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              border: 'none',
+              cursor: 'pointer',
+              background: viewMode === 'studio' ? '#DC2626' : 'transparent',
+              color: viewMode === 'studio' ? '#ffffff' : '#4B5563',
+            }}
+          >
+            Interactive Studio & Probe
+          </button>
+        </div>
+
+        {viewMode === 'canonical' ? (
+          <div style={{ marginBottom: '2rem' }}>
+            <CanonicalDefectCard report={report} />
+          </div>
+        ) : (
+          <>
+            {/* Reproduction Probe Result Banner */}
         {probeResult && (
           <div
             style={{
@@ -576,6 +622,8 @@ export default function ReportDetailPage() {
           </h3>
           <EventTimeline events={report.evidence || []} />
         </div>
+          </>
+        )}
       </div>
 
       {/* Export Modal */}
@@ -584,6 +632,9 @@ export default function ReportDetailPage() {
         isOpen={exportModalOpen}
         onClose={() => setExportModalOpen(false)}
       />
+
+      {/* Floating QA Copilot Chat with Live Supabase & Telemetry Context */}
+      <QACopilotChat activeReport={report} sessionId={report?.session_id} />
     </div>
   );
 }
