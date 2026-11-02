@@ -101,7 +101,7 @@ export default function LiveTelemetryFeed() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Activity size={16} color="#DC2626" />
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#111827' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#F8FAFC' }}>
             Realtime Telemetry Stream
           </h3>
         </div>
@@ -116,8 +116,9 @@ export default function LiveTelemetryFeed() {
               fontWeight: 700,
               padding: '0.2rem 0.5rem',
               borderRadius: '9999px',
-              background: isSubscribed ? '#DCFCE7' : '#FEF3C7',
-              color: isSubscribed ? '#166534' : '#B45309',
+              background: isSubscribed ? 'rgba(22, 163, 74, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+              color: isSubscribed ? '#86EFAC' : '#FDE68A',
+              border: isSubscribed ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid rgba(245, 158, 11, 0.35)',
             }}
           >
             <Radio size={12} className={isSubscribed ? 'animate-pulse' : ''} />
@@ -127,7 +128,7 @@ export default function LiveTelemetryFeed() {
           <button
             onClick={fetchRecentEvents}
             disabled={loading}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', padding: 0 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: 0 }}
             title="Refresh stream"
           >
             <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
@@ -136,7 +137,7 @@ export default function LiveTelemetryFeed() {
       </div>
 
       {events.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '1.5rem', color: '#9CA3AF', fontSize: '0.8rem' }}>
+        <div style={{ textAlign: 'center', padding: '1.5rem', color: '#94A3B8', fontSize: '0.8rem' }}>
           Listening for telemetry batches from extension or simulator...
         </div>
       ) : (
@@ -158,10 +159,11 @@ export default function LiveTelemetryFeed() {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '0.45rem 0.75rem',
-                  borderRadius: '6px',
-                  background: isWarn ? '#FEF2F2' : '#ffffff',
-                  border: isWarn ? '1px solid #FECACA' : '1px solid rgba(17, 24, 39, 0.06)',
+                  borderRadius: '8px',
+                  background: isWarn ? 'rgba(220, 38, 38, 0.16)' : 'rgba(255, 255, 255, 0.04)',
+                  border: isWarn ? '1px solid rgba(220, 38, 38, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
                   fontSize: '0.785rem',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', overflow: 'hidden' }}>
@@ -170,7 +172,7 @@ export default function LiveTelemetryFeed() {
                       fontSize: '0.675rem',
                       fontWeight: 800,
                       textTransform: 'uppercase',
-                      color: isWarn ? '#991B1B' : '#2563EB',
+                      color: isWarn ? '#FCA5A5' : '#38BDF8',
                     }}
                   >
                     {evt.type}
@@ -178,7 +180,7 @@ export default function LiveTelemetryFeed() {
                   <span
                     style={{
                       fontFamily: 'monospace',
-                      color: '#111827',
+                      color: '#F8FAFC',
                       textOverflow: 'ellipsis',
                       overflow: 'hidden',
                       whiteSpace: 'nowrap',
@@ -193,8 +195,9 @@ export default function LiveTelemetryFeed() {
                         fontWeight: 700,
                         padding: '0.1rem 0.35rem',
                         borderRadius: '4px',
-                        background: '#E0E7FF',
-                        color: '#3730A3',
+                        background: 'rgba(56, 189, 248, 0.15)',
+                        color: '#38BDF8',
+                        border: '1px solid rgba(56, 189, 248, 0.3)',
                         fontFamily: 'monospace',
                       }}
                     >
@@ -209,8 +212,9 @@ export default function LiveTelemetryFeed() {
                         fontWeight: 700,
                         padding: '0.1rem 0.35rem',
                         borderRadius: '4px',
-                        background: '#FEE2E2',
-                        color: '#991B1B',
+                        background: 'rgba(220, 38, 38, 0.25)',
+                        color: '#FCA5A5',
+                        border: '1px solid rgba(220, 38, 38, 0.4)',
                       }}
                     >
                       📸 DOM
@@ -218,7 +222,7 @@ export default function LiveTelemetryFeed() {
                   )}
                 </div>
 
-                <span style={{ fontSize: '0.675rem', fontFamily: 'monospace', color: '#9CA3AF', flexShrink: 0 }}>
+                <span style={{ fontSize: '0.675rem', fontFamily: 'monospace', color: '#94A3B8', flexShrink: 0 }}>
                   {timeFormatted}
                 </span>
               </div>

@@ -17,24 +17,31 @@ export default function ExportModal({ report, isOpen, onClose }: ExportModalProp
 
   // Generate GitHub Markdown
   function generateGitHubMarkdown() {
-    return `### [DEFECT REPORT] ${report.title}
+    const title = report.title || 'Untitled Defect Report';
+    const severity = (report.severity || 'high').toString().toUpperCase();
+    const status = (report.status || 'open').toString().toUpperCase();
+    const hypothesis = report.root_cause || 'Causal relationship verified from in-browser telemetry';
+    const steps = Array.isArray(report.steps) ? report.steps : [];
+    const evidenceIds = Array.isArray(report.evidence_ids) ? report.evidence_ids : [];
 
-**Severity**: \`${report.severity.toUpperCase()}\`  
-**Status**: \`${report.status.toUpperCase()}\`  
-**AI Hypothesis**: ${report.root_cause || 'Causal relationship verified from in-browser telemetry'}
+    return `### [DEFECT REPORT] ${title}
+
+**Severity**: \`${severity}\`  
+**Status**: \`${status}\`  
+**AI Hypothesis**: ${hypothesis}
 
 ---
 
 #### 🎯 Expected Behavior
-${report.expected}
+${report.expected || 'None documented'}
 
 #### 💥 Actual Behavior
-${report.actual}
+${report.actual || 'None documented'}
 
 ---
 
 #### 📋 Steps to Reproduce
-${report.steps?.map((s: string, idx: number) => `${idx + 1}. ${s}`).join('\n')}
+${steps.length > 0 ? steps.map((s: string, idx: number) => `${idx + 1}. ${s}`).join('\n') : '1. Follow session telemetry flow'}
 
 ---
 
@@ -50,29 +57,36 @@ ${report.playwright_script || '// No script generated'}
 ---
 
 #### 🔬 Verified Causal Evidence IDs
-${report.evidence_ids?.map((id: string) => `- \`${id}\``).join('\n') || '- None'}
+${evidenceIds.length > 0 ? evidenceIds.map((id: string) => `- \`${id}\``).join('\n') : '- None'}
 
 *Generated automatically by [Silent QA Flight Recorder](https://silentqa.dev)*`;
   }
 
   // Generate Jira Markup
   function generateJiraMarkup() {
-    return `h2. [DEFECT REPORT] ${report.title}
+    const title = report.title || 'Untitled Defect Report';
+    const severity = (report.severity || 'high').toString().toUpperCase();
+    const status = (report.status || 'open').toString().toUpperCase();
+    const hypothesis = report.root_cause || 'Telemetry verified';
+    const steps = Array.isArray(report.steps) ? report.steps : [];
+    const evidenceIds = Array.isArray(report.evidence_ids) ? report.evidence_ids : [];
 
-*Severity*: *${report.severity.toUpperCase()}*  
-*Status*: *${report.status.toUpperCase()}*  
-*AI Hypothesis*: ${report.root_cause || 'Telemetry verified'}
+    return `h2. [DEFECT REPORT] ${title}
+
+*Severity*: *${severity}*  
+*Status*: *${status}*  
+*AI Hypothesis*: ${hypothesis}
 
 {panel:title=Expected Behavior|borderColor=#16A34A|bgColor=#F0FDF4}
-${report.expected}
+${report.expected || 'None documented'}
 {panel}
 
 {panel:title=Actual Behavior|borderColor=#DC2626|bgColor=#FEF2F2}
-${report.actual}
+${report.actual || 'None documented'}
 {panel}
 
 h3. Steps to Reproduce
-# ${report.steps?.join('\n# ')}
+# ${steps.length > 0 ? steps.join('\n# ') : 'Follow session telemetry flow'}
 
 h3. Playwright Reproduction Script
 {code:typescript}
@@ -80,27 +94,34 @@ ${report.playwright_script || '// No script'}
 {code}
 
 h3. Verified Evidence IDs
-${report.evidence_ids?.map((id: string) => `* {{${id}}}`).join('\n')}`;
+${evidenceIds.length > 0 ? evidenceIds.map((id: string) => `* {{${id}}}`).join('\n') : '* None'}`;
   }
 
   // Generate Linear Markdown
   function generateLinearMarkdown() {
-    return `## ${report.title}
+    const title = report.title || 'Untitled Defect Report';
+    const severity = (report.severity || 'high').toString().toUpperCase();
+    const status = (report.status || 'open').toString().toUpperCase();
+    const summary = report.root_cause || report.actual || 'Anomaly detected during testing session';
+    const steps = Array.isArray(report.steps) ? report.steps : [];
+    const evidenceIds = Array.isArray(report.evidence_ids) ? report.evidence_ids : [];
 
-> **Severity**: ${report.severity.toUpperCase()}  
-> **Status**: ${report.status.toUpperCase()}  
+    return `## ${title}
+
+> **Severity**: ${severity}  
+> **Status**: ${status}  
 
 ### 🔍 Summary & Root Cause
-${report.root_cause || report.actual}
+${summary}
 
 ### 🎯 Expected
-${report.expected}
+${report.expected || 'None documented'}
 
 ### 💥 Actual
-${report.actual}
+${report.actual || 'None documented'}
 
 ### 🪜 Steps to Reproduce
-${report.steps?.map((s: string, idx: number) => `- [ ] ${s}`).join('\n')}
+${steps.length > 0 ? steps.map((s: string) => `- [ ] ${s}`).join('\n') : '- [ ] Follow session telemetry flow'}
 
 ### 🎭 Playwright Reproduction
 \`\`\`typescript
@@ -108,7 +129,7 @@ ${report.playwright_script || '// No script'}
 \`\`\`
 
 ---
-*Telemetry Evidence IDs*: ${report.evidence_ids?.join(', ')}`;
+*Telemetry Evidence IDs*: ${evidenceIds.join(', ') || 'None'}`;
   }
 
   // Format resolver
@@ -129,8 +150,9 @@ ${report.playwright_script || '// No script'}
     const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
+    const safeId = (report.id || 'report').toString().slice(0, 8);
     link.href = url;
-    link.download = `defect-report-${report.id.slice(0, 8)}.${ext}`;
+    link.download = `defect-report-${safeId}.${ext}`;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -141,8 +163,8 @@ ${report.playwright_script || '// No script'}
         position: 'fixed',
         inset: 0,
         zIndex: 100,
-        backgroundColor: 'rgba(17, 24, 39, 0.65)',
-        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(12px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -157,9 +179,10 @@ ${report.playwright_script || '// No script'}
           maxHeight: '88vh',
           display: 'flex',
           flexDirection: 'column',
-          background: '#ffffff',
+          background: 'rgba(13, 16, 25, 0.96)',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
           borderRadius: '16px',
-          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.25)',
+          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.6)',
           overflow: 'hidden',
         }}
       >
@@ -167,18 +190,18 @@ ${report.playwright_script || '// No script'}
         <div
           style={{
             padding: '1.25rem 1.75rem',
-            borderBottom: '1px solid rgba(17, 24, 39, 0.08)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            background: 'var(--bg-primary)',
+            background: 'rgba(255, 255, 255, 0.02)',
           }}
         >
           <div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#111827' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#F8FAFC' }}>
               Export Defect Report
             </h3>
-            <p style={{ fontSize: '0.8rem', color: '#6B7280' }}>
+            <p style={{ fontSize: '0.8rem', color: '#94A3B8' }}>
               Format and transfer verified bug telemetry directly into your team&apos;s issue tracker.
             </p>
           </div>
@@ -189,7 +212,7 @@ ${report.playwright_script || '// No script'}
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              color: '#6B7280',
+              color: '#94A3B8',
               padding: '0.25rem',
               borderRadius: '6px',
             }}
@@ -199,7 +222,7 @@ ${report.playwright_script || '// No script'}
         </div>
 
         {/* Format Selector Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', padding: '1rem 1.75rem 0.5rem', background: '#FAFAFA' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', padding: '1rem 1.75rem 0.5rem', background: 'rgba(255, 255, 255, 0.02)' }}>
           {(['github', 'jira', 'linear', 'json'] as const).map((fmt) => (
             <button
               key={fmt}
@@ -210,9 +233,9 @@ ${report.playwright_script || '// No script'}
                 fontSize: '0.8rem',
                 fontWeight: 700,
                 textTransform: 'uppercase',
-                border: activeFormat === fmt ? '2px solid #DC2626' : '1px solid rgba(17, 24, 39, 0.1)',
-                background: activeFormat === fmt ? '#ffffff' : 'transparent',
-                color: activeFormat === fmt ? '#DC2626' : '#6B7280',
+                border: activeFormat === fmt ? '1px solid #DC2626' : '1px solid rgba(255, 255, 255, 0.1)',
+                background: activeFormat === fmt ? 'rgba(220, 38, 38, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                color: activeFormat === fmt ? '#F87171' : '#94A3B8',
                 cursor: 'pointer',
               }}
             >
@@ -225,7 +248,8 @@ ${report.playwright_script || '// No script'}
         <div style={{ flex: 1, padding: '1rem 1.75rem', overflowY: 'auto' }}>
           <pre
             style={{
-              background: '#0F172A',
+              background: '#07080A',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
               color: '#E2E8F0',
               padding: '1.25rem',
               borderRadius: '10px',
@@ -245,11 +269,11 @@ ${report.playwright_script || '// No script'}
         <div
           style={{
             padding: '1rem 1.75rem',
-            borderTop: '1px solid rgba(17, 24, 39, 0.08)',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
             display: 'flex',
             justifyContent: 'flex-end',
             gap: '0.75rem',
-            background: 'var(--bg-primary)',
+            background: 'rgba(255, 255, 255, 0.02)',
           }}
         >
           <button onClick={onClose} className="btn-secondary" style={{ fontSize: '0.85rem' }}>
@@ -277,4 +301,3 @@ ${report.playwright_script || '// No script'}
     </div>
   );
 }
-

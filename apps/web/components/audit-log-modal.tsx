@@ -46,34 +46,34 @@ export default function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
   function getActionBadge(action: string) {
     if (action === 'REPORT_SYNTHESIZED') {
       return (
-        <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '9999px', background: '#DBEAFE', color: '#1D4ED8' }}>
+        <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '9999px', background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
           SYNTHESIZED
         </span>
       );
     }
     if (action === 'REPORT_UPDATED') {
       return (
-        <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '9999px', background: '#FEF3C7', color: '#B45309' }}>
+        <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '9999px', background: 'rgba(245, 158, 11, 0.15)', color: '#FBBF24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
           UPDATED
         </span>
       );
     }
     if (action === 'REPORT_DISPATCHED_EMAIL') {
       return (
-        <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '9999px', background: '#DCFCE7', color: '#166534' }}>
+        <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '9999px', background: 'rgba(16, 185, 129, 0.15)', color: '#34D399', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
           EMAIL SENT
         </span>
       );
     }
     if (action === 'REPORT_DELETED') {
       return (
-        <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '9999px', background: '#FEE2E2', color: '#991B1B' }}>
+        <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '9999px', background: 'rgba(220, 38, 38, 0.15)', color: '#F87171', border: '1px solid rgba(220, 38, 38, 0.3)' }}>
           DELETED
         </span>
       );
     }
     return (
-      <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '9999px', background: '#F3F4F6', color: '#374151' }}>
+      <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: '9999px', background: 'rgba(255, 255, 255, 0.05)', color: '#94A3B8', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
         {action}
       </span>
     );
@@ -85,8 +85,8 @@ export default function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
         position: 'fixed',
         inset: 0,
         zIndex: 100,
-        backgroundColor: 'rgba(17, 24, 39, 0.65)',
-        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(12px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -101,30 +101,32 @@ export default function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
           maxHeight: '85vh',
           display: 'flex',
           flexDirection: 'column',
-          background: '#ffffff',
+          background: 'rgba(13, 16, 25, 0.98)',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
           borderRadius: '18px',
-          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.25)',
+          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.6)',
           overflow: 'hidden',
+          color: '#F8FAFC',
         }}
       >
         {/* Header */}
         <div
           style={{
             padding: '1.25rem 1.75rem',
-            borderBottom: '1px solid rgba(17, 24, 39, 0.08)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            background: 'var(--bg-primary)',
+            background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(13, 16, 25, 0.95) 100%)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Shield size={20} color="#DC2626" />
             <div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#111827' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#F8FAFC', margin: 0 }}>
                 System Activity Audit Trail
               </h3>
-              <p style={{ fontSize: '0.785rem', color: '#6B7280' }}>
+              <p style={{ fontSize: '0.785rem', color: '#94A3B8', margin: '0.2rem 0 0' }}>
                 Immutable audit records stored in Supabase PostgreSQL audit_log table.
               </p>
             </div>
@@ -135,13 +137,13 @@ export default function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
               onClick={fetchAuditLogs}
               disabled={loading}
               title="Refresh logs"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8' }}
             >
               <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
             </button>
             <button
               onClick={onClose}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8' }}
             >
               <X size={20} />
             </button>
@@ -151,11 +153,11 @@ export default function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
         {/* Content list */}
         <div style={{ flex: 1, padding: '1.25rem 1.75rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
           {loading && logs.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '2rem', color: '#9CA3AF', fontSize: '0.85rem' }}>
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#94A3B8', fontSize: '0.85rem' }}>
               Fetching audit records from database...
             </div>
           ) : logs.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '2rem', color: '#9CA3AF', fontSize: '0.85rem' }}>
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#94A3B8', fontSize: '0.85rem' }}>
               No audit records logged yet. Operations will appear here automatically.
             </div>
           ) : (
@@ -165,8 +167,8 @@ export default function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
                 style={{
                   padding: '0.75rem 1rem',
                   borderRadius: '10px',
-                  background: '#F9FAFB',
-                  border: '1px solid rgba(17, 24, 39, 0.08)',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -176,23 +178,23 @@ export default function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   {getActionBadge(log.action)}
                   <div>
-                    <span style={{ fontWeight: 700, color: '#111827' }}>
+                    <span style={{ fontWeight: 700, color: '#F8FAFC' }}>
                       {log.action.replace(/_/g, ' ')}
                     </span>
                     {log.target_id && (
-                      <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', fontFamily: 'monospace', color: '#6B7280' }}>
+                      <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', fontFamily: 'monospace', color: '#94A3B8' }}>
                         ID: {log.target_id.slice(0, 8)}
                       </span>
                     )}
                     {log.details?.title && (
-                      <div style={{ fontSize: '0.785rem', color: '#4B5563', marginTop: '0.15rem' }}>
+                      <div style={{ fontSize: '0.785rem', color: '#CBD5E1', marginTop: '0.15rem' }}>
                         &quot;{log.details.title}&quot;
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div style={{ fontSize: '0.72rem', color: '#9CA3AF', fontFamily: 'monospace' }}>
+                <div style={{ fontSize: '0.72rem', color: '#94A3B8', fontFamily: 'monospace' }}>
                   {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                 </div>
               </div>
@@ -201,7 +203,7 @@ export default function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '0.85rem 1.75rem', borderTop: '1px solid rgba(17, 24, 39, 0.08)', display: 'flex', justifyContent: 'flex-end', background: 'var(--bg-primary)' }}>
+        <div style={{ padding: '0.85rem 1.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', justifyContent: 'flex-end', background: 'rgba(255, 255, 255, 0.02)' }}>
           <button onClick={onClose} className="btn-secondary" style={{ fontSize: '0.85rem' }}>
             Close
           </button>

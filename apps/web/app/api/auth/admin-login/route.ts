@@ -41,29 +41,31 @@ export async function POST(req: Request) {
       );
     }
 
-    // Ensure admin profile exists in database
+    // Ensure admin profile exists in database asynchronously (zero delay for login response)
     const adminSessionId = '22222222-2222-2222-2222-222222222222';
-    try {
-      await supabaseAdmin.from('profiles').upsert(
-        {
-          id: adminSessionId,
-          email: 'tgvincenzo@silentqa.internal',
-          role: 'admin',
-          org_id: '11111111-1111-1111-1111-111111111111',
-        },
-        { onConflict: 'email' }
-      );
+    (async () => {
+      try {
+        await supabaseAdmin.from('profiles').upsert(
+          {
+            id: adminSessionId,
+            email: 'tgvincenzo@silentqa.internal',
+            role: 'admin',
+            org_id: '11111111-1111-1111-1111-111111111111',
+          },
+          { onConflict: 'email' }
+        );
 
-      await supabaseAdmin.from('audit_log').insert({
-        id: crypto.randomUUID(),
-        action: 'ADMIN_LOGIN_SUCCESS',
-        target_id: adminSessionId,
-        details: { admin_id: 'TGVINCENZO', role: 'admin' },
-        timestamp: new Date().toISOString(),
-      });
-    } catch (dbErr: any) {
-      console.warn('[Admin DB Warning]:', dbErr?.message);
-    }
+        await supabaseAdmin.from('audit_log').insert({
+          id: crypto.randomUUID(),
+          action: 'ADMIN_LOGIN_SUCCESS',
+          target_id: adminSessionId,
+          details: { admin_id: 'TGVINCENZO', role: 'admin' },
+          timestamp: new Date().toISOString(),
+        });
+      } catch (dbErr: any) {
+        console.warn('[Admin DB Warning]:', dbErr?.message);
+      }
+    })();
 
     const response = NextResponse.json({
       success: true,

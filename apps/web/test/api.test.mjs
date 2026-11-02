@@ -118,11 +118,11 @@ test('Phase 3 - Mail: Renders responsive inline-styled HTML report email', () =>
   };
 
   const html = renderReportEmailHtml(sampleReport, 'http://localhost:3000/app/report/rep_demo_101');
-  assert.ok(html.includes('SILENT QA DEFECT REPORT'));
+  assert.ok(html.includes('SILENT QA'));
   assert.ok(html.includes('rep_demo_101'));
   assert.ok(html.includes('EXPECTED BEHAVIOR'));
   assert.ok(html.includes('ACTUAL OBSERVED'));
-  assert.ok(html.includes('Open Full Report & Evidence'));
+  assert.ok(html.includes('View Interactive Report &amp; Run Playwright Probe'));
 });
 
 test('Phase 3 - Report Patch & UUID Schema: Validates updates and RFC-4122 compliance', () => {

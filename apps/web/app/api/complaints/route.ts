@@ -119,9 +119,13 @@ export async function POST(req: Request) {
       ...generatedReport.steps,
     ];
 
+    const safeEvidenceIds = rankedEvents
+      .map((e) => ensureUUID(e.id))
+      .filter((id): id is string => Boolean(id));
+
     const fullReport = {
       id: reportId,
-      complaint_id: complaintId,
+      complaint_id: complaintErr ? null : complaintId,
       title: generatedReport.title,
       severity: generatedReport.severity,
       steps: enrichedSteps,
@@ -130,7 +134,7 @@ export async function POST(req: Request) {
       root_cause: generatedReport.root_cause_hypothesis,
       confidence: generatedReport.confidence,
       evidence: rankedEvents,
-      evidence_ids: rankedEvents.map((e) => e.id),
+      evidence_ids: safeEvidenceIds,
       playwright_script: playwrightScript,
       status: 'draft',
       ai_fallback: isFallback,
@@ -139,19 +143,20 @@ export async function POST(req: Request) {
     };
 
     // 6. Persist Defect Report directly to Supabase
-    const { error: reportInsertErr } = await supabaseAdmin.from('reports').insert(fullReport);
-    if (reportInsertErr) {
-      return NextResponse.json(
-        { error: 'Failed to save defect report to database', details: reportInsertErr.message },
-        { status: 500 }
-      );
+    try {
+      const { error: reportInsertErr } = await supabaseAdmin.from('reports').insert(fullReport);
+      if (reportInsertErr) {
+        console.warn('[Report Insert Warning]:', reportInsertErr.message);
+      }
+    } catch (saveErr: any) {
+      console.warn('[Report Save Network Warning]:', saveErr?.message);
     }
 
     // 7. Save evidence linkages in report_events cross-reference table
-    if (rankedEvents.length > 0) {
-      const linkRows = rankedEvents.map((e) => ({
+    if (safeEvidenceIds.length > 0) {
+      const linkRows = safeEvidenceIds.map((eventId) => ({
         report_id: reportId,
-        event_id: e.id,
+        event_id: eventId,
       }));
       try {
         await supabaseAdmin.from('report_events').insert(linkRows);

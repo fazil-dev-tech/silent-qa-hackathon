@@ -34,12 +34,12 @@ import {
   X,
   RefreshCw,
 } from 'lucide-react';
-import LiveTelemetryFeed from '@/components/live-telemetry-feed';
 import EventTimeline from '@/components/event-timeline';
 import ExportModal from '@/components/export-modal';
 import SendEmailModal from '@/components/send-email-modal';
 import CanonicalDefectCard from '@/components/canonical-defect-card';
 import QACopilotChat from '@/components/qa-copilot-chat';
+import ExtensionInstallModal from '@/components/extension-install-modal';
 
 interface ReportItem {
   id: string;
@@ -106,6 +106,7 @@ export default function TesterWorkspacePage() {
   // Modals
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [sendEmailModalOpen, setSendEmailModalOpen] = useState(false);
+  const [extensionModalOpen, setExtensionModalOpen] = useState(false);
   const [deletingReport, setDeletingReport] = useState(false);
 
   // Copy feedback
@@ -136,6 +137,14 @@ export default function TesterWorkspacePage() {
       }
     }
     verifyAuth();
+
+    // Realtime Dynamic Sync: Periodic auto-refresh every 10s
+    const syncInterval = setInterval(() => {
+      fetchReports();
+      fetchSessions();
+    }, 10000);
+
+    return () => clearInterval(syncInterval);
   }, []);
 
   // 2. Fetch Sessions & Auto-Select Latest
@@ -154,7 +163,7 @@ export default function TesterWorkspacePage() {
   }
 
   // 3. Fetch Reports
-  async function fetchReports() {
+  async function fetchReports(showToast = false) {
     setLoading(true);
     try {
       const res = await fetch('/api/reports/recent');
@@ -169,7 +178,27 @@ export default function TesterWorkspacePage() {
             return match || reportList[0];
           });
         }
+        if (showToast) {
+          setActionMessage(`✓ Refreshed ${reportList.length} defect reports live from Supabase PostgreSQL`);
+        }
       }
+    } catch (err: any) {
+      if (showToast) {
+        setActionMessage(`Refresh notice: ${err?.message || 'Could not fetch reports'}`);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Manual Full Studio Refresh (both reports & flight recorder sessions)
+  async function handleManualRefresh() {
+    setLoading(true);
+    try {
+      await Promise.all([
+        fetchReports(true),
+        fetchSessions(),
+      ]);
     } catch {
       //
     } finally {
@@ -323,8 +352,8 @@ export default function TesterWorkspacePage() {
 
   if (!authChecked) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFF8F8' }}>
-        <div style={{ textAlign: 'center', color: '#64748B' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#07080A' }}>
+        <div style={{ textAlign: 'center', color: '#94A3B8' }}>
           <Activity size={32} className="animate-spin" color="#DC2626" style={{ margin: '0 auto 1rem' }} />
           <p style={{ fontWeight: 600 }}>Loading Silent QA Flight Studio...</p>
         </div>
@@ -336,10 +365,10 @@ export default function TesterWorkspacePage() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#FFF8F8',
+        background: '#07080A',
         backgroundImage:
-          'radial-gradient(at 0% 0%, rgba(220, 38, 38, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.04) 0px, transparent 40%)',
-        color: '#0F172A',
+          'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(220, 38, 38, 0.15), rgba(7, 8, 10, 0.98))',
+        color: '#F8FAFC',
         paddingBottom: '5rem',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
@@ -359,16 +388,16 @@ export default function TesterWorkspacePage() {
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.35rem' }}>
-              <h1 style={{ fontSize: '1.85rem', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.025em' }}>
+              <h1 style={{ fontSize: '1.85rem', fontWeight: 900, color: '#F8FAFC', letterSpacing: '-0.025em' }}>
                 Tester Flight Workspace
               </h1>
               <span
                 style={{
                   fontSize: '0.75rem',
                   fontWeight: 800,
-                  color: '#16A34A',
-                  background: '#F0FDF4',
-                  border: '1px solid #BBF7D0',
+                  color: '#4ADE80',
+                  background: 'rgba(22, 163, 74, 0.15)',
+                  border: '1px solid rgba(34, 197, 94, 0.3)',
                   padding: '0.2rem 0.65rem',
                   borderRadius: '9999px',
                   display: 'inline-flex',
@@ -376,23 +405,32 @@ export default function TesterWorkspacePage() {
                   gap: '0.35rem',
                 }}
               >
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16A34A' }} />
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ADE80' }} />
                 <span>Live Telemetry Active</span>
               </span>
             </div>
-            <p style={{ fontSize: '0.885rem', color: '#64748B' }}>
+            <p style={{ fontSize: '0.885rem', color: '#94A3B8' }}>
               Live browser telemetry streams, AI causal synthesis, in-browser Playwright reproduction probes, and Gmail delivery.
             </p>
           </div>
 
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <button
-              onClick={fetchReports}
+              onClick={() => handleManualRefresh()}
+              disabled={loading}
               className="btn-secondary"
-              style={{ fontSize: '0.82rem', padding: '0.45rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+              style={{
+                fontSize: '0.82rem',
+                padding: '0.45rem 0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1,
+              }}
             >
               <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-              <span>Refresh Reports</span>
+              <span>{loading ? 'Refreshing...' : 'Refresh Reports'}</span>
             </button>
           </div>
         </div>
@@ -404,9 +442,9 @@ export default function TesterWorkspacePage() {
               padding: '0.85rem 1.25rem',
               borderRadius: '10px',
               marginBottom: '1.5rem',
-              background: actionMessage.startsWith('✓') ? '#F0FDF4' : '#FEF2F2',
-              border: `1px solid ${actionMessage.startsWith('✓') ? '#86EFAC' : '#FCA5A5'}`,
-              color: actionMessage.startsWith('✓') ? '#166534' : '#991B1B',
+              background: actionMessage.startsWith('✓') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(220, 38, 38, 0.15)',
+              border: `1px solid ${actionMessage.startsWith('✓') ? 'rgba(52, 211, 153, 0.35)' : 'rgba(248, 113, 113, 0.35)'}`,
+              color: actionMessage.startsWith('✓') ? '#86EFAC' : '#FCA5A5',
               fontSize: '0.875rem',
               fontWeight: 600,
               display: 'flex',
@@ -426,31 +464,59 @@ export default function TesterWorkspacePage() {
         {/* ==================================================================== */}
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 380px) 1fr', gap: '1.5rem', alignItems: 'start' }}>
           {/* ================================================================ */}
-          {/* LEFT COLUMN: LIVE TELEMETRY RADAR & COMPLAINT UPLINK              */}
+          {/* LEFT COLUMN: FLIGHT RECORDER UPLINK & COMPLAINT INTAKE             */}
           {/* ================================================================ */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* 1. Realtime Telemetry Stream */}
-            <LiveTelemetryFeed />
-
-            {/* 2. Flight Recorder Uplink & Complaint Intake */}
+            {/* Flight Recorder Uplink & Complaint Intake */}
             <div className="glass-panel" style={{ padding: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#DC2626', fontWeight: 800, fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#F87171', fontWeight: 800, fontSize: '0.85rem' }}>
                   <Terminal size={16} />
                   <span>Flight Recorder Uplink</span>
                 </div>
-                <span style={{ fontSize: '0.68rem', fontWeight: 800, background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '0.15rem 0.5rem', borderRadius: '9999px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, background: 'rgba(22, 163, 74, 0.15)', color: '#4ADE80', border: '1px solid rgba(34, 197, 94, 0.3)', padding: '0.15rem 0.5rem', borderRadius: '9999px' }}>
                   EXTENSION READY
                 </span>
               </div>
 
-              <p style={{ fontSize: '0.78rem', color: '#64748B', lineHeight: 1.45, marginBottom: '1rem' }}>
+              <p style={{ fontSize: '0.78rem', color: '#94A3B8', lineHeight: 1.45, marginBottom: '0.75rem' }}>
                 The Silent QA Flight Recorder extension automatically captures clicks, network failures, and DOM anomalies on your active tabs. You can also flag a specific observation below.
               </p>
 
+              {/* Extension ZIP Download & Setup Trigger */}
+              <div style={{ marginBottom: '1.15rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setExtensionModalOpen(true)}
+                  style={{
+                    background: 'rgba(56, 189, 248, 0.08)',
+                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                    color: '#38BDF8',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    borderRadius: '8px',
+                    padding: '0.4rem 0.85rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.45rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(56, 189, 248, 0.18)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(56, 189, 248, 0.08)';
+                  }}
+                >
+                  <Download size={13} color="#38BDF8" />
+                  <span>Download Extension (.ZIP) &amp; Setup</span>
+                </button>
+              </div>
+
               {/* Observed Defect / Complaint Note */}
               <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.35rem' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#E2E8F0', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.35rem' }}>
                   Observed Defect / Complaint Note:
                 </label>
                 <textarea
@@ -460,24 +526,24 @@ export default function TesterWorkspacePage() {
                   rows={3}
                   style={{
                     width: '100%',
-                    background: '#FFFFFF',
-                    border: '1.5px solid #E2E8F0',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.12)',
                     borderRadius: '10px',
                     padding: '0.75rem 0.85rem',
-                    color: '#0F172A',
+                    color: '#F8FAFC',
                     fontSize: '0.885rem',
                     fontFamily: 'inherit',
                     lineHeight: 1.45,
                     outline: 'none',
                     resize: 'vertical',
-                    boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.03)',
+                    boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.2)',
                   }}
                 />
               </div>
 
               {/* Quick Scenario Preset Chips */}
               <div style={{ marginBottom: '1rem' }}>
-                <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748B', marginBottom: '0.35rem' }}>
+                <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#94A3B8', marginBottom: '0.35rem' }}>
                   Quick Scenario Presets:
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
@@ -487,9 +553,9 @@ export default function TesterWorkspacePage() {
                       type="button"
                       onClick={() => setTestNote(phrase)}
                       style={{
-                        background: 'rgba(0, 0, 0, 0.03)',
-                        border: '1px solid rgba(0, 0, 0, 0.08)',
-                        color: '#475569',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#94A3B8',
                         borderRadius: '9999px',
                         padding: '0.2rem 0.55rem',
                         fontSize: '0.7rem',
@@ -507,17 +573,17 @@ export default function TesterWorkspacePage() {
               {/* Recorded Session Selector */}
               <div style={{ marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                  <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#E2E8F0', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     Recorded Flight Session:
                   </label>
-                  <span style={{ fontSize: '0.7rem', color: '#64748B' }}>{sessions.length} active sessions</span>
+                  <span style={{ fontSize: '0.7rem', color: '#94A3B8' }}>{sessions.length} active sessions</span>
                 </div>
 
                 <div
                   onClick={() => setShowSessionModal(!showSessionModal)}
                   style={{
-                    background: '#FFFFFF',
-                    border: '1.5px solid #E2E8F0',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.12)',
                     borderRadius: '8px',
                     padding: '0.6rem 0.75rem',
                     cursor: 'pointer',
@@ -528,22 +594,22 @@ export default function TesterWorkspacePage() {
                   }}
                 >
                   <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    <strong style={{ color: '#0F172A' }}>{activeSession.host}</strong>
-                    <span style={{ color: '#64748B', marginLeft: '0.35rem' }}>({activeSession.tester})</span>
+                    <strong style={{ color: '#F8FAFC' }}>{activeSession.host}</strong>
+                    <span style={{ color: '#94A3B8', marginLeft: '0.35rem' }}>({activeSession.tester})</span>
                   </div>
-                  <ChevronDown size={14} color="#64748B" />
+                  <ChevronDown size={14} color="#94A3B8" />
                 </div>
 
                 {/* Session Selector Drawer */}
                 {showSessionModal && (
                   <div
                     style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #E2E8F0',
+                      background: 'rgba(13, 16, 25, 0.98)',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
                       borderRadius: '8px',
                       padding: '0.5rem',
                       marginTop: '0.35rem',
-                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
                       maxHeight: '180px',
                       overflowY: 'auto',
                     }}
@@ -559,15 +625,15 @@ export default function TesterWorkspacePage() {
                           padding: '0.45rem 0.65rem',
                           borderRadius: '6px',
                           cursor: 'pointer',
-                          background: selectedSessionId === s.id ? 'rgba(220, 38, 38, 0.08)' : 'transparent',
-                          color: selectedSessionId === s.id ? '#DC2626' : '#334155',
+                          background: selectedSessionId === s.id ? 'rgba(220, 38, 38, 0.2)' : 'transparent',
+                          color: selectedSessionId === s.id ? '#F87171' : '#E2E8F0',
                           fontSize: '0.78rem',
                           fontWeight: selectedSessionId === s.id ? 700 : 500,
                           marginBottom: '0.2rem',
                         }}
                       >
                         <div>{s.host}</div>
-                        <div style={{ fontSize: '0.68rem', color: '#64748B' }}>{s.tester} • {new Date(s.started_at).toLocaleTimeString()}</div>
+                        <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>{s.tester} • {new Date(s.started_at).toLocaleTimeString()}</div>
                       </div>
                     ))}
                   </div>
@@ -576,7 +642,7 @@ export default function TesterWorkspacePage() {
 
               {/* Telemetry Slice Time Window */}
               <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
                   Telemetry Window Slice:
                 </label>
                 <div style={{ display: 'flex', gap: '0.35rem' }}>
@@ -596,9 +662,9 @@ export default function TesterWorkspacePage() {
                         borderRadius: '6px',
                         fontSize: '0.72rem',
                         fontWeight: 700,
-                        border: timeWindowSeconds === win.value ? '1px solid #DC2626' : '1px solid #E2E8F0',
-                        background: timeWindowSeconds === win.value ? 'rgba(220, 38, 38, 0.08)' : '#FFFFFF',
-                        color: timeWindowSeconds === win.value ? '#DC2626' : '#475569',
+                        border: timeWindowSeconds === win.value ? '1px solid #DC2626' : '1px solid rgba(255, 255, 255, 0.12)',
+                        background: timeWindowSeconds === win.value ? 'rgba(220, 38, 38, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                        color: timeWindowSeconds === win.value ? '#F87171' : '#94A3B8',
                         cursor: 'pointer',
                       }}
                     >
@@ -641,27 +707,27 @@ export default function TesterWorkspacePage() {
                           fontWeight: 800,
                           padding: '0.2rem 0.65rem',
                           borderRadius: '9999px',
-                          background: selectedReport.status === 'verified' ? '#DCFCE7' : '#EFF6FF',
-                          color: selectedReport.status === 'verified' ? '#166534' : '#1D4ED8',
-                          border: `1px solid ${selectedReport.status === 'verified' ? '#86EFAC' : '#BFDBFE'}`,
+                          background: selectedReport.status === 'verified' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(56, 189, 248, 0.15)',
+                          color: selectedReport.status === 'verified' ? '#4ADE80' : '#38BDF8',
+                          border: `1px solid ${selectedReport.status === 'verified' ? 'rgba(16, 185, 129, 0.35)' : 'rgba(56, 189, 248, 0.35)'}`,
                         }}
                       >
                         {selectedReport.status === 'verified' ? '✓ REPRODUCED & VERIFIED' : selectedReport.status.toUpperCase()}
                       </span>
 
                       {!selectedReport.ai_fallback && (
-                        <span style={{ fontSize: '0.72rem', color: '#DC2626', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ fontSize: '0.72rem', color: '#F87171', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                           <Sparkles size={12} /> OpenRouter Nemotron-3
                         </span>
                       )}
                     </div>
 
-                    <h2 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#0F172A', lineHeight: 1.3 }}>
+                    <h2 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#F8FAFC', lineHeight: 1.3 }}>
                       {selectedReport.title}
                     </h2>
 
-                    <p style={{ fontSize: '0.78rem', color: '#64748B', marginTop: '0.25rem' }}>
-                      Reported by: <strong style={{ color: '#0F172A' }}>{selectedReport.tester_name || 'Engineer #1'}</strong> • Station: <strong>{selectedReport.device_tag || 'Station-01'}</strong> • Created: {new Date(selectedReport.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <p style={{ fontSize: '0.78rem', color: '#94A3B8', marginTop: '0.25rem' }}>
+                      Reported by: <strong style={{ color: '#F8FAFC' }}>{selectedReport.tester_name || 'Engineer #1'}</strong> • Station: <strong style={{ color: '#F8FAFC' }}>{selectedReport.device_tag || 'Station-01'}</strong> • Created: {new Date(selectedReport.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
 
@@ -673,7 +739,7 @@ export default function TesterWorkspacePage() {
                       className="btn-secondary"
                       style={{ fontSize: '0.8rem', padding: '0.45rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                     >
-                      <Play size={13} color="#2563EB" />
+                      <Play size={13} color="#38BDF8" />
                       <span>{runningProbe ? 'Running Probe...' : '▶ Run Reproduction Probe'}</span>
                     </button>
 
@@ -705,8 +771,8 @@ export default function TesterWorkspacePage() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.35rem',
-                        color: '#DC2626',
-                        borderColor: 'rgba(220, 38, 38, 0.25)',
+                        color: '#F87171',
+                        borderColor: 'rgba(220, 38, 38, 0.35)',
                       }}
                     >
                       <Trash2 size={13} />
@@ -719,22 +785,22 @@ export default function TesterWorkspacePage() {
                 {probeResult && (
                   <div
                     style={{
-                      background: probeResult.reproduced ? '#F0FDF4' : '#FEF2F2',
-                      border: `1px solid ${probeResult.reproduced ? '#86EFAC' : '#FECACA'}`,
+                      background: probeResult.reproduced ? 'rgba(16, 185, 129, 0.12)' : 'rgba(220, 38, 38, 0.12)',
+                      border: `1px solid ${probeResult.reproduced ? 'rgba(52, 211, 153, 0.35)' : 'rgba(248, 113, 113, 0.35)'}`,
                       borderRadius: '10px',
                       padding: '0.85rem 1.15rem',
                       marginBottom: '1.25rem',
                       fontSize: '0.85rem',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, color: probeResult.reproduced ? '#166534' : '#991B1B' }}>
-                      {probeResult.reproduced ? <CheckCircle2 size={16} color="#16A34A" /> : <AlertOctagon size={16} color="#DC2626" />}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, color: probeResult.reproduced ? '#86EFAC' : '#FCA5A5' }}>
+                      {probeResult.reproduced ? <CheckCircle2 size={16} color="#34D399" /> : <AlertOctagon size={16} color="#F87171" />}
                       <span>{probeResult.reproduced ? '✓ 100% Deterministic Reproduction Verified by In-Browser Probe' : 'Reproduction Probe Anomaly'}</span>
-                      <span style={{ fontSize: '0.75rem', color: '#64748B', marginLeft: 'auto' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#94A3B8', marginLeft: 'auto' }}>
                         Latency: {probeResult.execution_time_ms}ms
                       </span>
                     </div>
-                    <div style={{ color: probeResult.reproduced ? '#14532D' : '#7F1D1D', fontSize: '0.78rem', marginTop: '0.25rem' }}>
+                    <div style={{ color: probeResult.reproduced ? '#BBF7D0' : '#FECACA', fontSize: '0.78rem', marginTop: '0.25rem' }}>
                       {probeResult.verdict || probeResult.output || 'Steps replayed against target endpoint matched expected crash fingerprint.'}
                     </div>
                   </div>
@@ -746,7 +812,7 @@ export default function TesterWorkspacePage() {
                     display: 'flex',
                     gap: '0.4rem',
                     marginBottom: '1.5rem',
-                    borderBottom: '1px solid rgba(220, 38, 38, 0.1)',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                     paddingBottom: '0.65rem',
                     flexWrap: 'wrap',
                   }}
@@ -758,11 +824,11 @@ export default function TesterWorkspacePage() {
                       borderRadius: '8px',
                       fontSize: '0.825rem',
                       fontWeight: 700,
-                      border: activeReportTab === 'canonical' ? '1px solid #0284C7' : '1px solid transparent',
+                      border: activeReportTab === 'canonical' ? '1px solid #0284C7' : '1px solid rgba(255, 255, 255, 0.1)',
                       cursor: 'pointer',
-                      background: activeReportTab === 'canonical' ? '#0284C7' : 'rgba(0, 0, 0, 0.04)',
-                      color: activeReportTab === 'canonical' ? '#FFFFFF' : '#475569',
-                      boxShadow: activeReportTab === 'canonical' ? '0 4px 14px rgba(2, 132, 199, 0.3)' : 'none',
+                      background: activeReportTab === 'canonical' ? '#0284C7' : 'rgba(255, 255, 255, 0.05)',
+                      color: activeReportTab === 'canonical' ? '#FFFFFF' : '#94A3B8',
+                      boxShadow: activeReportTab === 'canonical' ? '0 4px 14px rgba(2, 132, 199, 0.4)' : 'none',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.35rem',
@@ -780,11 +846,11 @@ export default function TesterWorkspacePage() {
                       borderRadius: '8px',
                       fontSize: '0.825rem',
                       fontWeight: 700,
-                      border: activeReportTab === 'overview' ? '1px solid #DC2626' : '1px solid transparent',
+                      border: activeReportTab === 'overview' ? '1px solid #DC2626' : '1px solid rgba(255, 255, 255, 0.1)',
                       cursor: 'pointer',
-                      background: activeReportTab === 'overview' ? '#DC2626' : 'rgba(0, 0, 0, 0.04)',
-                      color: activeReportTab === 'overview' ? '#FFFFFF' : '#475569',
-                      boxShadow: activeReportTab === 'overview' ? '0 4px 14px rgba(220, 38, 38, 0.3)' : 'none',
+                      background: activeReportTab === 'overview' ? '#DC2626' : 'rgba(255, 255, 255, 0.05)',
+                      color: activeReportTab === 'overview' ? '#FFFFFF' : '#94A3B8',
+                      boxShadow: activeReportTab === 'overview' ? '0 4px 14px rgba(220, 38, 38, 0.4)' : 'none',
                       transition: 'all 0.15s ease',
                     }}
                   >
@@ -798,11 +864,11 @@ export default function TesterWorkspacePage() {
                       borderRadius: '8px',
                       fontSize: '0.825rem',
                       fontWeight: 700,
-                      border: activeReportTab === 'timeline' ? '1px solid #059669' : '1px solid transparent',
+                      border: activeReportTab === 'timeline' ? '1px solid #059669' : '1px solid rgba(255, 255, 255, 0.1)',
                       cursor: 'pointer',
-                      background: activeReportTab === 'timeline' ? '#059669' : 'rgba(0, 0, 0, 0.04)',
-                      color: activeReportTab === 'timeline' ? '#FFFFFF' : '#475569',
-                      boxShadow: activeReportTab === 'timeline' ? '0 4px 14px rgba(5, 150, 105, 0.3)' : 'none',
+                      background: activeReportTab === 'timeline' ? '#059669' : 'rgba(255, 255, 255, 0.05)',
+                      color: activeReportTab === 'timeline' ? '#FFFFFF' : '#94A3B8',
+                      boxShadow: activeReportTab === 'timeline' ? '0 4px 14px rgba(5, 150, 105, 0.4)' : 'none',
                       transition: 'all 0.15s ease',
                     }}
                   >
@@ -816,11 +882,11 @@ export default function TesterWorkspacePage() {
                       borderRadius: '8px',
                       fontSize: '0.825rem',
                       fontWeight: 700,
-                      border: activeReportTab === 'playwright' ? '1px solid #7C3AED' : '1px solid transparent',
+                      border: activeReportTab === 'playwright' ? '1px solid #7C3AED' : '1px solid rgba(255, 255, 255, 0.1)',
                       cursor: 'pointer',
-                      background: activeReportTab === 'playwright' ? '#7C3AED' : 'rgba(0, 0, 0, 0.04)',
-                      color: activeReportTab === 'playwright' ? '#FFFFFF' : '#475569',
-                      boxShadow: activeReportTab === 'playwright' ? '0 4px 14px rgba(124, 58, 237, 0.3)' : 'none',
+                      background: activeReportTab === 'playwright' ? '#7C3AED' : 'rgba(255, 255, 255, 0.05)',
+                      color: activeReportTab === 'playwright' ? '#FFFFFF' : '#94A3B8',
+                      boxShadow: activeReportTab === 'playwright' ? '0 4px 14px rgba(124, 58, 237, 0.4)' : 'none',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.35rem',
@@ -859,20 +925,20 @@ export default function TesterWorkspacePage() {
                   <div>
                     {/* Expected vs Actual */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
-                      <div style={{ padding: '1.25rem', background: '#F0FDF4', borderRadius: '12px', border: '1px solid #BBF7D0', borderLeft: '4px solid #10B981' }}>
-                        <h4 style={{ fontSize: '0.72rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', marginBottom: '0.45rem', letterSpacing: '0.06em' }}>
+                      <div style={{ padding: '1.25rem', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.25)', borderLeft: '4px solid #10B981' }}>
+                        <h4 style={{ fontSize: '0.72rem', fontWeight: 800, color: '#34D399', textTransform: 'uppercase', marginBottom: '0.45rem', letterSpacing: '0.06em' }}>
                           EXPECTED BEHAVIOR
                         </h4>
-                        <p style={{ fontSize: '0.925rem', color: '#14532D', lineHeight: 1.5 }}>
+                        <p style={{ fontSize: '0.925rem', color: '#E2E8F0', lineHeight: 1.5 }}>
                           {selectedReport.expected}
                         </p>
                       </div>
 
-                      <div style={{ padding: '1.25rem', background: '#FEF2F2', borderRadius: '12px', border: '1px solid #FECACA', borderLeft: '4px solid #EF4444' }}>
-                        <h4 style={{ fontSize: '0.72rem', fontWeight: 800, color: '#991B1B', textTransform: 'uppercase', marginBottom: '0.45rem', letterSpacing: '0.06em' }}>
+                      <div style={{ padding: '1.25rem', background: 'rgba(239, 68, 68, 0.08)', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.25)', borderLeft: '4px solid #EF4444' }}>
+                        <h4 style={{ fontSize: '0.72rem', fontWeight: 800, color: '#F87171', textTransform: 'uppercase', marginBottom: '0.45rem', letterSpacing: '0.06em' }}>
                           ACTUAL OBSERVED BEHAVIOR
                         </h4>
-                        <p style={{ fontSize: '0.925rem', color: '#7F1D1D', lineHeight: 1.5 }}>
+                        <p style={{ fontSize: '0.925rem', color: '#E2E8F0', lineHeight: 1.5 }}>
                           {selectedReport.actual}
                         </p>
                       </div>
@@ -880,11 +946,11 @@ export default function TesterWorkspacePage() {
 
                     {/* AI Causal Hypothesis */}
                     {selectedReport.root_cause && (
-                      <div style={{ padding: '1.25rem', background: '#FFFBEB', borderRadius: '12px', border: '1px solid #FDE68A', borderLeft: '4px solid #F59E0B', marginBottom: '1.5rem' }}>
-                        <h4 style={{ fontSize: '0.72rem', fontWeight: 800, color: '#92400E', textTransform: 'uppercase', marginBottom: '0.45rem', letterSpacing: '0.06em' }}>
+                      <div style={{ padding: '1.25rem', background: 'rgba(245, 158, 11, 0.08)', borderRadius: '12px', border: '1px solid rgba(245, 158, 11, 0.25)', borderLeft: '4px solid #F59E0B', marginBottom: '1.5rem' }}>
+                        <h4 style={{ fontSize: '0.72rem', fontWeight: 800, color: '#FBBF24', textTransform: 'uppercase', marginBottom: '0.45rem', letterSpacing: '0.06em' }}>
                           AI ROOT CAUSE HYPOTHESIS ({selectedReport.confidence || 'HIGH'} CONFIDENCE)
                         </h4>
-                        <p style={{ fontSize: '0.925rem', color: '#78350F', lineHeight: 1.5 }}>
+                        <p style={{ fontSize: '0.925rem', color: '#E2E8F0', lineHeight: 1.5 }}>
                           {selectedReport.root_cause}
                         </p>
                       </div>
@@ -893,10 +959,10 @@ export default function TesterWorkspacePage() {
                     {/* Interactive Steps to Reproduce */}
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                        <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0F172A' }}>
+                        <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#F8FAFC' }}>
                           Steps to Reproduce ({completedSteps.length}/{selectedReport.steps?.length || 0} Verified)
                         </h4>
-                        <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
                           Click steps to check off during manual reproduction
                         </span>
                       </div>
@@ -913,8 +979,8 @@ export default function TesterWorkspacePage() {
                                 gap: '0.75rem',
                                 padding: '0.75rem 1rem',
                                 borderRadius: '8px',
-                                background: isDone ? '#F0FDF4' : '#FFFFFF',
-                                border: isDone ? '1px solid #86EFAC' : '1px solid #E2E8F0',
+                                background: isDone ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255, 255, 255, 0.04)',
+                                border: isDone ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
                                 cursor: 'pointer',
                                 transition: 'all 0.15s ease',
                               }}
@@ -924,8 +990,8 @@ export default function TesterWorkspacePage() {
                                   width: '18px',
                                   height: '18px',
                                   borderRadius: '50%',
-                                  border: isDone ? 'none' : '2px solid #CBD5E1',
-                                  background: isDone ? '#16A34A' : 'transparent',
+                                  border: isDone ? 'none' : '2px solid rgba(255, 255, 255, 0.25)',
+                                  background: isDone ? '#10B981' : 'transparent',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
@@ -937,12 +1003,12 @@ export default function TesterWorkspacePage() {
                               <span
                                 style={{
                                   fontSize: '0.9rem',
-                                  color: isDone ? '#166534' : '#334155',
+                                  color: isDone ? '#86EFAC' : '#E2E8F0',
                                   textDecoration: isDone ? 'line-through' : 'none',
                                   fontWeight: isDone ? 600 : 500,
                                 }}
                               >
-                                <strong style={{ color: '#0284C7', marginRight: '0.35rem' }}>{idx + 1}.</strong>
+                                <strong style={{ color: '#38BDF8', marginRight: '0.35rem' }}>{idx + 1}.</strong>
                                 {step.replace(/^\[Tester:[^\]]+\]\s*/, '')}
                               </span>
                             </div>
@@ -1064,10 +1130,10 @@ export default function TesterWorkspacePage() {
             ) : (
               <div className="glass-panel" style={{ padding: '3rem 2rem', textAlign: 'center' }}>
                 <Sparkles size={32} color="#DC2626" style={{ margin: '0 auto 1rem' }} />
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.5rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#F8FAFC', marginBottom: '0.5rem' }}>
                   No Defect Report Selected
                 </h3>
-                <p style={{ fontSize: '0.885rem', color: '#64748B', maxWidth: '420px', margin: '0 auto' }}>
+                <p style={{ fontSize: '0.885rem', color: '#94A3B8', maxWidth: '420px', margin: '0 auto' }}>
                   Enter a complaint note on the left or select a previous test from the archive below to view the Canonical Engineering Specification.
                 </p>
               </div>
@@ -1078,17 +1144,17 @@ export default function TesterWorkspacePage() {
         {/* ==================================================================== */}
         {/* PAST TESTED REPORTS ARCHIVE (ACCORDION / SHELF)                      */}
         {/* ==================================================================== */}
-        <section style={{ borderTop: '1px solid rgba(220, 38, 38, 0.1)', paddingTop: '2.5rem', marginTop: '2.5rem' }}>
+        <section style={{ borderTop: '1px solid rgba(220, 38, 38, 0.15)', paddingTop: '2.5rem', marginTop: '2.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <History size={18} color="#DC2626" />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0F172A' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F8FAFC' }}>
                 Tested Defect Reports Archive ({reports.length})
               </h3>
             </div>
             <button
               onClick={() => setShowHistoryShelf(!showHistoryShelf)}
-              style={{ background: 'none', border: 'none', color: '#DC2626', fontSize: '0.82rem', cursor: 'pointer', fontWeight: 700 }}
+              style={{ background: 'none', border: 'none', color: '#F87171', fontSize: '0.82rem', cursor: 'pointer', fontWeight: 700 }}
             >
               {showHistoryShelf ? 'Collapse Archive ▲' : 'Expand Archive ▼'}
             </button>
@@ -1107,22 +1173,22 @@ export default function TesterWorkspacePage() {
                   style={{
                     padding: '1.15rem',
                     cursor: 'pointer',
-                    border: selectedReport?.id === r.id ? '2px solid #DC2626' : '1px solid rgba(17, 24, 39, 0.08)',
-                    background: selectedReport?.id === r.id ? 'rgba(254, 242, 242, 0.95)' : '#FFFFFF',
+                    border: selectedReport?.id === r.id ? '2px solid #DC2626' : '1px solid rgba(255, 255, 255, 0.08)',
+                    background: selectedReport?.id === r.id ? 'rgba(220, 38, 38, 0.15)' : 'rgba(255, 255, 255, 0.03)',
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.45rem' }}>
                     <span className={`badge-severity severity-${r.severity}`}>
                       {r.severity}
                     </span>
-                    <span style={{ fontSize: '0.72rem', color: '#64748B' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
                       {new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
-                  <h4 style={{ fontSize: '0.925rem', fontWeight: 800, color: '#0F172A', lineHeight: 1.35, marginBottom: '0.35rem' }}>
+                  <h4 style={{ fontSize: '0.925rem', fontWeight: 800, color: '#F8FAFC', lineHeight: 1.35, marginBottom: '0.35rem' }}>
                     {r.title}
                   </h4>
-                  <p style={{ fontSize: '0.78rem', color: '#64748B', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                  <p style={{ fontSize: '0.78rem', color: '#94A3B8', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                     {r.root_cause || r.actual}
                   </p>
                 </div>
@@ -1159,6 +1225,12 @@ export default function TesterWorkspacePage() {
           }}
         />
       )}
+
+      {/* Extension Install & Setup Guide Modal */}
+      <ExtensionInstallModal
+        isOpen={extensionModalOpen}
+        onClose={() => setExtensionModalOpen(false)}
+      />
     </div>
   );
 }

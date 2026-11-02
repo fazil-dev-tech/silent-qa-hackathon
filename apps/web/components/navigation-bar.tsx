@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { User, LogOut, ShieldCheck, ChevronRight, Sparkles, KeyRound } from 'lucide-react';
+import { User, LogOut, ShieldCheck, ChevronRight, Sparkles, KeyRound, Download, Puzzle } from 'lucide-react';
+import ExtensionInstallModal from '@/components/extension-install-modal';
 
 interface AuthUser {
   name?: string;
@@ -19,6 +20,7 @@ export default function NavigationBar() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
+  const [extensionModalOpen, setExtensionModalOpen] = useState(false);
 
   async function checkSession() {
     try {
@@ -58,21 +60,25 @@ export default function NavigationBar() {
   }
 
   const isAdmin = user?.role === 'admin';
+  const isLanding = pathname === '/';
 
   return (
-    <header
-      style={{
+    <>
+      <header
+        style={{
         position: 'sticky',
         top: 0,
         zIndex: 50,
-        background: 'rgba(255, 248, 248, 0.92)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(220, 38, 38, 0.12)',
+        background: 'rgba(7, 8, 11, 0.85)',
+        backdropFilter: 'blur(28px) saturate(190%)',
+        WebkitBackdropFilter: 'blur(28px) saturate(190%)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
         padding: '0.85rem 2rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.02)',
+        boxShadow: '0 16px 36px rgba(0, 0, 0, 0.75), inset 0 -1px 0 rgba(255, 255, 255, 0.04)',
+        transition: 'all 0.2s ease',
       }}
     >
       {/* Brand & Left Navigation */}
@@ -86,7 +92,7 @@ export default function NavigationBar() {
             fontSize: '1.2rem',
             fontWeight: 800,
             letterSpacing: '-0.025em',
-            color: '#111827',
+            color: '#FFFFFF',
             textDecoration: 'none',
           }}
         >
@@ -104,8 +110,103 @@ export default function NavigationBar() {
           <span style={{ color: '#DC2626' }}>QA</span>
         </Link>
 
-        {/* Navigation links: Visible ONLY AFTER user logs in */}
-        {user && (
+        {/* Landing Page Navigation Links (Visible for everyone on Landing Page) */}
+        {isLanding ? (
+          <nav
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.4rem',
+              fontSize: '0.86rem',
+              fontWeight: 600,
+            }}
+          >
+            <a
+              href="#problem"
+              style={{
+                color: '#94A3B8',
+                textDecoration: 'none',
+                transition: 'color 0.15s ease',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#FFFFFF')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#94A3B8')}
+            >
+              The Problem
+            </a>
+            <a
+              href="#how-it-works"
+              style={{
+                color: '#94A3B8',
+                textDecoration: 'none',
+                transition: 'color 0.15s ease',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#FFFFFF')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#94A3B8')}
+            >
+              How It Works
+            </a>
+            <a
+              href="#capabilities"
+              style={{
+                color: '#94A3B8',
+                textDecoration: 'none',
+                transition: 'color 0.15s ease',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#FFFFFF')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#94A3B8')}
+            >
+              Capabilities
+            </a>
+            <a
+              href="#architecture"
+              style={{
+                color: '#00F0FF',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                padding: '0.22rem 0.65rem',
+                borderRadius: '9999px',
+                background: 'rgba(0, 240, 255, 0.08)',
+                border: '1px solid rgba(0, 240, 255, 0.25)',
+                boxShadow: '0 0 12px rgba(0, 240, 255, 0.15)',
+                fontWeight: 700,
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(0, 240, 255, 0.16)';
+                e.currentTarget.style.boxShadow = '0 0 18px rgba(0, 240, 255, 0.35)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(0, 240, 255, 0.08)';
+                e.currentTarget.style.boxShadow = '0 0 12px rgba(0, 240, 255, 0.15)';
+              }}
+            >
+              <span
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: '#00F0FF',
+                  boxShadow: '0 0 6px #00F0FF',
+                }}
+              />
+              <span>Architecture</span>
+            </a>
+            {user && (
+              <Link
+                href="/app"
+                style={{
+                  color: '#F87171',
+                  textDecoration: 'none',
+                  fontWeight: 700,
+                }}
+              >
+                Workspace
+              </Link>
+            )}
+          </nav>
+        ) : user ? (
           <nav
             style={{
               display: 'flex',
@@ -118,7 +219,7 @@ export default function NavigationBar() {
             <Link
               href="/"
               style={{
-                color: pathname === '/' ? '#DC2626' : '#4B5563',
+                color: pathname === '/' ? '#DC2626' : '#94A3B8',
                 textDecoration: 'none',
                 transition: 'color 0.15s',
               }}
@@ -128,7 +229,7 @@ export default function NavigationBar() {
             <Link
               href="/app"
               style={{
-                color: pathname === '/app' || pathname?.startsWith('/app/report') ? '#DC2626' : '#4B5563',
+                color: pathname === '/app' || pathname?.startsWith('/app/report') ? '#DC2626' : '#94A3B8',
                 textDecoration: 'none',
                 transition: 'color 0.15s',
               }}
@@ -139,7 +240,7 @@ export default function NavigationBar() {
               <Link
                 href="/admin"
                 style={{
-                  color: pathname === '/admin' ? '#DC2626' : '#4B5563',
+                  color: pathname === '/admin' ? '#DC2626' : '#94A3B8',
                   textDecoration: 'none',
                   transition: 'color 0.15s',
                   display: 'flex',
@@ -152,8 +253,9 @@ export default function NavigationBar() {
                   style={{
                     fontSize: '0.65rem',
                     fontWeight: 800,
-                    background: '#FEE2E2',
-                    color: '#DC2626',
+                    background: 'rgba(220, 38, 38, 0.2)',
+                    color: '#FCA5A5',
+                    border: '1px solid rgba(220, 38, 38, 0.35)',
                     padding: '0.1rem 0.35rem',
                     borderRadius: '4px',
                   }}
@@ -163,11 +265,45 @@ export default function NavigationBar() {
               </Link>
             )}
           </nav>
-        )}
+        ) : null}
       </div>
 
       {/* Right Controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        {/* Chrome Extension Download Button */}
+        <button
+          onClick={() => setExtensionModalOpen(true)}
+          title="Download Chrome Manifest V3 Extension (.ZIP) & View Setup Instructions"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.45rem',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            color: '#38BDF8',
+            background: 'rgba(56, 189, 248, 0.1)',
+            border: '1px solid rgba(56, 189, 248, 0.35)',
+            padding: '0.35rem 0.85rem',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 0 14px rgba(56, 189, 248, 0.15)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(56, 189, 248, 0.2)';
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(56, 189, 248, 0.35)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(56, 189, 248, 0.1)';
+            e.currentTarget.style.boxShadow = '0 0 14px rgba(56, 189, 248, 0.15)';
+            e.currentTarget.style.transform = 'none';
+          }}
+        >
+          <Download size={14} color="#38BDF8" />
+          <span>Extension .ZIP</span>
+        </button>
+
         {/* Supabase Realtime Health Pill */}
         <div
           style={{
@@ -176,11 +312,11 @@ export default function NavigationBar() {
             gap: '0.4rem',
             fontSize: '0.75rem',
             fontWeight: 700,
-            color: '#15803D',
-            background: '#DCFCE7',
+            color: '#4ADE80',
+            background: 'rgba(22, 163, 74, 0.15)',
             padding: '0.3rem 0.75rem',
             borderRadius: '9999px',
-            border: '1px solid #86EFAC',
+            border: '1px solid rgba(74, 222, 128, 0.3)',
           }}
         >
           <span
@@ -189,6 +325,7 @@ export default function NavigationBar() {
               height: '6px',
               borderRadius: '50%',
               backgroundColor: '#16A34A',
+              boxShadow: '0 0 6px #16A34A',
             }}
           />
           Live Cloud
@@ -204,12 +341,12 @@ export default function NavigationBar() {
                 gap: '0.45rem',
                 fontSize: '0.82rem',
                 fontWeight: 600,
-                color: '#1F2937',
-                background: '#FFFFFF',
+                color: '#F8FAFC',
+                background: 'rgba(255, 255, 255, 0.08)',
                 padding: '0.35rem 0.75rem',
                 borderRadius: '8px',
-                border: '1px solid rgba(17, 24, 39, 0.1)',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                boxShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
               }}
             >
               <User size={14} color="#DC2626" />
@@ -229,8 +366,9 @@ export default function NavigationBar() {
                   fontSize: '0.65rem',
                   fontWeight: 800,
                   textTransform: 'uppercase',
-                  background: isAdmin ? '#FEE2E2' : '#E0E7FF',
-                  color: isAdmin ? '#991B1B' : '#3730A3',
+                  background: isAdmin ? 'rgba(220, 38, 38, 0.2)' : 'rgba(56, 189, 248, 0.15)',
+                  color: isAdmin ? '#FCA5A5' : '#7DD3FC',
+                  border: `1px solid ${isAdmin ? 'rgba(220, 38, 38, 0.35)' : 'rgba(56, 189, 248, 0.3)'}`,
                   padding: '0.12rem 0.4rem',
                   borderRadius: '4px',
                 }}
@@ -279,14 +417,14 @@ export default function NavigationBar() {
               title="Sign Out"
               style={{
                 background: 'transparent',
-                border: '1px solid rgba(17, 24, 39, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '8px',
                 padding: '0.4rem 0.6rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.3rem',
-                color: '#6B7280',
+                color: '#94A3B8',
                 fontSize: '0.8rem',
                 fontWeight: 600,
                 transition: 'all 0.15s ease',
@@ -309,7 +447,7 @@ export default function NavigationBar() {
                 alignItems: 'center',
                 gap: '0.4rem',
                 textDecoration: 'none',
-                boxShadow: '0 4px 14px rgba(220, 38, 38, 0.25)',
+                boxShadow: '0 4px 14px rgba(220, 38, 38, 0.35)',
               }}
             >
               <KeyRound size={14} />
@@ -319,5 +457,11 @@ export default function NavigationBar() {
         )}
       </div>
     </header>
+
+    <ExtensionInstallModal
+      isOpen={extensionModalOpen}
+      onClose={() => setExtensionModalOpen(false)}
+    />
+  </>
   );
 }

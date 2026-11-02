@@ -135,8 +135,8 @@ export default function SendEmailModal({
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        background: 'rgba(15, 23, 42, 0.45)',
-        backdropFilter: 'blur(10px)',
+        background: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(12px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -148,15 +148,15 @@ export default function SendEmailModal({
           width: '100%',
           maxWidth: '780px',
           maxHeight: '92vh',
-          background: 'rgba(255, 255, 255, 0.98)',
+          background: 'rgba(13, 16, 25, 0.98)',
           backdropFilter: 'blur(20px)',
-          border: '1.5px solid rgba(220, 38, 38, 0.18)',
+          border: '1.5px solid rgba(220, 38, 38, 0.25)',
           borderRadius: '16px',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 60px -15px rgba(220, 38, 38, 0.15), 0 10px 30px rgba(0, 0, 0, 0.08)',
+          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 30px rgba(220, 38, 38, 0.15)',
           overflow: 'hidden',
-          color: '#0F172A',
+          color: '#F8FAFC',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         }}
       >
@@ -164,11 +164,11 @@ export default function SendEmailModal({
         <div
           style={{
             padding: '1.25rem 1.5rem',
-            borderBottom: '1px solid rgba(226, 232, 240, 0.9)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            background: 'linear-gradient(135deg, rgba(254, 242, 242, 0.8) 0%, rgba(255, 255, 255, 0.95) 100%)',
+            background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.18) 0%, rgba(13, 16, 25, 0.95) 100%)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
@@ -182,16 +182,16 @@ export default function SendEmailModal({
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#FFFFFF',
-                boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
               }}
             >
               <Mail size={18} />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F8FAFC', margin: 0 }}>
                 Approve &amp; Dispatch Defect Report via Email
               </h2>
-              <p style={{ fontSize: '0.75rem', color: '#64748B', margin: 0, marginTop: '0.15rem' }}>
+              <p style={{ fontSize: '0.75rem', color: '#94A3B8', margin: 0, marginTop: '0.15rem' }}>
                 Delivers the formatted Canonical Specification with Before/After proof and AI Auto-Fix code
               </p>
             </div>
@@ -201,9 +201,9 @@ export default function SendEmailModal({
             onClick={onClose}
             type="button"
             style={{
-              background: 'rgba(0, 0, 0, 0.04)',
+              background: 'rgba(255, 255, 255, 0.05)',
               border: 'none',
-              color: '#64748B',
+              color: '#94A3B8',
               cursor: 'pointer',
               padding: '0.4rem',
               borderRadius: '8px',
@@ -223,9 +223,9 @@ export default function SendEmailModal({
                   width: 58,
                   height: 58,
                   borderRadius: '50%',
-                  background: '#F0FDF4',
+                  background: 'rgba(16, 185, 129, 0.15)',
                   border: '2px solid #10B981',
-                  color: '#16A34A',
+                  color: '#4ADE80',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -235,19 +235,19 @@ export default function SendEmailModal({
               >
                 <CheckCircle size={32} />
               </div>
-              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#F8FAFC', marginBottom: '0.5rem' }}>
                 Defect Report Dispatched Successfully!
               </h3>
-              <p style={{ fontSize: '0.85rem', color: '#475569', maxWidth: '480px', margin: '0 auto 1.5rem' }}>
+              <p style={{ fontSize: '0.85rem', color: '#94A3B8', maxWidth: '480px', margin: '0 auto 1.5rem' }}>
                 Delivered to{' '}
-                <strong style={{ color: '#0F172A' }}>{sentResult.recipients?.join(', ')}</strong>. The report
-                status in Supabase has been updated to <strong style={{ color: '#0284C7' }}>SENT</strong>.
+                <strong style={{ color: '#F8FAFC' }}>{sentResult.recipients?.join(', ')}</strong>. The report
+                status in Supabase has been updated to <strong style={{ color: '#38BDF8' }}>SENT</strong>.
               </p>
 
               <div
                 style={{
-                  background: '#F8FAFC',
-                  border: '1px solid #E2E8F0',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
                   borderRadius: '10px',
                   padding: '1rem',
                   maxWidth: '520px',
@@ -256,7 +256,7 @@ export default function SendEmailModal({
                   fontSize: '0.78rem',
                 }}
               >
-                <div style={{ color: '#64748B', marginBottom: '0.35rem', fontWeight: 600 }}>Public Verification Link:</div>
+                <div style={{ color: '#94A3B8', marginBottom: '0.35rem', fontWeight: 600 }}>Public Verification Link:</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <input
                     type="text"
@@ -266,7 +266,7 @@ export default function SendEmailModal({
                       flex: 1,
                       background: 'transparent',
                       border: 'none',
-                      color: '#0284C7',
+                      color: '#38BDF8',
                       fontFamily: 'monospace',
                       fontSize: '0.8rem',
                       fontWeight: 600,
@@ -281,9 +281,9 @@ export default function SendEmailModal({
                     }}
                     type="button"
                     style={{
-                      background: 'rgba(2, 132, 199, 0.08)',
-                      border: '1px solid rgba(2, 132, 199, 0.25)',
-                      color: '#0284C7',
+                      background: 'rgba(56, 189, 248, 0.15)',
+                      border: '1px solid rgba(56, 189, 248, 0.3)',
+                      color: '#38BDF8',
                       padding: '0.3rem 0.65rem',
                       borderRadius: '6px',
                       fontSize: '0.72rem',
@@ -318,7 +318,7 @@ export default function SendEmailModal({
                     display: 'block',
                     fontSize: '0.75rem',
                     fontWeight: 800,
-                    color: '#DC2626',
+                    color: '#F87171',
                     textTransform: 'uppercase',
                     letterSpacing: '0.06em',
                     marginBottom: '0.45rem',
@@ -330,8 +330,8 @@ export default function SendEmailModal({
                 {/* Recipient Chips Container */}
                 <div
                   style={{
-                    background: '#F8FAFC',
-                    border: '1.5px solid #E2E8F0',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.12)',
                     borderRadius: '10px',
                     padding: '0.5rem 0.65rem',
                     display: 'flex',
@@ -345,9 +345,9 @@ export default function SendEmailModal({
                     <span
                       key={email}
                       style={{
-                        background: 'rgba(239, 246, 255, 0.95)',
-                        border: '1px solid #BFDBFE',
-                        color: '#1D4ED8',
+                        background: 'rgba(56, 189, 248, 0.15)',
+                        border: '1px solid rgba(56, 189, 248, 0.3)',
+                        color: '#38BDF8',
                         padding: '0.2rem 0.55rem',
                         borderRadius: '9999px',
                         fontSize: '0.75rem',
@@ -364,7 +364,7 @@ export default function SendEmailModal({
                         style={{
                           background: 'none',
                           border: 'none',
-                          color: '#3B82F6',
+                          color: '#38BDF8',
                           cursor: 'pointer',
                           padding: 0,
                           display: 'flex',
@@ -396,7 +396,7 @@ export default function SendEmailModal({
                       background: 'transparent',
                       border: 'none',
                       outline: 'none',
-                      color: '#0F172A',
+                      color: '#F8FAFC',
                       fontSize: '0.85rem',
                       padding: '0.2rem 0.35rem',
                     }}
@@ -428,7 +428,7 @@ export default function SendEmailModal({
 
                 {/* Quick Preset Email Buttons */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 600 }}>Quick Presets:</span>
+                  <span style={{ fontSize: '0.7rem', color: '#94A3B8', fontWeight: 600 }}>Quick Presets:</span>
                   {[
                     'qa-lead@silentqa.local',
                     'dev-triage@company.com',
@@ -439,9 +439,9 @@ export default function SendEmailModal({
                       type="button"
                       onClick={() => handleAddPreset(preset)}
                       style={{
-                        background: 'rgba(0, 0, 0, 0.04)',
-                        border: '1px solid rgba(0, 0, 0, 0.08)',
-                        color: '#475569',
+                        background: 'rgba(255, 255, 255, 0.04)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#94A3B8',
                         borderRadius: '4px',
                         padding: '0.15rem 0.45rem',
                         fontSize: '0.7rem',
@@ -462,7 +462,7 @@ export default function SendEmailModal({
                     display: 'block',
                     fontSize: '0.75rem',
                     fontWeight: 800,
-                    color: '#DC2626',
+                    color: '#F87171',
                     textTransform: 'uppercase',
                     letterSpacing: '0.06em',
                     marginBottom: '0.35rem',
@@ -477,11 +477,11 @@ export default function SendEmailModal({
                   rows={2}
                   style={{
                     width: '100%',
-                    background: '#F8FAFC',
-                    border: '1.5px solid #E2E8F0',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.12)',
                     borderRadius: '8px',
                     padding: '0.65rem 0.85rem',
-                    color: '#0F172A',
+                    color: '#F8FAFC',
                     fontSize: '0.85rem',
                     fontFamily: 'inherit',
                     lineHeight: 1.45,
@@ -496,7 +496,7 @@ export default function SendEmailModal({
                 style={{
                   display: 'flex',
                   gap: '0.5rem',
-                  borderBottom: '1px solid rgba(226, 232, 240, 0.9)',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                   paddingBottom: '0.65rem',
                   marginBottom: '1rem',
                 }}
@@ -509,10 +509,10 @@ export default function SendEmailModal({
                     borderRadius: '6px',
                     fontSize: '0.78rem',
                     fontWeight: 700,
-                    border: 'none',
+                    border: activeTab === 'preview' ? '1px solid #DC2626' : '1px solid transparent',
                     cursor: 'pointer',
-                    background: activeTab === 'preview' ? 'rgba(220, 38, 38, 0.1)' : 'transparent',
-                    color: activeTab === 'preview' ? '#DC2626' : '#64748B',
+                    background: activeTab === 'preview' ? 'rgba(220, 38, 38, 0.2)' : 'transparent',
+                    color: activeTab === 'preview' ? '#F87171' : '#94A3B8',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.35rem',
@@ -529,10 +529,10 @@ export default function SendEmailModal({
                     borderRadius: '6px',
                     fontSize: '0.78rem',
                     fontWeight: 700,
-                    border: 'none',
+                    border: activeTab === 'payload' ? '1px solid #DC2626' : '1px solid transparent',
                     cursor: 'pointer',
-                    background: activeTab === 'payload' ? 'rgba(220, 38, 38, 0.1)' : 'transparent',
-                    color: activeTab === 'payload' ? '#DC2626' : '#64748B',
+                    background: activeTab === 'payload' ? 'rgba(220, 38, 38, 0.2)' : 'transparent',
+                    color: activeTab === 'payload' ? '#F87171' : '#94A3B8',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.35rem',
@@ -547,8 +547,8 @@ export default function SendEmailModal({
               {activeTab === 'preview' ? (
                 <div
                   style={{
-                    background: '#F8FAFC',
-                    border: '1px solid #E2E8F0',
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
                     borderRadius: '10px',
                     padding: '1.25rem',
                     maxHeight: '320px',
@@ -559,8 +559,8 @@ export default function SendEmailModal({
                   {/* Subject Line Bar */}
                   <div
                     style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #E2E8F0',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
                       padding: '0.65rem 0.85rem',
                       borderRadius: '8px',
                       marginBottom: '1rem',
@@ -568,12 +568,12 @@ export default function SendEmailModal({
                     }}
                   >
                     <div>
-                      <strong style={{ color: '#64748B' }}>To:</strong>{' '}
-                      <span style={{ color: '#0F172A', fontWeight: 600 }}>{recipients.join(', ') || 'No recipients'}</span>
+                      <strong style={{ color: '#94A3B8' }}>To:</strong>{' '}
+                      <span style={{ color: '#F8FAFC', fontWeight: 600 }}>{recipients.join(', ') || 'No recipients'}</span>
                     </div>
                     <div style={{ marginTop: '0.2rem' }}>
-                      <strong style={{ color: '#64748B' }}>Subject:</strong>{' '}
-                      <span style={{ color: '#0F172A', fontWeight: 700 }}>
+                      <strong style={{ color: '#94A3B8' }}>Subject:</strong>{' '}
+                      <span style={{ color: '#F8FAFC', fontWeight: 700 }}>
                         [DEFECT REPORT] {report.title} ({report.severity.toUpperCase()})
                       </span>
                     </div>
@@ -599,15 +599,15 @@ export default function SendEmailModal({
 
                   <div
                     style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #E2E8F0',
+                      background: 'rgba(13, 16, 25, 0.95)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
                       borderTop: 'none',
                       borderRadius: '0 0 8px 8px',
                       padding: '1.25rem',
                     }}
                   >
                     {/* Badges */}
-                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
                       <span
                         style={{
                           background: severityColor,
@@ -623,9 +623,9 @@ export default function SendEmailModal({
                       </span>
                       <span
                         style={{
-                          background: 'rgba(2, 132, 199, 0.08)',
-                          color: '#0284C7',
-                          border: '1px solid rgba(2, 132, 199, 0.25)',
+                          background: 'rgba(56, 189, 248, 0.15)',
+                          color: '#38BDF8',
+                          border: '1px solid rgba(56, 189, 248, 0.3)',
                           fontSize: '0.68rem',
                           fontWeight: 700,
                           padding: '0.15rem 0.5rem',
@@ -636,9 +636,9 @@ export default function SendEmailModal({
                       </span>
                       <span
                         style={{
-                          background: 'rgba(16, 185, 129, 0.08)',
-                          color: '#059669',
-                          border: '1px solid rgba(16, 185, 129, 0.25)',
+                          background: 'rgba(16, 185, 129, 0.15)',
+                          color: '#34D399',
+                          border: '1px solid rgba(16, 185, 129, 0.3)',
                           fontSize: '0.68rem',
                           fontWeight: 700,
                           padding: '0.15rem 0.5rem',
@@ -653,20 +653,20 @@ export default function SendEmailModal({
                       </span>
                     </div>
 
-                    <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0F172A', margin: '0 0 0.5rem' }}>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F8FAFC', margin: '0 0 0.5rem' }}>
                       {report.title}
                     </h4>
 
                     {customNote && (
                       <div
                         style={{
-                          background: '#FEF2F2',
+                          background: 'rgba(220, 38, 38, 0.12)',
                           borderLeft: '3px solid #EF4444',
                           padding: '0.5rem 0.75rem',
                           borderRadius: '4px',
                           marginBottom: '0.75rem',
                           fontSize: '0.78rem',
-                          color: '#991B1B',
+                          color: '#FCA5A5',
                         }}
                       >
                         <strong>Note from Tester:</strong> &ldquo;{customNote}&rdquo;
@@ -675,35 +675,35 @@ export default function SendEmailModal({
 
                     {/* Before/After in Preview */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                      <div style={{ background: '#FEF2F2', borderLeft: '3px solid #EF4444', padding: '0.5rem', borderRadius: '4px' }}>
-                        <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#DC2626', textTransform: 'uppercase' }}>RAW HUMAN NOTE</div>
-                        <div style={{ fontSize: '0.75rem', fontStyle: 'italic', color: '#7F1D1D' }}>&ldquo;{report.raw_note || report.title}&rdquo;</div>
+                      <div style={{ background: 'rgba(220, 38, 38, 0.12)', borderLeft: '3px solid #EF4444', padding: '0.5rem', borderRadius: '4px' }}>
+                        <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#F87171', textTransform: 'uppercase' }}>RAW HUMAN NOTE</div>
+                        <div style={{ fontSize: '0.75rem', fontStyle: 'italic', color: '#FECACA' }}>&ldquo;{report.raw_note || report.title}&rdquo;</div>
                       </div>
-                      <div style={{ background: '#F0FDF4', borderLeft: '3px solid #10B981', padding: '0.5rem', borderRadius: '4px' }}>
-                        <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#059669', textTransform: 'uppercase' }}>AI SPECIFICATION</div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#065F46' }}>{report.title}</div>
+                      <div style={{ background: 'rgba(16, 185, 129, 0.12)', borderLeft: '3px solid #10B981', padding: '0.5rem', borderRadius: '4px' }}>
+                        <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#34D399', textTransform: 'uppercase' }}>AI SPECIFICATION</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#A7F3D0' }}>{report.title}</div>
                       </div>
                     </div>
 
                     {/* Expected vs Actual in Preview */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                      <div style={{ background: '#F0FDF4', borderLeft: '3px solid #10B981', padding: '0.5rem', borderRadius: '4px' }}>
-                        <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#059669', textTransform: 'uppercase' }}>EXPECTED</div>
-                        <div style={{ fontSize: '0.75rem', color: '#14532D' }}>{report.expected}</div>
+                      <div style={{ background: 'rgba(16, 185, 129, 0.12)', borderLeft: '3px solid #10B981', padding: '0.5rem', borderRadius: '4px' }}>
+                        <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#34D399', textTransform: 'uppercase' }}>EXPECTED</div>
+                        <div style={{ fontSize: '0.75rem', color: '#D1FAE5' }}>{report.expected}</div>
                       </div>
-                      <div style={{ background: '#FEF2F2', borderLeft: '3px solid #EF4444', padding: '0.5rem', borderRadius: '4px' }}>
-                        <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#DC2626', textTransform: 'uppercase' }}>ACTUAL</div>
-                        <div style={{ fontSize: '0.75rem', color: '#7F1D1D' }}>{report.actual}</div>
+                      <div style={{ background: 'rgba(220, 38, 38, 0.12)', borderLeft: '3px solid #EF4444', padding: '0.5rem', borderRadius: '4px' }}>
+                        <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#F87171', textTransform: 'uppercase' }}>ACTUAL</div>
+                        <div style={{ fontSize: '0.75rem', color: '#FEE2E2' }}>{report.actual}</div>
                       </div>
                     </div>
 
                     {/* Auto-fix code in Preview */}
                     {report.suggested_fix && (
                       <div style={{ marginBottom: '0.75rem' }}>
-                        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#059669', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#34D399', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
                           ✨ AI AUTO-FIX CODE PATCH
                         </div>
-                        <pre style={{ background: '#0F172A', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '6px', padding: '0.65rem 0.85rem', fontSize: '0.72rem', color: '#A7F3D0', margin: 0, overflowX: 'auto' }}>
+                        <pre style={{ background: '#07080A', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '6px', padding: '0.65rem 0.85rem', fontSize: '0.72rem', color: '#A7F3D0', margin: 0, overflowX: 'auto' }}>
                           <code>{report.suggested_fix}</code>
                         </pre>
                       </div>
@@ -714,8 +714,8 @@ export default function SendEmailModal({
                 /* Tab 2: Settings & Payload */
                 <div
                   style={{
-                    background: '#0F172A',
-                    border: '1px solid #1E293B',
+                    background: '#07080A',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '10px',
                     padding: '1rem',
                     fontFamily: 'monospace',
@@ -748,9 +748,9 @@ export default function SendEmailModal({
                     marginTop: '1rem',
                     padding: '0.65rem 0.85rem',
                     borderRadius: '8px',
-                    background: '#FEF2F2',
-                    border: '1px solid #FECACA',
-                    color: '#991B1B',
+                    background: 'rgba(220, 38, 38, 0.15)',
+                    border: '1px solid rgba(248, 113, 113, 0.35)',
+                    color: '#FCA5A5',
                     fontSize: '0.78rem',
                     display: 'flex',
                     alignItems: 'center',
@@ -770,14 +770,14 @@ export default function SendEmailModal({
           <div
             style={{
               padding: '1rem 1.5rem',
-              borderTop: '1px solid rgba(226, 232, 240, 0.9)',
+              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              background: '#F8FAFC',
+              background: 'rgba(255, 255, 255, 0.02)',
             }}
           >
-            <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>
+            <div style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 600 }}>
               <span>{recipients.length} recipient(s) queued for delivery</span>
             </div>
 

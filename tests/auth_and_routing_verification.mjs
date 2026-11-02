@@ -91,8 +91,8 @@ async function runTests() {
   assert.ok(overviewHtml.includes('Silent QA'), 'Has brand title');
   assert.ok(overviewHtml.includes('Turn 1-Sentence Tester Notes into'), 'Has primary headline');
   assert.ok(overviewHtml.includes('Sign In / Register'), 'Has Sign In CTA');
-  assert.ok(overviewHtml.includes('The 8-Stage Real-Time Telemetry Pipeline'), 'Has pipeline contents');
-  assert.ok(overviewHtml.includes('Preset Real-World Reproduction Scenarios'), 'Has scenario data');
+  assert.ok(overviewHtml.includes('Three steps to executable repros') || overviewHtml.includes('How It Works'), 'Has How It Works workflow contents');
+  assert.ok(overviewHtml.includes('See How Raw Human Text Becomes a') || overviewHtml.includes('Flight Simulator'), 'Has live flight simulator contents');
   console.log('✓ Overview page verified with comprehensive data, metrics, and clean unauthenticated state.');
 
   console.log('\n================================================================');

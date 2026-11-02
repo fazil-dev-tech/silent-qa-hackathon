@@ -4,7 +4,7 @@
 ### *Enterprise Browser Flight Recorder • AI Causal Synthesis • Deterministic Playwright Reproduction*
 
 [![Live Production](https://img.shields.io/badge/Vercel-Live%20Production-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://hhhcct.vercel.app)
-[![TCS Technology Day](https://img.shields.io/badge/TCS%20Technology%20Day-Aligned%20Solution-005696?style=for-the-badge&logo=tata)](https://hhhcct.vercel.app)
+[![Enterprise QA Standard](https://img.shields.io/badge/Enterprise%20QA-ISO%2FIEC%2029119%20Aligned-005696?style=for-the-badge)](https://hhhcct.vercel.app)
 [![Quality Standard](https://img.shields.io/badge/Quality%20Feedback%20Score-%E2%89%A585%25%20Canonical-10B981?style=for-the-badge)](https://hhhcct.vercel.app)
 [![Next.js 15](https://img.shields.io/badge/Next.js-15.5.28%20App%20Router-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7.3-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
@@ -15,7 +15,7 @@
 
 <br />
 
-**[🌐 Experience Live Production Web App](https://hhhcct.vercel.app)** • **[📖 Problem Statement Alignment](#-tcs-technology-day-problem-statement-alignment)** • **[📊 Enhancement Criteria](#-the-4-pillars-of-defect-enhancement)** • **[⚡ Architecture](#-system-architecture)** • **[🚀 Quickstart](#-monorepo-setup--local-development)**
+**[🌐 Experience Live Production Web App](https://hhhcct.vercel.app)** • **[📖 Industry Standard Alignment](#-enterprise-qa-standard--industry-alignment)** • **[📊 Enhancement Criteria](#-the-4-pillars-of-defect-enhancement)** • **[⚡ Architecture](#-system-architecture)** • **[🚀 Quickstart](#-monorepo-setup--local-development)**
 
 </div>
 
@@ -39,9 +39,9 @@ When a tester observes an issue and types even a 4-word note (e.g., *"checkout b
 
 ---
 
-## 🏆 TCS Technology Day Problem Statement Alignment
+## 🏆 Enterprise QA Standard & Industry Alignment
 
-| Problem Statement Dimension | TCS Problem Statement Requirement | Silent QA Enterprise Implementation | Status |
+| Industry Specification Dimension | Enterprise QA Standard Requirement | Silent QA Enterprise Implementation | Status |
 | :--- | :--- | :--- | :--- |
 | **Track & Category** | **IT Quality Assurance: Automated Defect Description Enhancer** | Full-stack platform combining Chrome MV3 Flight Recorder, Next.js 15 Web Workspace, and AI synthesis. | ✅ **100% Compliant** |
 | **Input Specification** | Raw, informal, incomplete defect text from human testers | Natural language input note + synchronized in-memory telemetry slice from the active browser tab. | ✅ **Exceeded** |
@@ -215,7 +215,7 @@ hhhcct/
 │   │   │   │   └── sessions/    # Flight recording session manager
 │   │   │   └── login/           # Authentication portal (Admin & Tester roles)
 │   │   ├── components/          # Enterprise UI Component Suite
-│   │   │   ├── canonical-defect-card.tsx       # TCS Criteria spec card with 85%+ quality banner
+│   │   │   ├── canonical-defect-card.tsx       # 4-Pillars Criteria spec card with 85%+ quality banner
 │   │   │   ├── enhancement-criteria-modal.tsx  # Interactive 4-Pillar Criteria Showcase & Scoring
 │   │   │   ├── navigation-bar.tsx              # Unified light-theme glassmorphism navigation header
 │   │   │   ├── qa-copilot-chat.tsx             # Interactive floating Copilot AI assistant
@@ -246,8 +246,8 @@ hhhcct/
 
 ### 2. Clone and Install Dependencies
 ```bash
-git clone https://github.com/fazil-dev-tech/silent-qa-hackathon.git
-cd silent-qa-hackathon
+git clone https://github.com/fazil-dev-tech/silent-qa-enterprise.git
+cd silent-qa
 npm install
 ```
 
@@ -321,9 +321,10 @@ npx vercel --prod --yes
 
 ## 👥 Authors & Team
 - **Project Lead & Architecture**: Mohamed Fazil ([@fazil-dev-tech](https://github.com/fazil-dev-tech))
-- **Competition**: TCS Technology Day — Automated Defect Description Enhancer
+- **Standard**: Enterprise IT Quality Assurance — Automated Defect Description Enhancer
 - **License**: MIT Enterprise License
 
 <div align="center">
 <b>Silent QA</b> — *Turning chaotic bug reports into deterministic, reproducible engineering specifications in 1.2 seconds.*
 </div>
+

@@ -218,11 +218,12 @@ export default function ReportDetailPage() {
       <div
         style={{
           minHeight: '100vh',
-          background: '#FFF8F8',
+          background: '#07080A',
           backgroundImage:
-            'radial-gradient(at 0% 0%, rgba(220, 38, 38, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.04) 0px, transparent 40%)',
+            'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(220, 38, 38, 0.15), rgba(7, 8, 10, 0.98))',
           padding: '2.5rem 1.5rem',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          color: '#F8FAFC',
         }}
       >
         <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
@@ -231,7 +232,7 @@ export default function ReportDetailPage() {
               href="/app"
               style={{
                 fontSize: '0.85rem',
-                color: '#DC2626',
+                color: '#F87171',
                 fontWeight: 700,
                 display: 'flex',
                 alignItems: 'center',
@@ -258,9 +259,9 @@ export default function ReportDetailPage() {
                 padding: '0.85rem 1.25rem',
                 borderRadius: '10px',
                 marginBottom: '1.5rem',
-                background: actionMessage.startsWith('✓') ? '#DCFCE7' : '#FEE2E2',
-                border: `1px solid ${actionMessage.startsWith('✓') ? '#86EFAC' : '#F87171'}`,
-                color: actionMessage.startsWith('✓') ? '#166534' : '#991B1B',
+                background: actionMessage.startsWith('✓') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(220, 38, 38, 0.15)',
+                border: `1px solid ${actionMessage.startsWith('✓') ? 'rgba(52, 211, 153, 0.35)' : 'rgba(248, 113, 113, 0.35)'}`,
+                color: actionMessage.startsWith('✓') ? '#86EFAC' : '#FCA5A5',
                 fontSize: '0.875rem',
                 fontWeight: 600,
               }}
@@ -283,27 +284,34 @@ export default function ReportDetailPage() {
                       borderRadius: '9999px',
                       background:
                         report.status === 'verified'
-                          ? '#DCFCE7'
+                          ? 'rgba(16, 185, 129, 0.15)'
                           : report.status === 'sent'
-                            ? '#EFF6FF'
-                            : '#FEF3C7',
+                            ? 'rgba(56, 189, 248, 0.15)'
+                            : 'rgba(245, 158, 11, 0.15)',
                       color:
                         report.status === 'verified'
-                          ? '#166534'
+                          ? '#4ADE80'
                           : report.status === 'sent'
-                            ? '#1D4ED8'
-                            : '#B45309',
+                            ? '#38BDF8'
+                            : '#FBBF24',
+                      border: `1px solid ${
+                        report.status === 'verified'
+                          ? 'rgba(16, 185, 129, 0.35)'
+                          : report.status === 'sent'
+                            ? 'rgba(56, 189, 248, 0.35)'
+                            : 'rgba(245, 158, 11, 0.35)'
+                      }`,
                     }}
                   >
                     {report.status === 'verified' ? '✓ REPRODUCED & VERIFIED' : report.status.toUpperCase()}
                   </span>
                   {!report.ai_fallback && (
-                    <span style={{ fontSize: '0.75rem', color: '#DC2626', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#F87171', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                       <Sparkles size={12} /> OpenRouter Nemotron-3
                     </span>
                   )}
                 </div>
-                <h1 style={{ fontSize: '1.95rem', fontWeight: 900, color: '#111827', lineHeight: 1.25 }}>
+                <h1 style={{ fontSize: '1.95rem', fontWeight: 900, color: '#F8FAFC', lineHeight: 1.25 }}>
                   {report.title}
                 </h1>
               </div>
@@ -315,7 +323,7 @@ export default function ReportDetailPage() {
                   className="btn-secondary"
                   style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                 >
-                  <Play size={13} color="#2563EB" />
+                  <Play size={13} color="#38BDF8" />
                   <span>{runningProbe ? 'Running Probe...' : '▶ Run Reproduction Probe'}</span>
                 </button>
 
@@ -346,8 +354,8 @@ export default function ReportDetailPage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.35rem',
-                    color: '#DC2626',
-                    borderColor: 'rgba(220, 38, 38, 0.25)',
+                    color: '#F87171',
+                    borderColor: 'rgba(220, 38, 38, 0.35)',
                   }}
                 >
                   <Trash2 size={13} />
@@ -357,7 +365,7 @@ export default function ReportDetailPage() {
             </div>
 
             {/* 4 Professional Navigation Tabs */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid rgba(17, 24, 39, 0.08)', paddingBottom: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.75rem', flexWrap: 'wrap' }}>
               <button
                 onClick={() => setActiveTab('canonical')}
                 style={{
@@ -365,11 +373,11 @@ export default function ReportDetailPage() {
                   borderRadius: '8px',
                   fontSize: '0.85rem',
                   fontWeight: 700,
-                  border: activeTab === 'canonical' ? '1px solid #0284C7' : '1px solid transparent',
+                  border: activeTab === 'canonical' ? '1px solid #0284C7' : '1px solid rgba(255, 255, 255, 0.1)',
                   cursor: 'pointer',
-                  background: activeTab === 'canonical' ? '#0284C7' : 'rgba(0, 0, 0, 0.04)',
-                  color: activeTab === 'canonical' ? '#ffffff' : '#4B5563',
-                  boxShadow: activeTab === 'canonical' ? '0 0 12px rgba(2, 132, 199, 0.35)' : 'none',
+                  background: activeTab === 'canonical' ? '#0284C7' : 'rgba(255, 255, 255, 0.05)',
+                  color: activeTab === 'canonical' ? '#ffffff' : '#94A3B8',
+                  boxShadow: activeTab === 'canonical' ? '0 0 12px rgba(2, 132, 199, 0.4)' : 'none',
                   transition: 'all 0.15s ease',
                 }}
               >
@@ -383,11 +391,11 @@ export default function ReportDetailPage() {
                   borderRadius: '8px',
                   fontSize: '0.85rem',
                   fontWeight: 700,
-                  border: activeTab === 'overview' ? '1px solid #DC2626' : '1px solid transparent',
+                  border: activeTab === 'overview' ? '1px solid #DC2626' : '1px solid rgba(255, 255, 255, 0.1)',
                   cursor: 'pointer',
-                  background: activeTab === 'overview' ? '#DC2626' : 'rgba(0, 0, 0, 0.04)',
-                  color: activeTab === 'overview' ? '#ffffff' : '#4B5563',
-                  boxShadow: activeTab === 'overview' ? '0 0 12px rgba(220, 38, 38, 0.35)' : 'none',
+                  background: activeTab === 'overview' ? '#DC2626' : 'rgba(255, 255, 255, 0.05)',
+                  color: activeTab === 'overview' ? '#ffffff' : '#94A3B8',
+                  boxShadow: activeTab === 'overview' ? '0 0 12px rgba(220, 38, 38, 0.4)' : 'none',
                   transition: 'all 0.15s ease',
                 }}
               >
@@ -401,11 +409,11 @@ export default function ReportDetailPage() {
                   borderRadius: '8px',
                   fontSize: '0.85rem',
                   fontWeight: 700,
-                  border: activeTab === 'timeline' ? '1px solid #059669' : '1px solid transparent',
+                  border: activeTab === 'timeline' ? '1px solid #059669' : '1px solid rgba(255, 255, 255, 0.1)',
                   cursor: 'pointer',
-                  background: activeTab === 'timeline' ? '#059669' : 'rgba(0, 0, 0, 0.04)',
-                  color: activeTab === 'timeline' ? '#ffffff' : '#4B5563',
-                  boxShadow: activeTab === 'timeline' ? '0 0 12px rgba(5, 150, 105, 0.35)' : 'none',
+                  background: activeTab === 'timeline' ? '#059669' : 'rgba(255, 255, 255, 0.05)',
+                  color: activeTab === 'timeline' ? '#ffffff' : '#94A3B8',
+                  boxShadow: activeTab === 'timeline' ? '0 0 12px rgba(5, 150, 105, 0.4)' : 'none',
                   transition: 'all 0.15s ease',
                 }}
               >
@@ -419,11 +427,11 @@ export default function ReportDetailPage() {
                   borderRadius: '8px',
                   fontSize: '0.85rem',
                   fontWeight: 700,
-                  border: activeTab === 'playwright' ? '1px solid #7C3AED' : '1px solid transparent',
+                  border: activeTab === 'playwright' ? '1px solid #7C3AED' : '1px solid rgba(255, 255, 255, 0.1)',
                   cursor: 'pointer',
-                  background: activeTab === 'playwright' ? '#7C3AED' : 'rgba(0, 0, 0, 0.04)',
-                  color: activeTab === 'playwright' ? '#ffffff' : '#4B5563',
-                  boxShadow: activeTab === 'playwright' ? '0 0 12px rgba(124, 58, 237, 0.35)' : 'none',
+                  background: activeTab === 'playwright' ? '#7C3AED' : 'rgba(255, 255, 255, 0.05)',
+                  color: activeTab === 'playwright' ? '#ffffff' : '#94A3B8',
+                  boxShadow: activeTab === 'playwright' ? '0 0 12px rgba(124, 58, 237, 0.4)' : 'none',
                   transition: 'all 0.15s ease',
                 }}
               >
@@ -447,24 +455,24 @@ export default function ReportDetailPage() {
                       padding: '1rem',
                       borderRadius: '10px',
                       marginBottom: '1.75rem',
-                      background: probeResult.reproduced ? '#F0FDF4' : '#FEF2F2',
-                      border: probeResult.reproduced ? '1px solid #86EFAC' : '1px solid #FECACA',
+                      background: probeResult.reproduced ? 'rgba(16, 185, 129, 0.12)' : 'rgba(220, 38, 38, 0.12)',
+                      border: `1px solid ${probeResult.reproduced ? 'rgba(52, 211, 153, 0.35)' : 'rgba(248, 113, 113, 0.35)'}`,
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
                       {probeResult.reproduced ? (
-                        <CheckCircle2 size={16} color="#16A34A" />
+                        <CheckCircle2 size={16} color="#34D399" />
                       ) : (
-                        <AlertOctagon size={16} color="#DC2626" />
+                        <AlertOctagon size={16} color="#F87171" />
                       )}
-                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: probeResult.reproduced ? '#166534' : '#991B1B' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: probeResult.reproduced ? '#86EFAC' : '#FCA5A5' }}>
                         Verdict: {probeResult.reproduced ? 'REPRODUCED & VERIFIED IN REALTIME' : 'PROBE COMPLETE'}
                       </span>
-                      <span style={{ fontSize: '0.75rem', color: '#6B7280', marginLeft: 'auto' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#94A3B8', marginLeft: 'auto' }}>
                         Latency: {probeResult.execution_time_ms}ms
                       </span>
                     </div>
-                    <p style={{ fontSize: '0.85rem', color: probeResult.reproduced ? '#14532D' : '#7F1D1D' }}>
+                    <p style={{ fontSize: '0.85rem', color: probeResult.reproduced ? '#BBF7D0' : '#FECACA' }}>
                       {probeResult.verdict}
                     </p>
                   </div>
@@ -472,39 +480,39 @@ export default function ReportDetailPage() {
 
                 {/* Expected vs Actual */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '2rem' }}>
-                  <div style={{ padding: '1.25rem', background: '#F0FDF4', borderRadius: '12px', border: '1px solid #BBF7D0' }}>
-                    <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                  <div style={{ padding: '1.25rem', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.25)', borderLeft: '4px solid #10B981' }}>
+                    <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#34D399', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                       Expected Behavior
                     </h3>
-                    <p style={{ fontSize: '0.95rem', color: '#14532D', lineHeight: 1.5 }}>{report.expected}</p>
+                    <p style={{ fontSize: '0.95rem', color: '#E2E8F0', lineHeight: 1.5 }}>{report.expected}</p>
                   </div>
 
-                  <div style={{ padding: '1.25rem', background: '#FEF2F2', borderRadius: '12px', border: '1px solid #FECACA' }}>
-                    <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#991B1B', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                  <div style={{ padding: '1.25rem', background: 'rgba(239, 68, 68, 0.08)', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.25)', borderLeft: '4px solid #EF4444' }}>
+                    <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#F87171', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                       Actual Behavior
                     </h3>
-                    <p style={{ fontSize: '0.95rem', color: '#7F1D1D', lineHeight: 1.5 }}>{report.actual}</p>
+                    <p style={{ fontSize: '0.95rem', color: '#E2E8F0', lineHeight: 1.5 }}>{report.actual}</p>
                   </div>
                 </div>
 
                 {/* Root Cause Hypothesis */}
                 {report.root_cause && (
-                  <div style={{ padding: '1.25rem', background: '#FFFBEB', borderRadius: '12px', border: '1px solid #FDE68A', marginBottom: '2rem' }}>
-                    <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#92400E', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                  <div style={{ padding: '1.25rem', background: 'rgba(245, 158, 11, 0.08)', borderRadius: '12px', border: '1px solid rgba(245, 158, 11, 0.25)', borderLeft: '4px solid #F59E0B', marginBottom: '2rem' }}>
+                    <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#FBBF24', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                       AI Causal Hypothesis (OpenRouter Reasoning)
                     </h3>
-                    <p style={{ fontSize: '0.95rem', color: '#78350F', lineHeight: 1.5 }}>{report.root_cause}</p>
+                    <p style={{ fontSize: '0.95rem', color: '#E2E8F0', lineHeight: 1.5 }}>{report.root_cause}</p>
                   </div>
                 )}
 
                 {/* Interactive Steps to Reproduce */}
                 <div style={{ marginBottom: '2rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F8FAFC' }}>
                       Steps to Reproduce ({completedSteps.length}/{report.steps?.length || 0} Verified)
                     </h3>
                     {report.steps && report.steps.length > 0 && (
-                      <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
                         Click steps to check off during manual reproduction
                       </span>
                     )}
@@ -522,8 +530,8 @@ export default function ReportDetailPage() {
                             gap: '0.75rem',
                             padding: '0.75rem 1rem',
                             borderRadius: '8px',
-                            background: isDone ? '#F0FDF4' : '#FFFFFF',
-                            border: isDone ? '1px solid #86EFAC' : '1px solid rgba(17, 24, 39, 0.08)',
+                            background: isDone ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255, 255, 255, 0.04)',
+                            border: isDone ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
                             cursor: 'pointer',
                             transition: 'all 0.15s ease',
                           }}
@@ -533,8 +541,8 @@ export default function ReportDetailPage() {
                               width: '20px',
                               height: '20px',
                               borderRadius: '50%',
-                              border: isDone ? 'none' : '2px solid #D1D5DB',
-                              background: isDone ? '#16A34A' : 'transparent',
+                              border: isDone ? 'none' : '2px solid rgba(255, 255, 255, 0.25)',
+                              background: isDone ? '#10B981' : 'transparent',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
@@ -546,7 +554,7 @@ export default function ReportDetailPage() {
                           <span
                             style={{
                               fontSize: '0.925rem',
-                              color: isDone ? '#166534' : '#374151',
+                              color: isDone ? '#86EFAC' : '#E2E8F0',
                               textDecoration: isDone ? 'line-through' : 'none',
                               fontWeight: isDone ? 600 : 500,
                             }}
@@ -564,7 +572,7 @@ export default function ReportDetailPage() {
             {/* Tab 3: Interactive Event Timeline */}
             {activeTab === 'timeline' && (
               <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827', marginBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F8FAFC', marginBottom: '0.75rem' }}>
                   Flight Telemetry Timeline ({Array.isArray(report.evidence) ? report.evidence.length : 0} Events)
                 </h3>
                 <EventTimeline events={report.evidence || []} />
@@ -577,7 +585,7 @@ export default function ReportDetailPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <Terminal size={18} color="#DC2626" />
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F8FAFC' }}>
                       Synthesized Playwright Reproduction Test
                     </h3>
                   </div>
@@ -606,8 +614,8 @@ export default function ReportDetailPage() {
                 {/* Terminal Execution Snippet */}
                 <div
                   style={{
-                    background: '#1E293B',
-                    border: '1px solid #334155',
+                    background: '#07080A',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '8px',
                     padding: '0.65rem 1rem',
                     marginBottom: '1rem',
@@ -631,8 +639,8 @@ export default function ReportDetailPage() {
                       )
                     }
                     style={{
-                      background: '#0F172A',
-                      border: '1px solid #475569',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
                       color: '#94A3B8',
                       padding: '0.25rem 0.55rem',
                       borderRadius: '4px',
@@ -651,7 +659,7 @@ export default function ReportDetailPage() {
 
                 <pre
                   style={{
-                    background: '#0F172A',
+                    background: '#07080A',
                     color: '#E2E8F0',
                     padding: '1.25rem',
                     borderRadius: '12px',
@@ -667,175 +675,6 @@ export default function ReportDetailPage() {
             )}
           </div>
         </div>
-
-        {/* Root Cause Hypothesis */}
-        {report.root_cause && (
-          <div style={{ padding: '1.25rem', background: '#FFFBEB', borderRadius: '12px', border: '1px solid #FDE68A', marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '0.775rem', fontWeight: 800, color: '#92400E', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-              AI Causal Hypothesis (OpenRouter Reasoning)
-            </h3>
-            <p style={{ fontSize: '0.95rem', color: '#78350F', lineHeight: 1.5 }}>{report.root_cause}</p>
-          </div>
-        )}
-
-        {/* Interactive Steps to Reproduce */}
-        <div style={{ marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>
-              Steps to Reproduce ({completedSteps.length}/{report.steps?.length || 0} Verified)
-            </h3>
-            {report.steps && report.steps.length > 0 && (
-              <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
-                Click steps to check off during manual reproduction
-              </span>
-            )}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {report.steps?.map((step: string, idx: number) => {
-              const isDone = completedSteps.includes(idx);
-              return (
-                <div
-                  key={idx}
-                  onClick={() => handleToggleStep(idx)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '8px',
-                    background: isDone ? '#F0FDF4' : '#FFFFFF',
-                    border: isDone ? '1px solid #86EFAC' : '1px solid rgba(17, 24, 39, 0.08)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      border: isDone ? 'none' : '2px solid #D1D5DB',
-                      background: isDone ? '#16A34A' : 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {isDone && <Check size={12} color="#FFFFFF" />}
-                  </div>
-                  <span
-                    style={{
-                      fontSize: '0.925rem',
-                      color: isDone ? '#166534' : '#374151',
-                      textDecoration: isDone ? 'line-through' : 'none',
-                      fontWeight: isDone ? 600 : 500,
-                    }}
-                  >
-                    {idx + 1}. {step}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Playwright Script */}
-        {report.playwright_script && (
-          <div style={{ marginBottom: '2.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Terminal size={18} color="#DC2626" />
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>
-                  Synthesized Playwright Reproduction Test
-                </h3>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <button
-                  onClick={handleDownloadScript}
-                  className="btn-secondary"
-                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                >
-                  <Download size={13} />
-                  <span>Download (.spec.ts)</span>
-                </button>
-
-                <button
-                  onClick={handleCopyScript}
-                  className="btn-secondary"
-                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                >
-                  {copiedScript ? <Check size={14} color="#16A34A" /> : <Copy size={14} />}
-                  <span>{copiedScript ? 'Copied!' : 'Copy Script'}</span>
-                </button>
-              </div>
-            </div>
-
-
-            {/* Terminal Execution Snippet */}
-            <div
-              style={{
-                background: '#1E293B',
-                border: '1px solid #334155',
-                borderRadius: '8px',
-                padding: '0.65rem 1rem',
-                marginBottom: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '0.75rem',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
-                <span style={{ color: '#F43F5E', fontWeight: 800, fontSize: '0.8rem', userSelect: 'none' }}>$</span>
-                <code style={{ color: '#F1F5F9', fontSize: '0.8rem', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  npx playwright test tests/reproduce-{id ? id.slice(0, 8) : 'test'}.spec.ts --headed
-                </code>
-              </div>
-
-              <button
-                onClick={() =>
-                  handleCopyCommand(
-                    `npx playwright test tests/reproduce-${id ? id.slice(0, 8) : 'test'}.spec.ts --headed`
-                  )
-                }
-                style={{
-                  background: '#0F172A',
-                  border: '1px solid #475569',
-                  color: '#94A3B8',
-                  padding: '0.25rem 0.55rem',
-                  borderRadius: '4px',
-                  fontSize: '0.725rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {copiedCmd ? <Check size={11} color="#10B981" /> : <Copy size={11} />}
-                <span>{copiedCmd ? 'Copied' : 'Copy Command'}</span>
-              </button>
-            </div>
-
-            <pre
-              style={{
-                background: '#0F172A',
-                color: '#E2E8F0',
-                padding: '1.25rem',
-                borderRadius: '12px',
-                overflowX: 'auto',
-                fontSize: '0.85rem',
-                lineHeight: 1.5,
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-              }}
-            >
-              <code>{report.playwright_script}</code>
-            </pre>
-          </div>
-        )}
-
       </div>
 
       {/* Export Modal */}

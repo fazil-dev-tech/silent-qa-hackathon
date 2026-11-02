@@ -159,9 +159,7 @@ function AuthForm() {
       const data = await res.json();
       if (res.ok) {
         setMessage({ text: '✓ Verified successfully! Redirecting...', type: 'success' });
-        setTimeout(() => {
-          router.push(redirectTarget || data.redirect || '/app');
-        }, 600);
+        router.push(redirectTarget || data.redirect || '/app');
       } else {
         throw new Error(data.error || 'Verification failed');
       }
@@ -196,9 +194,7 @@ function AuthForm() {
       const data = await res.json();
       if (res.ok) {
         setMessage({ text: '✓ Administrator verified! Entering Command Center...', type: 'success' });
-        setTimeout(() => {
-          router.push(redirectTarget || '/admin');
-        }, 500);
+        router.push(redirectTarget || '/admin');
       } else {
         throw new Error(data.error || 'Invalid Administrator credentials');
       }
@@ -216,8 +212,8 @@ function AuthForm() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '2rem 1.5rem',
-        background: 'linear-gradient(180deg, #FFF8F8 0%, #FFFFFF 100%)',
+        padding: '2.5rem 1.5rem',
+        background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(220, 38, 38, 0.12), rgba(7, 8, 10, 0.98))',
       }}
     >
       <motion.div
@@ -236,29 +232,30 @@ function AuthForm() {
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '48px',
-              height: '48px',
-              borderRadius: '14px',
-              background: '#FEE2E2',
-              color: '#DC2626',
+              width: '52px',
+              height: '52px',
+              borderRadius: '16px',
+              background: 'rgba(220, 38, 38, 0.12)',
+              color: '#EF4444',
               marginBottom: '0.85rem',
-              boxShadow: '0 4px 12px rgba(220, 38, 38, 0.15)',
+              border: '1px solid rgba(220, 38, 38, 0.3)',
+              boxShadow: '0 0 24px rgba(220, 38, 38, 0.25)',
             }}
           >
-            <ShieldCheck size={26} />
+            <ShieldCheck size={28} />
           </div>
           <h1
             style={{
-              fontSize: '1.65rem',
+              fontSize: '1.75rem',
               fontWeight: 800,
               letterSpacing: '-0.025em',
-              color: '#111827',
+              color: '#FFFFFF',
               margin: '0 0 0.4rem 0',
             }}
           >
             Silent QA Access Portal
           </h1>
-          <p style={{ fontSize: '0.875rem', color: '#6B7280', margin: 0 }}>
+          <p style={{ fontSize: '0.875rem', color: '#94A3B8', margin: 0 }}>
             {authMethod === 'admin'
               ? 'Lead & Administrative Command Center access'
               : 'Passkey-free flight recorder access via verified OTP'}
@@ -270,11 +267,11 @@ function AuthForm() {
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
-            background: '#F3F4F6',
-            padding: '0.25rem',
-            borderRadius: '10px',
+            background: 'rgba(255, 255, 255, 0.03)',
+            padding: '0.3rem',
+            borderRadius: '12px',
             marginBottom: '1.25rem',
-            border: '1px solid rgba(17, 24, 39, 0.06)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
           }}
         >
           <button
@@ -284,15 +281,15 @@ function AuthForm() {
               setMessage(null);
             }}
             style={{
-              padding: '0.55rem',
-              borderRadius: '8px',
-              fontSize: '0.82rem',
+              padding: '0.6rem',
+              borderRadius: '9px',
+              fontSize: '0.84rem',
               fontWeight: 700,
-              border: 'none',
+              border: authMethod === 'tester' ? '1px solid rgba(220, 38, 38, 0.4)' : '1px solid transparent',
               cursor: 'pointer',
-              background: authMethod === 'tester' ? '#FFFFFF' : 'transparent',
-              color: authMethod === 'tester' ? '#111827' : '#6B7280',
-              boxShadow: authMethod === 'tester' ? '0 2px 6px rgba(0, 0, 0, 0.06)' : 'none',
+              background: authMethod === 'tester' ? 'rgba(220, 38, 38, 0.2)' : 'transparent',
+              color: authMethod === 'tester' ? '#FFFFFF' : '#94A3B8',
+              boxShadow: authMethod === 'tester' ? '0 0 16px rgba(220, 38, 38, 0.25)' : 'none',
               transition: 'all 0.15s ease',
             }}
           >
@@ -305,15 +302,15 @@ function AuthForm() {
               setMessage(null);
             }}
             style={{
-              padding: '0.55rem',
-              borderRadius: '8px',
-              fontSize: '0.82rem',
+              padding: '0.6rem',
+              borderRadius: '9px',
+              fontSize: '0.84rem',
               fontWeight: 700,
-              border: 'none',
+              border: authMethod === 'admin' ? '1px solid rgba(220, 38, 38, 0.4)' : '1px solid transparent',
               cursor: 'pointer',
-              background: authMethod === 'admin' ? '#FFFFFF' : 'transparent',
-              color: authMethod === 'admin' ? '#DC2626' : '#6B7280',
-              boxShadow: authMethod === 'admin' ? '0 2px 6px rgba(0, 0, 0, 0.06)' : 'none',
+              background: authMethod === 'admin' ? 'rgba(220, 38, 38, 0.2)' : 'transparent',
+              color: authMethod === 'admin' ? '#FFFFFF' : '#94A3B8',
+              boxShadow: authMethod === 'admin' ? '0 0 16px rgba(220, 38, 38, 0.25)' : 'none',
               transition: 'all 0.15s ease',
             }}
           >
@@ -324,12 +321,12 @@ function AuthForm() {
         {/* Auth Glass Card */}
         <div
           style={{
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(16px)',
-            borderRadius: '16px',
-            padding: '1.75rem',
-            border: '1px solid rgba(220, 38, 38, 0.14)',
-            boxShadow: '0 12px 36px rgba(220, 38, 38, 0.08)',
+            background: 'rgba(13, 16, 25, 0.85)',
+            backdropFilter: 'blur(24px)',
+            borderRadius: '18px',
+            padding: '1.85rem',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(220, 38, 38, 0.08)',
           }}
         >
           {/* Notification Alert Message */}
@@ -347,9 +344,9 @@ function AuthForm() {
                   borderRadius: '10px',
                   fontSize: '0.82rem',
                   fontWeight: 600,
-                  background: message.type === 'success' ? '#DCFCE7' : '#FEE2E2',
-                  color: message.type === 'success' ? '#15803D' : '#DC2626',
-                  border: `1px solid ${message.type === 'success' ? '#86EFAC' : '#FCA5A5'}`,
+                  background: message.type === 'success' ? 'rgba(22, 101, 52, 0.25)' : 'rgba(220, 38, 38, 0.15)',
+                  color: message.type === 'success' ? '#86EFAC' : '#FCA5A5',
+                  border: `1px solid ${message.type === 'success' ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
                   overflow: 'hidden',
                 }}
               >
@@ -370,7 +367,7 @@ function AuthForm() {
                     justifyContent: 'center',
                     gap: '1.5rem',
                     marginBottom: '1.5rem',
-                    borderBottom: '1px solid #F3F4F6',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                     paddingBottom: '0.75rem',
                   }}
                 >
@@ -386,8 +383,8 @@ function AuthForm() {
                       fontSize: '0.875rem',
                       fontWeight: 700,
                       cursor: 'pointer',
-                      color: testerMode === 'login' ? '#DC2626' : '#9CA3AF',
-                      borderBottom: testerMode === 'login' ? '2px solid #DC2626' : '2px solid transparent',
+                      color: testerMode === 'login' ? '#F8FAFC' : '#64748B',
+                      borderBottom: testerMode === 'login' ? '2px solid #EF4444' : '2px solid transparent',
                       paddingBottom: '0.5rem',
                       transition: 'all 0.15s ease',
                     }}
@@ -406,8 +403,8 @@ function AuthForm() {
                       fontSize: '0.875rem',
                       fontWeight: 700,
                       cursor: 'pointer',
-                      color: testerMode === 'register' ? '#DC2626' : '#9CA3AF',
-                      borderBottom: testerMode === 'register' ? '2px solid #DC2626' : '2px solid transparent',
+                      color: testerMode === 'register' ? '#F8FAFC' : '#64748B',
+                      borderBottom: testerMode === 'register' ? '2px solid #EF4444' : '2px solid transparent',
                       paddingBottom: '0.5rem',
                       transition: 'all 0.15s ease',
                     }}
@@ -428,7 +425,7 @@ function AuthForm() {
                         display: 'block',
                         fontSize: '0.8rem',
                         fontWeight: 700,
-                        color: '#374151',
+                        color: '#CBD5E1',
                         marginBottom: '0.4rem',
                       }}
                     >
@@ -447,7 +444,9 @@ function AuthForm() {
                           width: '100%',
                           padding: '0.65rem 0.85rem 0.65rem 2.4rem',
                           borderRadius: '8px',
-                          border: '1px solid rgba(17, 24, 39, 0.16)',
+                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          background: 'rgba(255, 255, 255, 0.04)',
+                          color: '#F8FAFC',
                           fontSize: '0.875rem',
                           boxSizing: 'border-box',
                           outline: 'none',
@@ -474,7 +473,7 @@ function AuthForm() {
                           display: 'block',
                           fontSize: '0.8rem',
                           fontWeight: 700,
-                          color: '#374151',
+                          color: '#CBD5E1',
                           marginBottom: '0.4rem',
                         }}
                       >
@@ -493,7 +492,9 @@ function AuthForm() {
                             width: '100%',
                             padding: '0.65rem 0.85rem 0.65rem 2.4rem',
                             borderRadius: '8px',
-                            border: '1px solid rgba(17, 24, 39, 0.16)',
+                            border: '1px solid rgba(255, 255, 255, 0.12)',
+                            background: 'rgba(255, 255, 255, 0.04)',
+                            color: '#F8FAFC',
                             fontSize: '0.875rem',
                             boxSizing: 'border-box',
                             outline: 'none',
@@ -505,7 +506,7 @@ function AuthForm() {
                           style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }}
                         />
                       </div>
-                      <span style={{ fontSize: '0.72rem', color: '#6B7280', marginTop: '0.25rem', display: 'block' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '0.25rem', display: 'block' }}>
                         Only mobile number and email required. Role is automatically provisioned as Flight Tester.
                       </span>
                     </motion.div>
@@ -527,6 +528,10 @@ function AuthForm() {
                       gap: '0.45rem',
                       cursor: loading ? 'not-allowed' : 'pointer',
                       marginTop: '0.5rem',
+                      background: 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)',
+                      color: '#FFFFFF',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      boxShadow: '0 4px 20px rgba(220, 38, 38, 0.45)',
                     }}
                   >
                     {loading ? (
@@ -543,10 +548,10 @@ function AuthForm() {
                 /* Step 2: 6-Digit OTP Verification Boxes */
                 <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.35rem' }}>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.85rem', color: '#4B5563', marginBottom: '0.2rem' }}>
+                    <div style={{ fontSize: '0.85rem', color: '#94A3B8', marginBottom: '0.2rem' }}>
                       Enter the 6-digit code delivered to:
                     </div>
-                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#111827' }}>{email}</div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#F8FAFC' }}>{email}</div>
                   </div>
 
                   {/* 6 Digit Input Group */}
@@ -571,10 +576,11 @@ function AuthForm() {
                           fontSize: '1.4rem',
                           fontWeight: 800,
                           borderRadius: '10px',
-                          border: digit ? '2px solid #DC2626' : '1px solid rgba(17, 24, 39, 0.2)',
-                          background: digit ? '#FFF8F8' : '#FFFFFF',
+                          border: digit ? '2px solid #EF4444' : '1px solid rgba(255, 255, 255, 0.14)',
+                          background: digit ? 'rgba(220, 38, 38, 0.16)' : 'rgba(255, 255, 255, 0.04)',
                           outline: 'none',
-                          color: '#111827',
+                          color: '#F8FAFC',
+                          boxShadow: digit ? '0 0 15px rgba(220, 38, 38, 0.35)' : 'none',
                           transition: 'all 0.15s ease',
                         }}
                       />
@@ -596,6 +602,10 @@ function AuthForm() {
                       justifyContent: 'center',
                       gap: '0.45rem',
                       cursor: verifying ? 'not-allowed' : 'pointer',
+                      background: 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)',
+                      color: '#FFFFFF',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      boxShadow: '0 4px 20px rgba(220, 38, 38, 0.45)',
                     }}
                   >
                     {verifying ? (
@@ -616,7 +626,7 @@ function AuthForm() {
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: '#6B7280',
+                        color: '#94A3B8',
                         cursor: 'pointer',
                         padding: 0,
                         textDecoration: 'underline',
@@ -632,7 +642,7 @@ function AuthForm() {
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: cooldown > 0 ? '#9CA3AF' : '#DC2626',
+                        color: cooldown > 0 ? '#64748B' : '#EF4444',
                         fontWeight: 700,
                         cursor: cooldown > 0 ? 'default' : 'pointer',
                         padding: 0,
@@ -651,18 +661,18 @@ function AuthForm() {
             <form onSubmit={handleAdminLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
               <div
                 style={{
-                  background: '#FEF2F2',
-                  border: '1px solid #FCA5A5',
+                  background: 'rgba(220, 38, 38, 0.12)',
+                  border: '1px solid rgba(220, 38, 38, 0.3)',
                   padding: '0.65rem 0.85rem',
                   borderRadius: '8px',
                   fontSize: '0.78rem',
-                  color: '#991B1B',
+                  color: '#FCA5A5',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.4rem',
                 }}
               >
-                <Shield size={16} color="#DC2626" />
+                <Shield size={16} color="#EF4444" />
                 <span>Executive Command Center. Pre-authorized credentials required.</span>
               </div>
 
@@ -674,7 +684,7 @@ function AuthForm() {
                     display: 'block',
                     fontSize: '0.8rem',
                     fontWeight: 700,
-                    color: '#374151',
+                    color: '#CBD5E1',
                     marginBottom: '0.4rem',
                   }}
                 >
@@ -694,7 +704,9 @@ function AuthForm() {
                       width: '100%',
                       padding: '0.65rem 0.85rem 0.65rem 2.4rem',
                       borderRadius: '8px',
-                      border: '1px solid rgba(17, 24, 39, 0.16)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      color: '#F8FAFC',
                       fontSize: '0.875rem',
                       boxSizing: 'border-box',
                       outline: 'none',
@@ -716,7 +728,7 @@ function AuthForm() {
                     display: 'block',
                     fontSize: '0.8rem',
                     fontWeight: 700,
-                    color: '#374151',
+                    color: '#CBD5E1',
                     marginBottom: '0.4rem',
                   }}
                 >
@@ -736,7 +748,9 @@ function AuthForm() {
                       width: '100%',
                       padding: '0.65rem 2.4rem 0.65rem 2.4rem',
                       borderRadius: '8px',
-                      border: '1px solid rgba(17, 24, 39, 0.16)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      color: '#F8FAFC',
                       fontSize: '0.875rem',
                       boxSizing: 'border-box',
                       outline: 'none',
@@ -784,6 +798,9 @@ function AuthForm() {
                   cursor: loading ? 'not-allowed' : 'pointer',
                   marginTop: '0.5rem',
                   background: 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)',
+                  color: '#FFFFFF',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  boxShadow: '0 4px 20px rgba(220, 38, 38, 0.45)',
                 }}
               >
                 {loading ? (
@@ -800,7 +817,7 @@ function AuthForm() {
         </div>
 
         {/* Security Note Footer */}
-        <div style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.75rem', color: '#6B7280' }}>
+        <div style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.75rem', color: '#64748B' }}>
           <span>Protected by SHA-256 OTP Code Verification & Gmail SMTP Transport.</span>
         </div>
       </motion.div>

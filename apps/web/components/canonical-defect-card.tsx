@@ -107,13 +107,14 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
   return (
     <div
       style={{
-        background: 'rgba(255, 255, 255, 0.96)',
-        backdropFilter: 'blur(20px)',
-        border: '1.5px solid rgba(220, 38, 38, 0.15)',
+        background: 'rgba(13, 16, 25, 0.85)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
         borderRadius: '16px',
         padding: '1.75rem',
-        boxShadow: '0 20px 45px -10px rgba(220, 38, 38, 0.08), 0 4px 16px rgba(0, 0, 0, 0.03)',
-        color: '#0F172A',
+        boxShadow: '0 20px 45px rgba(0, 0, 0, 0.7), 0 0 35px rgba(220, 38, 38, 0.08)',
+        color: '#F8FAFC',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
     >
@@ -147,9 +148,9 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         {/* AI Confidence Badge */}
         <span
           style={{
-            border: '1px solid #0284C7',
-            color: '#0369A1',
-            background: 'rgba(2, 132, 199, 0.08)',
+            border: '1px solid rgba(2, 132, 199, 0.4)',
+            color: '#38BDF8',
+            background: 'rgba(2, 132, 199, 0.12)',
             fontSize: '0.72rem',
             fontWeight: 700,
             padding: '0.25rem 0.75rem',
@@ -160,8 +161,8 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           }}
         >
           <span>AI Confidence</span>
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#0284C7' }} />
-          <strong style={{ color: '#0284C7' }}>{confidencePercent}</strong>
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#38BDF8' }} />
+          <strong style={{ color: '#38BDF8' }}>{confidencePercent}</strong>
         </span>
 
         {/* SHA-256 Verified Badge */}
@@ -170,9 +171,9 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           type="button"
           title="Click to copy verified SHA-256 telemetry cryptographic hash"
           style={{
-            border: '1px solid #059669',
-            color: '#047857',
-            background: 'rgba(16, 185, 129, 0.08)',
+            border: '1px solid rgba(16, 185, 129, 0.4)',
+            color: '#34D399',
+            background: 'rgba(16, 185, 129, 0.12)',
             fontSize: '0.72rem',
             fontWeight: 700,
             padding: '0.25rem 0.75rem',
@@ -184,19 +185,19 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
             transition: 'all 0.15s ease',
           }}
         >
-          <Lock size={12} color="#059669" />
+          <Lock size={12} color="#34D399" />
           <span>{copiedHash ? '✓ SHA-256 Copied!' : 'SHA-256 Verified (Click to copy)'}</span>
         </button>
 
-        {/* TCS QA Enhancement Score Badge */}
+        {/* Enterprise QA Enhancement Score Badge */}
         <button
           onClick={() => setCriteriaModalOpen(true)}
           type="button"
           title="Click to view full Documentation on Enhancement Criteria and 85%+ quality metrics"
           style={{
-            border: '1px solid #16A34A',
-            color: '#15803D',
-            background: 'rgba(22, 163, 74, 0.08)',
+            border: '1px solid rgba(34, 197, 94, 0.4)',
+            color: '#86EFAC',
+            background: 'rgba(22, 163, 74, 0.15)',
             fontSize: '0.72rem',
             fontWeight: 800,
             padding: '0.25rem 0.75rem',
@@ -208,16 +209,16 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
             transition: 'all 0.15s ease',
           }}
         >
-          <Award size={12} color="#16A34A" />
+          <Award size={12} color="#86EFAC" />
           <span>Quality Feedback: 94% (&gt;85% Standard)</span>
         </button>
       </div>
 
-      {/* TCS IT QA Enhancement Criteria Banner */}
+      {/* Enterprise IT QA Enhancement Criteria Banner */}
       <div
         style={{
-          background: 'linear-gradient(135deg, rgba(254, 242, 242, 0.7) 0%, rgba(240, 253, 244, 0.7) 100%)',
-          border: '1px solid rgba(220, 38, 38, 0.12)',
+          background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(16, 185, 129, 0.1) 100%)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
           borderRadius: '12px',
           padding: '0.85rem 1.15rem',
           marginBottom: '1.25rem',
@@ -231,14 +232,14 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
           <Sparkles size={16} color="#DC2626" />
           <div>
-            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#111827' }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#FFFFFF' }}>
               Automated Defect Description Enhancer • GenAI Text Refinement &amp; Telemetry Fusion
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#4B5563', display: 'flex', gap: '0.75rem', marginTop: '0.15rem' }}>
-              <span>Clarity: <strong style={{ color: '#166534' }}>96%</strong></span>
-              <span>Completeness: <strong style={{ color: '#166534' }}>92%</strong></span>
-              <span>Reproducibility: <strong style={{ color: '#166534' }}>95%</strong></span>
-              <span>Latency: <strong style={{ color: '#0284C7' }}>1.2s Real-time</strong></span>
+            <div style={{ fontSize: '0.72rem', color: '#94A3B8', display: 'flex', gap: '0.75rem', marginTop: '0.15rem' }}>
+              <span>Clarity: <strong style={{ color: '#86EFAC' }}>96%</strong></span>
+              <span>Completeness: <strong style={{ color: '#86EFAC' }}>92%</strong></span>
+              <span>Reproducibility: <strong style={{ color: '#86EFAC' }}>95%</strong></span>
+              <span>Latency: <strong style={{ color: '#38BDF8' }}>1.2s Real-time</strong></span>
             </div>
           </div>
         </div>
@@ -246,9 +247,9 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         <button
           onClick={() => setCriteriaModalOpen(true)}
           style={{
-            background: '#FFFFFF',
-            border: '1px solid rgba(220, 38, 38, 0.25)',
-            color: '#DC2626',
+            background: 'rgba(255, 255, 255, 0.06)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            color: '#F8FAFC',
             fontSize: '0.75rem',
             fontWeight: 700,
             padding: '0.35rem 0.75rem',
@@ -257,7 +258,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
             display: 'flex',
             alignItems: 'center',
             gap: '0.35rem',
-            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.03)',
+            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
             transition: 'all 0.15s ease',
           }}
         >
@@ -277,11 +278,11 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
       >
         <div
           style={{
-            background: 'rgba(254, 242, 242, 0.85)',
+            background: 'rgba(220, 38, 38, 0.12)',
             borderLeft: '4px solid #EF4444',
             borderRadius: '10px',
             padding: '1rem',
-            border: '1px solid rgba(239, 68, 68, 0.15)',
+            border: '1px solid rgba(220, 38, 38, 0.25)',
             borderLeftWidth: '4px',
           }}
         >
@@ -289,7 +290,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
             style={{
               fontSize: '0.68rem',
               fontWeight: 800,
-              color: '#DC2626',
+              color: '#F87171',
               textTransform: 'uppercase',
               marginBottom: '0.35rem',
               letterSpacing: '0.06em',
@@ -297,18 +298,18 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           >
             RAW HUMAN NOTE (INPUT)
           </div>
-          <div style={{ fontSize: '0.92rem', fontStyle: 'italic', color: '#991B1B', lineHeight: 1.45 }}>
+          <div style={{ fontSize: '0.92rem', fontStyle: 'italic', color: '#FCA5A5', lineHeight: 1.45 }}>
             &ldquo;{report.raw_note || report.title}&rdquo;
           </div>
         </div>
 
         <div
           style={{
-            background: 'rgba(240, 253, 244, 0.85)',
+            background: 'rgba(16, 185, 129, 0.12)',
             borderLeft: '4px solid #10B981',
             borderRadius: '10px',
             padding: '1rem',
-            border: '1px solid rgba(16, 185, 129, 0.15)',
+            border: '1px solid rgba(16, 185, 129, 0.25)',
             borderLeftWidth: '4px',
           }}
         >
@@ -316,7 +317,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
             style={{
               fontSize: '0.68rem',
               fontWeight: 800,
-              color: '#059669',
+              color: '#34D399',
               textTransform: 'uppercase',
               marginBottom: '0.35rem',
               letterSpacing: '0.06em',
@@ -324,10 +325,10 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           >
             AI-ENHANCED SPECIFICATION (OUTPUT)
           </div>
-          <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#065F46', lineHeight: 1.45 }}>
+          <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.45 }}>
             {report.title}
           </div>
-          <div style={{ fontSize: '0.72rem', color: '#047857', marginTop: '0.35rem', fontWeight: 600 }}>
+          <div style={{ fontSize: '0.72rem', color: '#86EFAC', marginTop: '0.35rem', fontWeight: 600 }}>
             {report.steps.length} verified steps • {severityLabel} • {confidencePercent} confidence
           </div>
         </div>
@@ -351,7 +352,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           style={{
             fontSize: '1rem',
             fontStyle: 'italic',
-            color: '#1E293B',
+            color: '#E2E8F0',
             lineHeight: 1.45,
           }}
         >
@@ -363,7 +364,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
       <div style={{ marginBottom: '1.25rem' }}>
         <div
           style={{
-            color: '#0284C7',
+            color: '#38BDF8',
             fontSize: '0.72rem',
             fontWeight: 800,
             letterSpacing: '0.08em',
@@ -376,7 +377,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         <div
           style={{
             fontSize: '0.9rem',
-            color: '#334155',
+            color: '#94A3B8',
             fontWeight: 600,
           }}
         >
@@ -388,7 +389,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
       <div style={{ marginBottom: '1.5rem' }}>
         <div
           style={{
-            color: '#0284C7',
+            color: '#38BDF8',
             fontSize: '0.72rem',
             fontWeight: 800,
             letterSpacing: '0.08em',
@@ -404,15 +405,15 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
               key={idx}
               style={{
                 fontSize: '0.885rem',
-                color: '#334155',
+                color: '#E2E8F0',
                 lineHeight: 1.45,
-                background: 'rgba(248, 250, 252, 0.8)',
-                border: '1px solid rgba(226, 232, 240, 0.8)',
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius: '8px',
                 padding: '0.55rem 0.85rem',
               }}
             >
-              <strong style={{ color: '#0284C7', marginRight: '0.4rem' }}>{idx + 1}.</strong>
+              <strong style={{ color: '#38BDF8', marginRight: '0.4rem' }}>{idx + 1}.</strong>
               {step.replace(/^\[Tester:[^\]]+\]\s*/, '')}
             </div>
           ))}
@@ -432,7 +433,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         <div>
           <div
             style={{
-              color: '#059669',
+              color: '#34D399',
               fontSize: '0.72rem',
               fontWeight: 800,
               letterSpacing: '0.08em',
@@ -444,13 +445,13 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           </div>
           <div
             style={{
-              background: '#F0FDF4',
-              border: '1px solid #BBF7D0',
+              background: 'rgba(16, 185, 129, 0.1)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
               borderLeft: '4px solid #10B981',
               borderRadius: '8px',
               padding: '0.85rem 1rem',
               fontSize: '0.885rem',
-              color: '#14532D',
+              color: '#A7F3D0',
               lineHeight: 1.45,
             }}
           >
@@ -462,7 +463,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         <div>
           <div
             style={{
-              color: '#DC2626',
+              color: '#F87171',
               fontSize: '0.72rem',
               fontWeight: 800,
               letterSpacing: '0.08em',
@@ -474,13 +475,13 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           </div>
           <div
             style={{
-              background: '#FEF2F2',
-              border: '1px solid #FECACA',
+              background: 'rgba(220, 38, 38, 0.1)',
+              border: '1px solid rgba(220, 38, 38, 0.3)',
               borderLeft: '4px solid #EF4444',
               borderRadius: '8px',
               padding: '0.85rem 1rem',
               fontSize: '0.885rem',
-              color: '#7F1D1D',
+              color: '#FCA5A5',
               lineHeight: 1.45,
             }}
           >
@@ -493,7 +494,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
       <div style={{ marginBottom: '1.5rem' }}>
         <div
           style={{
-            color: '#475569',
+            color: '#94A3B8',
             fontSize: '0.72rem',
             fontWeight: 800,
             letterSpacing: '0.08em',
@@ -505,8 +506,8 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         </div>
         <div
           style={{
-            background: '#0F172A',
-            border: '1px solid #1E293B',
+            background: 'rgba(4, 6, 11, 0.85)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
             borderRadius: '10px',
             padding: '0.85rem 1.15rem',
             fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
@@ -523,7 +524,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
       <div style={{ marginBottom: '1.5rem' }}>
         <div
           style={{
-            color: '#D97706',
+            color: '#FBBF24',
             fontSize: '0.72rem',
             fontWeight: 800,
             letterSpacing: '0.08em',
@@ -535,13 +536,13 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         </div>
         <div
           style={{
-            background: '#FFFBEB',
-            border: '1px solid #FDE68A',
+            background: 'rgba(245, 158, 11, 0.1)',
+            border: '1px solid rgba(245, 158, 11, 0.3)',
             borderLeft: '4px solid #F59E0B',
             borderRadius: '8px',
             padding: '0.85rem 1rem',
             fontSize: '0.885rem',
-            color: '#78350F',
+            color: '#FDE68A',
             lineHeight: 1.5,
           }}
         >
@@ -551,7 +552,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
 
       {/* 7. AI AUTO-FIX CODE PATCH */}
       {report.suggested_fix && (
-        <div style={{ borderTop: '1px solid rgba(226, 232, 240, 0.9)', paddingTop: '1.25rem' }}>
+        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1.25rem' }}>
           <div
             style={{
               display: 'flex',
@@ -562,7 +563,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           >
             <div
               style={{
-                color: '#059669',
+                color: '#34D399',
                 fontSize: '0.72rem',
                 fontWeight: 800,
                 letterSpacing: '0.08em',
@@ -576,11 +577,12 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
               <span
                 style={{
                   fontSize: '0.65rem',
-                  background: 'rgba(16, 185, 129, 0.12)',
-                  color: '#059669',
+                  background: 'rgba(16, 185, 129, 0.15)',
+                  color: '#86EFAC',
                   padding: '0.1rem 0.45rem',
                   borderRadius: '4px',
                   fontWeight: 700,
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
                 }}
               >
                 Experimental
@@ -596,7 +598,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#059669',
+                color: '#34D399',
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 cursor: 'pointer',
@@ -611,7 +613,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           </div>
           <pre
             style={{
-              background: '#0F172A',
+              background: 'rgba(4, 6, 11, 0.95)',
               border: '1.5px solid rgba(16, 185, 129, 0.35)',
               borderRadius: '10px',
               padding: '1rem 1.15rem',
@@ -627,7 +629,7 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         </div>
       )}
 
-      {/* TCS IT QA Enhancement Criteria & Examples Modal */}
+      {/* Enterprise IT QA Enhancement Criteria & Examples Modal */}
       <EnhancementCriteriaModal
         isOpen={criteriaModalOpen}
         onClose={() => setCriteriaModalOpen(false)}

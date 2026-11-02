@@ -44,8 +44,8 @@ export default function ProjectSettingsModal({ isOpen, onClose }: ProjectSetting
         position: 'fixed',
         inset: 0,
         zIndex: 100,
-        backgroundColor: 'rgba(17, 24, 39, 0.65)',
-        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(12px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -57,27 +57,29 @@ export default function ProjectSettingsModal({ isOpen, onClose }: ProjectSetting
         style={{
           width: '100%',
           maxWidth: '680px',
-          background: '#ffffff',
+          background: 'rgba(13, 16, 25, 0.98)',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
           borderRadius: '18px',
-          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.25)',
+          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.6)',
           overflow: 'hidden',
+          color: '#F8FAFC',
         }}
       >
         {/* Header */}
         <div
           style={{
             padding: '1.25rem 1.75rem',
-            borderBottom: '1px solid rgba(17, 24, 39, 0.08)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            background: 'var(--bg-primary)',
+            background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(13, 16, 25, 0.95) 100%)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Settings size={20} color="#DC2626" />
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#111827' }}>
-              Project & API Key Configuration
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#F8FAFC', margin: 0 }}>
+              Project &amp; API Key Configuration
             </h3>
           </div>
 
@@ -87,7 +89,7 @@ export default function ProjectSettingsModal({ isOpen, onClose }: ProjectSetting
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              color: '#6B7280',
+              color: '#94A3B8',
               padding: '0.25rem',
             }}
           >
@@ -99,10 +101,10 @@ export default function ProjectSettingsModal({ isOpen, onClose }: ProjectSetting
         <div style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* Project Details */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#4B5563', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
               Active Project ID:
             </label>
-            <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#111827', background: '#F9FAFB', padding: '0.55rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(17, 24, 39, 0.08)' }}>
+            <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#F8FAFC', background: 'rgba(255, 255, 255, 0.04)', padding: '0.55rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
               {projectId}
             </div>
           </div>
@@ -110,7 +112,7 @@ export default function ProjectSettingsModal({ isOpen, onClose }: ProjectSetting
           {/* Project API Ingestion Token */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#4B5563', textTransform: 'uppercase' }}>
+              <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase' }}>
                 Project API Ingest Token:
               </label>
               <button
@@ -122,35 +124,35 @@ export default function ProjectSettingsModal({ isOpen, onClose }: ProjectSetting
                 <span>{copiedKey ? 'Copied Token!' : 'Copy Token'}</span>
               </button>
             </div>
-            <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#DC2626', fontWeight: 700, background: '#FFF1F2', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid #FECACA' }}>
+            <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#F87171', fontWeight: 700, background: 'rgba(220, 38, 38, 0.12)', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(220, 38, 38, 0.25)' }}>
               {projectToken}
             </div>
-            <p style={{ fontSize: '0.75rem', color: '#6B7280', marginTop: '0.35rem' }}>
-              SHA-256 hashed in database. Pass as <code style={{ color: '#DC2626' }}>project_token</code> in ingestion payloads from the extension or CLI recorder.
+            <p style={{ fontSize: '0.75rem', color: '#94A3B8', marginTop: '0.35rem' }}>
+              SHA-256 hashed in database. Pass as <code style={{ color: '#F87171' }}>project_token</code> in ingestion payloads from the extension or CLI recorder.
             </p>
           </div>
 
           {/* System Services Status */}
-          <div style={{ background: '#F8FAFC', padding: '1.25rem', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
-            <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#111827', marginBottom: '0.75rem' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '1.25rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#F8FAFC', marginBottom: '0.75rem' }}>
               Carrier-Grade Service Connections
             </h4>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.8rem' }}>
               <div>
-                <span style={{ color: '#6B7280' }}>Database:</span>{' '}
-                <strong style={{ color: '#16A34A' }}>Supabase PostgreSQL (Live)</strong>
+                <span style={{ color: '#94A3B8' }}>Database:</span>{' '}
+                <strong style={{ color: '#34D399' }}>Supabase PostgreSQL (Live)</strong>
               </div>
               <div>
-                <span style={{ color: '#6B7280' }}>AI Reasoner:</span>{' '}
-                <strong style={{ color: '#111827' }}>OpenRouter Nemotron-3</strong>
+                <span style={{ color: '#94A3B8' }}>AI Reasoner:</span>{' '}
+                <strong style={{ color: '#38BDF8' }}>OpenRouter Nemotron-3</strong>
               </div>
               <div>
-                <span style={{ color: '#6B7280' }}>Email SMTP:</span>{' '}
-                <strong style={{ color: '#16A34A' }}>Gmail SSL (Port 465)</strong>
+                <span style={{ color: '#94A3B8' }}>Email SMTP:</span>{' '}
+                <strong style={{ color: '#34D399' }}>Gmail SSL (Port 465)</strong>
               </div>
               <div>
-                <span style={{ color: '#6B7280' }}>Realtime Pub:</span>{' '}
-                <strong style={{ color: '#16A34A' }}>supabase_realtime Active</strong>
+                <span style={{ color: '#94A3B8' }}>Realtime Pub:</span>{' '}
+                <strong style={{ color: '#34D399' }}>supabase_realtime Active</strong>
               </div>
             </div>
           </div>
@@ -158,7 +160,7 @@ export default function ProjectSettingsModal({ isOpen, onClose }: ProjectSetting
           {/* Chrome Extension Setup Snippet */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#4B5563', textTransform: 'uppercase' }}>
+              <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase' }}>
                 Chrome Extension Configuration:
               </label>
               <button
@@ -170,14 +172,14 @@ export default function ProjectSettingsModal({ isOpen, onClose }: ProjectSetting
                 <span>{copiedSnippet ? 'Copied Config!' : 'Copy Config'}</span>
               </button>
             </div>
-            <pre style={{ background: '#0F172A', color: '#E2E8F0', padding: '0.85rem', borderRadius: '8px', fontSize: '0.785rem', lineHeight: 1.4 }}>
+            <pre style={{ background: '#07080A', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#E2E8F0', padding: '0.85rem', borderRadius: '8px', fontSize: '0.785rem', lineHeight: 1.4 }}>
               <code>{extensionConfigJson}</code>
             </pre>
           </div>
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '1rem 1.75rem', borderTop: '1px solid rgba(17, 24, 39, 0.08)', display: 'flex', justifyContent: 'flex-end', background: 'var(--bg-primary)' }}>
+        <div style={{ padding: '1rem 1.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', justifyContent: 'flex-end', background: 'rgba(255, 255, 255, 0.02)' }}>
           <button onClick={onClose} className="btn-primary" style={{ fontSize: '0.85rem' }}>
             Done
           </button>

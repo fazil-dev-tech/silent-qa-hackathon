@@ -90,9 +90,9 @@ export default function EventTimeline({ events }: EventTimelineProps) {
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.04em',
-              border: filter === tab ? '1px solid #DC2626' : '1px solid rgba(17, 24, 39, 0.1)',
-              background: filter === tab ? '#FEE2E2' : '#ffffff',
-              color: filter === tab ? '#991B1B' : '#4B5563',
+              border: filter === tab ? '1px solid #DC2626' : '1px solid rgba(255, 255, 255, 0.1)',
+              background: filter === tab ? 'rgba(220, 38, 38, 0.25)' : 'rgba(255, 255, 255, 0.04)',
+              color: filter === tab ? '#FCA5A5' : '#94A3B8',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
@@ -112,7 +112,7 @@ export default function EventTimeline({ events }: EventTimelineProps) {
             top: '8px',
             bottom: '8px',
             width: '2px',
-            background: 'rgba(220, 38, 38, 0.15)',
+            background: 'rgba(220, 38, 38, 0.25)',
           }}
         />
 
@@ -128,11 +128,11 @@ export default function EventTimeline({ events }: EventTimelineProps) {
                 key={item.id}
                 style={{
                   position: 'relative',
-                  background: isSignal ? '#FEF2F2' : '#ffffff',
-                  border: isSignal ? '1px solid #FECACA' : '1px solid rgba(17, 24, 39, 0.08)',
+                  background: isSignal ? 'rgba(220, 38, 38, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                  border: isSignal ? '1px solid rgba(220, 38, 38, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
                   borderRadius: '10px',
                   padding: '0.75rem 1rem',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                   transition: 'all 0.15s ease',
                 }}
               >
@@ -145,9 +145,9 @@ export default function EventTimeline({ events }: EventTimelineProps) {
                     width: '12px',
                     height: '12px',
                     borderRadius: '50%',
-                    background: isSignal ? '#DC2626' : '#ffffff',
-                    border: isSignal ? '2px solid #991B1B' : '2px solid #DC2626',
-                    boxShadow: isSignal ? '0 0 8px rgba(220, 38, 38, 0.4)' : 'none',
+                    background: isSignal ? '#DC2626' : '#0D1019',
+                    border: isSignal ? '2px solid #F87171' : '2px solid #38BDF8',
+                    boxShadow: isSignal ? '0 0 8px rgba(220, 38, 38, 0.5)' : 'none',
                   }}
                 />
 
@@ -155,7 +155,7 @@ export default function EventTimeline({ events }: EventTimelineProps) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     {getEventIcon(item.type, item.severity)}
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: isSignal ? '#991B1B' : '#111827' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: isSignal ? '#F87171' : '#F8FAFC' }}>
                       {item.type}
                     </span>
                     <span
@@ -164,8 +164,8 @@ export default function EventTimeline({ events }: EventTimelineProps) {
                         fontWeight: 600,
                         padding: '0.15rem 0.45rem',
                         borderRadius: '9999px',
-                        background: 'rgba(17, 24, 39, 0.06)',
-                        color: '#4B5563',
+                        background: 'rgba(255, 255, 255, 0.06)',
+                        color: '#94A3B8',
                         fontFamily: 'monospace',
                       }}
                     >
@@ -174,13 +174,13 @@ export default function EventTimeline({ events }: EventTimelineProps) {
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <span style={{ fontSize: '0.7rem', fontFamily: 'monospace', color: '#9CA3AF' }}>
+                    <span style={{ fontSize: '0.7rem', fontFamily: 'monospace', color: '#64748B' }}>
                       {item.id.slice(0, 8)}
                     </span>
                     <button
                       onClick={() => handleCopy(item.id, item.id)}
                       title="Copy Event UUID"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6B7280' }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#94A3B8' }}
                     >
                       {copiedId === item.id ? <Check size={12} color="#16A34A" /> : <Copy size={12} />}
                     </button>
@@ -188,7 +188,7 @@ export default function EventTimeline({ events }: EventTimelineProps) {
                 </div>
 
                 {/* Event Content Details */}
-                <div style={{ fontSize: '0.85rem', color: '#374151', lineHeight: 1.4 }}>
+                <div style={{ fontSize: '0.85rem', color: '#E2E8F0', lineHeight: 1.4 }}>
                   {item.type === 'network' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <span
@@ -197,13 +197,13 @@ export default function EventTimeline({ events }: EventTimelineProps) {
                           fontWeight: 700,
                           padding: '0.15rem 0.45rem',
                           borderRadius: '4px',
-                          background: item.method === 'POST' ? '#DBEAFE' : '#E0E7FF',
-                          color: item.method === 'POST' ? '#1D4ED8' : '#3730A3',
+                          background: item.method === 'POST' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(168, 85, 247, 0.15)',
+                          color: item.method === 'POST' ? '#38BDF8' : '#C084FC',
                         }}
                       >
                         {item.method}
                       </span>
-                      <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#111827' }}>{item.url}</span>
+                      <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#F8FAFC' }}>{item.url}</span>
                       {item.status && (
                         <span
                           style={{
@@ -211,15 +211,15 @@ export default function EventTimeline({ events }: EventTimelineProps) {
                             fontWeight: 700,
                             padding: '0.15rem 0.45rem',
                             borderRadius: '4px',
-                            background: item.status < 400 ? '#DCFCE7' : '#FEE2E2',
-                            color: item.status < 400 ? '#166534' : '#991B1B',
+                            background: item.status < 400 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(220, 38, 38, 0.15)',
+                            color: item.status < 400 ? '#4ADE80' : '#F87171',
                           }}
                         >
                           HTTP {item.status}
                         </span>
                       )}
                       {((item.duration_ms !== undefined && item.duration_ms !== null) || (item.shape?.duration_ms !== undefined && item.shape?.duration_ms !== null)) && (
-                        <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
                           ({item.duration_ms ?? item.shape?.duration_ms}ms)
                         </span>
                       )}
@@ -230,8 +230,8 @@ export default function EventTimeline({ events }: EventTimelineProps) {
                             fontSize: '0.7rem',
                             padding: '0.1rem 0.35rem',
                             borderRadius: '4px',
-                            background: '#FEE2E2',
-                            color: '#991B1B',
+                            background: 'rgba(220, 38, 38, 0.2)',
+                            color: '#F87171',
                             fontWeight: 700,
                           }}
                         >
@@ -243,16 +243,16 @@ export default function EventTimeline({ events }: EventTimelineProps) {
 
                   {item.type === 'click' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      <span style={{ fontWeight: 600, color: '#111827' }}>Clicked: &quot;{item.text || 'Element'}&quot;</span>
+                      <span style={{ fontWeight: 600, color: '#F8FAFC' }}>Clicked: &quot;{item.text || 'Element'}&quot;</span>
                       {item.selector && (
                         <span
                           style={{
                             fontSize: '0.75rem',
                             fontFamily: 'monospace',
-                            background: '#F3F4F6',
+                            background: 'rgba(255, 255, 255, 0.06)',
                             padding: '0.15rem 0.45rem',
                             borderRadius: '4px',
-                            color: '#1F2937',
+                            color: '#38BDF8',
                           }}
                         >
                           {item.selector}
@@ -263,13 +263,13 @@ export default function EventTimeline({ events }: EventTimelineProps) {
 
                   {item.type === 'dom' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontWeight: 600, color: '#4B5563' }}>Mutation:</span>
-                      <span style={{ fontFamily: 'monospace', color: '#111827' }}>{item.text}</span>
+                      <span style={{ fontWeight: 600, color: '#94A3B8' }}>Mutation:</span>
+                      <span style={{ fontFamily: 'monospace', color: '#F8FAFC' }}>{item.text}</span>
                     </div>
                   )}
 
                   {item.type === 'signal' && (
-                    <div style={{ color: '#991B1B', fontWeight: 600 }}>
+                    <div style={{ color: '#F87171', fontWeight: 600 }}>
                       ⚡ {item.text}
                     </div>
                   )}
@@ -286,7 +286,7 @@ export default function EventTimeline({ events }: EventTimelineProps) {
                       alignItems: 'center',
                       gap: '0.25rem',
                       fontSize: '0.725rem',
-                      color: '#6B7280',
+                      color: '#94A3B8',
                       cursor: 'pointer',
                       padding: 0,
                     }}
@@ -301,7 +301,8 @@ export default function EventTimeline({ events }: EventTimelineProps) {
                         marginTop: '0.4rem',
                         padding: '0.6rem',
                         borderRadius: '6px',
-                        background: '#0F172A',
+                        background: '#07080A',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
                         color: '#E2E8F0',
                         fontSize: '0.75rem',
                         overflowX: 'auto',
