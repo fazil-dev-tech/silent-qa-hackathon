@@ -111,8 +111,8 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
         border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '16px',
-        padding: '1.75rem',
+        borderRadius: '12px',
+        padding: 'clamp(0.85rem, 1.8vw, 1.25rem)',
         boxShadow: '0 20px 45px rgba(0, 0, 0, 0.7), 0 0 35px rgba(220, 38, 38, 0.08)',
         color: '#F8FAFC',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -123,9 +123,9 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.65rem',
+          gap: '0.45rem',
           flexWrap: 'wrap',
-          marginBottom: '1.5rem',
+          marginBottom: '0.85rem',
         }}
       >
         {/* Severity Badge */}
@@ -134,9 +134,9 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
             border: `1px solid ${currentSev.border}`,
             color: currentSev.text,
             background: currentSev.bg,
-            fontSize: '0.72rem',
+            fontSize: '0.68rem',
             fontWeight: 800,
-            padding: '0.25rem 0.75rem',
+            padding: '0.2rem 0.6rem',
             borderRadius: '9999px',
             letterSpacing: '0.06em',
             textTransform: 'uppercase',
@@ -151,13 +151,13 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
             border: '1px solid rgba(2, 132, 199, 0.4)',
             color: '#38BDF8',
             background: 'rgba(2, 132, 199, 0.12)',
-            fontSize: '0.72rem',
+            fontSize: '0.68rem',
             fontWeight: 700,
-            padding: '0.25rem 0.75rem',
+            padding: '0.2rem 0.6rem',
             borderRadius: '9999px',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.45rem',
+            gap: '0.35rem',
           }}
         >
           <span>AI Confidence</span>
@@ -174,18 +174,18 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
             border: '1px solid rgba(16, 185, 129, 0.4)',
             color: '#34D399',
             background: 'rgba(16, 185, 129, 0.12)',
-            fontSize: '0.72rem',
+            fontSize: '0.68rem',
             fontWeight: 700,
-            padding: '0.25rem 0.75rem',
+            padding: '0.2rem 0.6rem',
             borderRadius: '9999px',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.4rem',
+            gap: '0.35rem',
             cursor: 'pointer',
             transition: 'all 0.15s ease',
           }}
         >
-          <Lock size={12} color="#34D399" />
+          <Lock size={11} color="#34D399" />
           <span>{copiedHash ? '✓ SHA-256 Copied!' : 'SHA-256 Verified (Click to copy)'}</span>
         </button>
 
@@ -198,18 +198,18 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
             border: '1px solid rgba(34, 197, 94, 0.4)',
             color: '#86EFAC',
             background: 'rgba(22, 163, 74, 0.15)',
-            fontSize: '0.72rem',
+            fontSize: '0.68rem',
             fontWeight: 800,
-            padding: '0.25rem 0.75rem',
+            padding: '0.2rem 0.6rem',
             borderRadius: '9999px',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.4rem',
+            gap: '0.35rem',
             cursor: 'pointer',
             transition: 'all 0.15s ease',
           }}
         >
-          <Award size={12} color="#86EFAC" />
+          <Award size={11} color="#86EFAC" />
           <span>Quality Feedback: 94% (&gt;85% Standard)</span>
         </button>
       </div>
@@ -217,25 +217,25 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
       {/* Enterprise IT QA Enhancement Criteria Banner */}
       <div
         style={{
-          background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(16, 185, 129, 0.1) 100%)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: '12px',
-          padding: '0.85rem 1.15rem',
-          marginBottom: '1.25rem',
+          background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '10px',
+          padding: '0.55rem 0.85rem',
+          marginBottom: '0.85rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '0.75rem',
+          gap: '0.5rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <Sparkles size={16} color="#DC2626" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Sparkles size={14} color="#DC2626" />
           <div>
-            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#FFFFFF' }}>
+            <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#FFFFFF' }}>
               Automated Defect Description Enhancer • GenAI Text Refinement &amp; Telemetry Fusion
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#94A3B8', display: 'flex', gap: '0.75rem', marginTop: '0.15rem' }}>
+            <div style={{ fontSize: '0.68rem', color: '#94A3B8', display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginTop: '0.1rem' }}>
               <span>Clarity: <strong style={{ color: '#86EFAC' }}>96%</strong></span>
               <span>Completeness: <strong style={{ color: '#86EFAC' }}>92%</strong></span>
               <span>Reproducibility: <strong style={{ color: '#86EFAC' }}>95%</strong></span>
@@ -250,183 +250,160 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
             background: 'rgba(255, 255, 255, 0.06)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
             color: '#F8FAFC',
-            fontSize: '0.75rem',
+            fontSize: '0.7rem',
             fontWeight: 700,
-            padding: '0.35rem 0.75rem',
-            borderRadius: '8px',
+            padding: '0.25rem 0.6rem',
+            borderRadius: '6px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.35rem',
+            gap: '0.3rem',
             boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
             transition: 'all 0.15s ease',
           }}
         >
-          <BookOpen size={13} />
-          <span>Documentation on Enhancement Criteria</span>
+          <BookOpen size={12} />
+          <span>Enhancement Criteria</span>
         </button>
       </div>
 
       {/* Before -> After Visual Transformation Banner */}
       <div
         style={{
-          marginBottom: '1.5rem',
+          marginBottom: '1rem',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '0.85rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: '0.65rem',
         }}
       >
         <div
           style={{
-            background: 'rgba(220, 38, 38, 0.12)',
-            borderLeft: '4px solid #EF4444',
-            borderRadius: '10px',
-            padding: '1rem',
-            border: '1px solid rgba(220, 38, 38, 0.25)',
-            borderLeftWidth: '4px',
+            background: 'rgba(220, 38, 38, 0.1)',
+            borderLeft: '3px solid #EF4444',
+            borderRadius: '8px',
+            padding: '0.65rem 0.85rem',
+            border: '1px solid rgba(220, 38, 38, 0.2)',
+            borderLeftWidth: '3px',
           }}
         >
           <div
             style={{
-              fontSize: '0.68rem',
+              fontSize: '0.65rem',
               fontWeight: 800,
               color: '#F87171',
               textTransform: 'uppercase',
-              marginBottom: '0.35rem',
+              marginBottom: '0.25rem',
               letterSpacing: '0.06em',
             }}
           >
             RAW HUMAN NOTE (INPUT)
           </div>
-          <div style={{ fontSize: '0.92rem', fontStyle: 'italic', color: '#FCA5A5', lineHeight: 1.45 }}>
+          <div style={{ fontSize: '0.84rem', fontStyle: 'italic', color: '#FCA5A5', lineHeight: 1.4 }}>
             &ldquo;{report.raw_note || report.title}&rdquo;
           </div>
         </div>
 
         <div
           style={{
-            background: 'rgba(16, 185, 129, 0.12)',
-            borderLeft: '4px solid #10B981',
-            borderRadius: '10px',
-            padding: '1rem',
-            border: '1px solid rgba(16, 185, 129, 0.25)',
-            borderLeftWidth: '4px',
+            background: 'rgba(16, 185, 129, 0.1)',
+            borderLeft: '3px solid #10B981',
+            borderRadius: '8px',
+            padding: '0.65rem 0.85rem',
+            border: '1px solid rgba(16, 185, 129, 0.2)',
+            borderLeftWidth: '3px',
           }}
         >
           <div
             style={{
-              fontSize: '0.68rem',
+              fontSize: '0.65rem',
               fontWeight: 800,
               color: '#34D399',
               textTransform: 'uppercase',
-              marginBottom: '0.35rem',
+              marginBottom: '0.25rem',
               letterSpacing: '0.06em',
             }}
           >
             AI-ENHANCED SPECIFICATION (OUTPUT)
           </div>
-          <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.45 }}>
+          <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.4 }}>
             {report.title}
           </div>
-          <div style={{ fontSize: '0.72rem', color: '#86EFAC', marginTop: '0.35rem', fontWeight: 600 }}>
+          <div style={{ fontSize: '0.68rem', color: '#86EFAC', marginTop: '0.25rem', fontWeight: 600 }}>
             {report.steps.length} verified steps • {severityLabel} • {confidencePercent} confidence
           </div>
         </div>
       </div>
 
-      {/* 1. RAW QA NOTE */}
-      <div style={{ marginBottom: '1.25rem' }}>
-        <div
-          style={{
-            color: '#DC2626',
-            fontSize: '0.72rem',
-            fontWeight: 800,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            marginBottom: '0.3rem',
-          }}
-        >
-          RAW QA NOTE
-        </div>
-        <div
-          style={{
-            fontSize: '1rem',
-            fontStyle: 'italic',
-            color: '#E2E8F0',
-            lineHeight: 1.45,
-          }}
-        >
-          &ldquo;{report.raw_note || report.title}&rdquo;
-        </div>
-      </div>
-
-      {/* 2. ENVIRONMENT */}
-      <div style={{ marginBottom: '1.25rem' }}>
-        <div
+      {/* ENVIRONMENT & CONTEXT */}
+      <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <span
           style={{
             color: '#38BDF8',
-            fontSize: '0.72rem',
+            fontSize: '0.68rem',
             fontWeight: 800,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            marginBottom: '0.3rem',
           }}
         >
-          ENVIRONMENT
-        </div>
-        <div
+          ENVIRONMENT:
+        </span>
+        <span
           style={{
-            fontSize: '0.9rem',
+            fontSize: '0.82rem',
             color: '#94A3B8',
             fontWeight: 600,
+            background: 'rgba(255, 255, 255, 0.04)',
+            padding: '0.2rem 0.55rem',
+            borderRadius: '6px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
           }}
         >
           {envString}
-        </div>
+        </span>
       </div>
 
-      {/* 3. STEPS TO REPRODUCE */}
-      <div style={{ marginBottom: '1.5rem' }}>
+      {/* STEPS TO REPRODUCE */}
+      <div style={{ marginBottom: '1rem' }}>
         <div
           style={{
             color: '#38BDF8',
-            fontSize: '0.72rem',
+            fontSize: '0.68rem',
             fontWeight: 800,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            marginBottom: '0.45rem',
+            marginBottom: '0.35rem',
           }}
         >
           STEPS TO REPRODUCE
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
           {(report.steps || ['1. Trigger tested action on page']).map((step, idx) => (
             <div
               key={idx}
               style={{
-                fontSize: '0.885rem',
+                fontSize: '0.825rem',
                 color: '#E2E8F0',
-                lineHeight: 1.45,
+                lineHeight: 1.4,
                 background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                borderRadius: '8px',
-                padding: '0.55rem 0.85rem',
+                border: '1px solid rgba(255, 255, 255, 0.07)',
+                borderRadius: '6px',
+                padding: '0.45rem 0.75rem',
               }}
             >
-              <strong style={{ color: '#38BDF8', marginRight: '0.4rem' }}>{idx + 1}.</strong>
+              <strong style={{ color: '#38BDF8', marginRight: '0.35rem' }}>{idx + 1}.</strong>
               {step.replace(/^\[Tester:[^\]]+\]\s*/, '')}
             </div>
           ))}
         </div>
       </div>
 
-      {/* 4. EXPECTED RESULT & ACTUAL RESULT (Side by Side) */}
+      {/* EXPECTED RESULT & ACTUAL RESULT (Side by Side) */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '1.25rem',
-          marginBottom: '1.5rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: '0.85rem',
+          marginBottom: '1rem',
         }}
       >
         {/* Expected */}
@@ -434,25 +411,25 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           <div
             style={{
               color: '#34D399',
-              fontSize: '0.72rem',
+              fontSize: '0.68rem',
               fontWeight: 800,
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
-              marginBottom: '0.4rem',
+              marginBottom: '0.3rem',
             }}
           >
             EXPECTED RESULT
           </div>
           <div
             style={{
-              background: 'rgba(16, 185, 129, 0.1)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              borderLeft: '4px solid #10B981',
-              borderRadius: '8px',
-              padding: '0.85rem 1rem',
-              fontSize: '0.885rem',
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              borderLeft: '3px solid #10B981',
+              borderRadius: '6px',
+              padding: '0.65rem 0.85rem',
+              fontSize: '0.825rem',
               color: '#A7F3D0',
-              lineHeight: 1.45,
+              lineHeight: 1.4,
             }}
           >
             {report.expected || 'Action should complete successfully with UI feedback and zero errors.'}
@@ -464,25 +441,25 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
           <div
             style={{
               color: '#F87171',
-              fontSize: '0.72rem',
+              fontSize: '0.68rem',
               fontWeight: 800,
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
-              marginBottom: '0.4rem',
+              marginBottom: '0.3rem',
             }}
           >
             ACTUAL RESULT
           </div>
           <div
             style={{
-              background: 'rgba(220, 38, 38, 0.1)',
-              border: '1px solid rgba(220, 38, 38, 0.3)',
-              borderLeft: '4px solid #EF4444',
-              borderRadius: '8px',
-              padding: '0.85rem 1rem',
-              fontSize: '0.885rem',
+              background: 'rgba(220, 38, 38, 0.08)',
+              border: '1px solid rgba(220, 38, 38, 0.25)',
+              borderLeft: '3px solid #EF4444',
+              borderRadius: '6px',
+              padding: '0.65rem 0.85rem',
+              fontSize: '0.825rem',
               color: '#FCA5A5',
-              lineHeight: 1.45,
+              lineHeight: 1.4,
             }}
           >
             {report.actual || 'Anomaly observed during test flight.'}
@@ -490,16 +467,16 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         </div>
       </div>
 
-      {/* 5. TECHNICAL EVIDENCE (CAPTURED BY EXTENSION) */}
-      <div style={{ marginBottom: '1.5rem' }}>
+      {/* TECHNICAL EVIDENCE (CAPTURED BY EXTENSION) */}
+      <div style={{ marginBottom: '1rem' }}>
         <div
           style={{
             color: '#94A3B8',
-            fontSize: '0.72rem',
+            fontSize: '0.68rem',
             fontWeight: 800,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            marginBottom: '0.4rem',
+            marginBottom: '0.3rem',
           }}
         >
           TECHNICAL EVIDENCE (CAPTURED BY EXTENSION)
@@ -507,79 +484,79 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
         <div
           style={{
             background: 'rgba(4, 6, 11, 0.85)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '10px',
-            padding: '0.85rem 1.15rem',
+            border: '1px solid rgba(255, 255, 255, 0.07)',
+            borderRadius: '8px',
+            padding: '0.65rem 0.95rem',
             fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-            fontSize: '0.78rem',
+            fontSize: '0.74rem',
             color: '#94A3B8',
-            lineHeight: 1.55,
+            lineHeight: 1.5,
           }}
         >
           {technicalEvidenceText}
         </div>
       </div>
 
-      {/* 6. ROOT CAUSE HYPOTHESIS */}
-      <div style={{ marginBottom: '1.5rem' }}>
+      {/* ROOT CAUSE HYPOTHESIS */}
+      <div style={{ marginBottom: '1rem' }}>
         <div
           style={{
             color: '#FBBF24',
-            fontSize: '0.72rem',
+            fontSize: '0.68rem',
             fontWeight: 800,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            marginBottom: '0.35rem',
+            marginBottom: '0.3rem',
           }}
         >
           ROOT CAUSE HYPOTHESIS
         </div>
         <div
           style={{
-            background: 'rgba(245, 158, 11, 0.1)',
-            border: '1px solid rgba(245, 158, 11, 0.3)',
-            borderLeft: '4px solid #F59E0B',
-            borderRadius: '8px',
-            padding: '0.85rem 1rem',
-            fontSize: '0.885rem',
+            background: 'rgba(245, 158, 11, 0.08)',
+            border: '1px solid rgba(245, 158, 11, 0.25)',
+            borderLeft: '3px solid #F59E0B',
+            borderRadius: '6px',
+            padding: '0.65rem 0.85rem',
+            fontSize: '0.825rem',
             color: '#FDE68A',
-            lineHeight: 1.5,
+            lineHeight: 1.45,
           }}
         >
           {report.root_cause || 'Causal telemetry analysis indicates potential event handler or API discrepancy.'}
         </div>
       </div>
 
-      {/* 7. AI AUTO-FIX CODE PATCH */}
+      {/* AI AUTO-FIX CODE PATCH */}
       {report.suggested_fix && (
-        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1.25rem' }}>
+        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1rem' }}>
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '0.45rem',
+              marginBottom: '0.4rem',
             }}
           >
             <div
               style={{
                 color: '#34D399',
-                fontSize: '0.72rem',
+                fontSize: '0.68rem',
                 fontWeight: 800,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.4rem',
+                gap: '0.35rem',
               }}
             >
               <span>✨ AI Auto-Fix Code Patch</span>
               <span
                 style={{
-                  fontSize: '0.65rem',
+                  fontSize: '0.62rem',
                   background: 'rgba(16, 185, 129, 0.15)',
                   color: '#86EFAC',
-                  padding: '0.1rem 0.45rem',
+                  padding: '0.1rem 0.4rem',
                   borderRadius: '4px',
                   fontWeight: 700,
                   border: '1px solid rgba(16, 185, 129, 0.3)',
@@ -599,29 +576,29 @@ export default function CanonicalDefectCard({ report }: CanonicalReportProps) {
                 background: 'none',
                 border: 'none',
                 color: '#34D399',
-                fontSize: '0.75rem',
+                fontSize: '0.72rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.3rem',
+                gap: '0.25rem',
               }}
             >
-              {copiedFix ? <Check size={13} /> : <Copy size={13} />}
+              {copiedFix ? <Check size={12} /> : <Copy size={12} />}
               <span>{copiedFix ? 'Copied Fix' : 'Copy Code'}</span>
             </button>
           </div>
           <pre
             style={{
               background: 'rgba(4, 6, 11, 0.95)',
-              border: '1.5px solid rgba(16, 185, 129, 0.35)',
-              borderRadius: '10px',
-              padding: '1rem 1.15rem',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              borderRadius: '8px',
+              padding: '0.75rem 0.95rem',
               fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-              fontSize: '0.8rem',
+              fontSize: '0.76rem',
               color: '#A7F3D0',
               overflowX: 'auto',
-              lineHeight: 1.55,
+              lineHeight: 1.5,
             }}
           >
             <code>{report.suggested_fix}</code>

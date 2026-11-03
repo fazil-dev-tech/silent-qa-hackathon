@@ -865,7 +865,7 @@ export default function AdminDashboardPage() {
       {/* VIEW 2: USER ACCOUNT & EXTENSION MANAGEMENT (NO EMAILS EXPOSED)          */}
       {/* ========================================================================= */}
       {adminView === 'users' && (
-        <div className="glass-panel" style={{ padding: '2rem' }}>
+        <div className="glass-panel" style={{ padding: 'clamp(1rem, 3vw, 2rem)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#F8FAFC' }}>
@@ -1103,7 +1103,7 @@ export default function AdminDashboardPage() {
               Computing operational analytics across 12 partitioned tables...
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1.5rem' }}>
               {/* Category 1: User Analytics */}
               <div className="glass-panel" style={{ padding: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>

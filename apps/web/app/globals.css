@@ -354,8 +354,8 @@ pre, code {
 /* Responsive Grid Systems */
 .workspace-grid {
   display: grid;
-  grid-template-columns: 400px 1fr;
-  gap: 2rem;
+  grid-template-columns: minmax(320px, 380px) 1fr;
+  gap: 1.5rem;
   align-items: start;
 }
 
@@ -375,9 +375,25 @@ pre, code {
   }
 }
 
+@media (max-width: 768px) {
+  .desktop-nav-links {
+    display: none !important;
+  }
+  .mobile-header-padding {
+    padding: 0.75rem 1rem !important;
+  }
+  .mobile-hide-text {
+    display: none !important;
+  }
+}
+
 @media (max-width: 640px) {
   .kanban-grid {
     grid-template-columns: 1fr;
+  }
+  .workspace-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }
 

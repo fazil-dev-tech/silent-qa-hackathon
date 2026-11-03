@@ -194,12 +194,12 @@ export default function QACopilotChat({ activeReport, sessionId }: QACopilotChat
             transition={{ duration: 0.2 }}
             style={{
               position: 'fixed',
-              bottom: isExpanded ? '20px' : '24px',
-              right: isExpanded ? '20px' : '24px',
-              width: isExpanded ? 'calc(100vw - 40px)' : '480px',
+              bottom: isExpanded ? '16px' : '20px',
+              right: isExpanded ? '16px' : '20px',
+              width: isExpanded ? 'calc(100vw - 32px)' : 'min(480px, calc(100vw - 32px))',
               maxWidth: isExpanded ? '920px' : '480px',
-              height: isExpanded ? 'calc(100vh - 40px)' : '640px',
-              maxHeight: 'calc(100vh - 40px)',
+              height: isExpanded ? 'calc(100vh - 32px)' : 'min(640px, calc(100vh - 32px))',
+              maxHeight: 'calc(100vh - 32px)',
               background: 'rgba(13, 16, 25, 0.96)',
               backdropFilter: 'blur(28px)',
               border: '1.5px solid rgba(220, 38, 38, 0.3)',

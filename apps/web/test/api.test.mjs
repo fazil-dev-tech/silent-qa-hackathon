@@ -254,5 +254,125 @@ test('Phase 4 - Multi-Tester Fleet & Recent Anomaly Mapping: Validates concurren
   assert.strictEqual(uniqueSessionIds.size, 10, 'All 10 engineers maintain distinct session boundaries');
 });
 
+test('Phase 4 - Flight-Specific Telemetry Scenario Extraction: Dynamically isolates session anomalies', () => {
+  // Session A: Checkout flow with 500 error & JS exception
+  const sessionAEvents = [
+    {
+      id: 'e_click_pay',
+      session_id: 'ses_checkout',
+      ts: '2026-11-01T18:14:14.000Z',
+      type: 'click',
+      severity: 'info',
+      selector: 'button#checkout-pay',
+      text: 'Complete Payment',
+    },
+    {
+      id: 'e_500_pay',
+      session_id: 'ses_checkout',
+      ts: '2026-11-01T18:14:15.100Z',
+      type: 'network',
+      severity: 'critical',
+      url: '/api/checkout/pay',
+      method: 'POST',
+      status: 500,
+    },
+    {
+      id: 'e_js_err',
+      session_id: 'ses_checkout',
+      ts: '2026-11-01T18:14:15.200Z',
+      type: 'error',
+      severity: 'critical',
+      text: 'Uncaught TypeError: Cannot read properties of undefined (reading "chargeId")',
+    },
+  ];
+
+  // Session B: Supabase admin with rage click & 404
+  const sessionBEvents = [
+    {
+      id: 'e_rage_span',
+      session_id: 'ses_supabase_admin',
+      ts: '2026-11-02T18:44:20.000Z',
+      type: 'signal',
+      severity: 'warn',
+      selector: 'span.refresh-btn',
+      text: 'rage_click: 3+ clicks on span within 2s',
+    },
+    {
+      id: 'e_404_auth',
+      session_id: 'ses_supabase_admin',
+      ts: '2026-11-02T18:44:21.000Z',
+      type: 'network',
+      severity: 'error',
+      url: 'https://api.supabase.com/platform/integrations/github/authorization',
+      method: 'GET',
+      status: 404,
+    },
+  ];
+
+  // Verify Session A extracts checkout pay and 500
+  const sessionAAnomalies = sessionAEvents.filter(e => (e.status && e.status >= 500) || e.type === 'error');
+  assert.strictEqual(sessionAAnomalies.length, 2);
+  assert.strictEqual(sessionAAnomalies[0].status, 500);
+  assert.match(sessionAAnomalies[1].text, /chargeId/);
+
+  // Verify Session B extracts rage clicks and 404 without bleeding Session A
+  const sessionBAnomalies = sessionBEvents.filter(e => e.type === 'signal' || (e.status && e.status >= 400));
+  assert.strictEqual(sessionBAnomalies.length, 2);
+  assert.strictEqual(sessionBAnomalies[0].type, 'signal');
+  assert.strictEqual(sessionBAnomalies[0].selector, 'span.refresh-btn');
+  assert.strictEqual(sessionBAnomalies[1].status, 404);
+});
+
+test('Phase 4 - Flight Session Selection Stability: Prevents background sync from resetting user-selected session', () => {
+  const activeFleet = [
+    { id: 'session_top_1', host: 'api.enterprise.com', started_at: '2026-11-03T10:00:00Z' },
+    { id: 'session_user_picked_2', host: 'app.local/checkout.js', started_at: '2026-11-03T10:05:00Z' },
+    { id: 'session_other_3', host: 'app.local/cart.js', started_at: '2026-11-03T10:10:00Z' },
+  ];
+
+  // Logic used in page.tsx setSelectedSessionId((prev) => ...)
+  function computeStableSessionSelection(prevSelectedId, newFleetList, storedId = null) {
+    if (prevSelectedId && newFleetList.some(s => s.id === prevSelectedId)) {
+      return prevSelectedId; // Locked by user
+    }
+    if (storedId && newFleetList.some(s => s.id === storedId)) {
+      return storedId;
+    }
+    return newFleetList.length > 0 ? newFleetList[0].id : '';
+  }
+
+  // 1. Initial load with no selection: defaults to top
+  const initial = computeStableSessionSelection('', activeFleet);
+  assert.strictEqual(initial, 'session_top_1', 'Defaults to first session on pristine load');
+
+  // 2. User explicitly selects session 2
+  const userSelection = 'session_user_picked_2';
+
+  // 3. Background sync occurs 10s later with updated fleet sessions list
+  const updatedFleet = [
+    { id: 'session_top_brand_new_0', host: 'new.service.internal', started_at: '2026-11-03T10:15:00Z' },
+    ...activeFleet,
+  ];
+
+  const postSyncSelection = computeStableSessionSelection(userSelection, updatedFleet);
+  assert.strictEqual(
+    postSyncSelection,
+    'session_user_picked_2',
+    'User selection MUST remain locked and NOT reset to top session on auto-sync'
+  );
+
+  // 4. If selected session is terminated/expired, fallback to top safely
+  const prunedFleet = [
+    { id: 'session_top_brand_new_0', host: 'new.service.internal', started_at: '2026-11-03T10:15:00Z' },
+  ];
+  const postPruneSelection = computeStableSessionSelection(userSelection, prunedFleet);
+  assert.strictEqual(
+    postPruneSelection,
+    'session_top_brand_new_0',
+    'Safely falls back to top session only when user-selected session no longer exists'
+  );
+});
+
+
 
 

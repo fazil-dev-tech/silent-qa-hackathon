@@ -65,54 +65,59 @@ export default function NavigationBar() {
   return (
     <>
       <header
+        className="mobile-header-padding"
         style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-        background: 'rgba(7, 8, 11, 0.85)',
-        backdropFilter: 'blur(28px) saturate(190%)',
-        WebkitBackdropFilter: 'blur(28px) saturate(190%)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        padding: '0.85rem 2rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        boxShadow: '0 16px 36px rgba(0, 0, 0, 0.75), inset 0 -1px 0 rgba(255, 255, 255, 0.04)',
-        transition: 'all 0.2s ease',
-      }}
-    >
-      {/* Brand & Left Navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-        <Link
-          href="/"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '1.2rem',
-            fontWeight: 800,
-            letterSpacing: '-0.025em',
-            color: '#FFFFFF',
-            textDecoration: 'none',
-          }}
-        >
-          <span
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+          background: 'rgba(7, 8, 11, 0.9)',
+          backdropFilter: 'blur(28px) saturate(190%)',
+          WebkitBackdropFilter: 'blur(28px) saturate(190%)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          padding: '0.65rem clamp(0.75rem, 2vw, 1.5rem)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.65rem',
+          boxShadow: '0 16px 36px rgba(0, 0, 0, 0.75), inset 0 -1px 0 rgba(255, 255, 255, 0.04)',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        {/* Brand & Left Navigation */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.75rem, 2vw, 1.75rem)', flexWrap: 'wrap' }}>
+          <Link
+            href="/"
             style={{
-              display: 'inline-block',
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              backgroundColor: '#DC2626',
-              boxShadow: '0 0 10px #DC2626',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontSize: '1.15rem',
+              fontWeight: 800,
+              letterSpacing: '-0.025em',
+              color: '#FFFFFF',
+              textDecoration: 'none',
+              flexShrink: 0,
             }}
-          />
-          <span>Silent</span>
-          <span style={{ color: '#DC2626' }}>QA</span>
-        </Link>
+          >
+            <span
+              style={{
+                display: 'inline-block',
+                width: '9px',
+                height: '9px',
+                borderRadius: '50%',
+                backgroundColor: '#DC2626',
+                boxShadow: '0 0 10px #DC2626',
+              }}
+            />
+            <span>Silent</span>
+            <span style={{ color: '#DC2626' }}>QA</span>
+          </Link>
 
         {/* Landing Page Navigation Links (Visible for everyone on Landing Page) */}
         {isLanding ? (
           <nav
+            className="desktop-nav-links"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -208,6 +213,7 @@ export default function NavigationBar() {
           </nav>
         ) : user ? (
           <nav
+            className="desktop-nav-links"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -246,22 +252,10 @@ export default function NavigationBar() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.3rem',
+                  fontWeight: pathname === '/admin' ? 700 : 600,
                 }}
               >
-                <span>Admin Command Center</span>
-                <span
-                  style={{
-                    fontSize: '0.65rem',
-                    fontWeight: 800,
-                    background: 'rgba(220, 38, 38, 0.2)',
-                    color: '#FCA5A5',
-                    border: '1px solid rgba(220, 38, 38, 0.35)',
-                    padding: '0.1rem 0.35rem',
-                    borderRadius: '4px',
-                  }}
-                >
-                  CONSOLE
-                </span>
+                <span>Admin Console</span>
               </Link>
             )}
           </nav>
@@ -269,7 +263,7 @@ export default function NavigationBar() {
       </div>
 
       {/* Right Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
         {/* Chrome Extension Download Button */}
         <button
           onClick={() => setExtensionModalOpen(true)}
@@ -277,46 +271,46 @@ export default function NavigationBar() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.45rem',
-            fontSize: '0.78rem',
+            gap: '0.35rem',
+            fontSize: '0.74rem',
             fontWeight: 700,
             color: '#38BDF8',
             background: 'rgba(56, 189, 248, 0.1)',
             border: '1px solid rgba(56, 189, 248, 0.35)',
-            padding: '0.35rem 0.85rem',
-            borderRadius: '8px',
+            padding: '0.3rem 0.65rem',
+            borderRadius: '6px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
-            boxShadow: '0 0 14px rgba(56, 189, 248, 0.15)',
+            boxShadow: '0 0 10px rgba(56, 189, 248, 0.12)',
+            whiteSpace: 'nowrap',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = 'rgba(56, 189, 248, 0.2)';
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(56, 189, 248, 0.35)';
-            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 0 16px rgba(56, 189, 248, 0.3)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = 'rgba(56, 189, 248, 0.1)';
-            e.currentTarget.style.boxShadow = '0 0 14px rgba(56, 189, 248, 0.15)';
-            e.currentTarget.style.transform = 'none';
+            e.currentTarget.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.12)';
           }}
         >
-          <Download size={14} color="#38BDF8" />
+          <Download size={13} color="#38BDF8" />
           <span>Extension .ZIP</span>
-        </button>
+        </button> 
 
         {/* Supabase Realtime Health Pill */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.4rem',
-            fontSize: '0.75rem',
+            gap: '0.35rem',
+            fontSize: '0.72rem',
             fontWeight: 700,
             color: '#4ADE80',
             background: 'rgba(22, 163, 74, 0.15)',
-            padding: '0.3rem 0.75rem',
+            padding: '0.25rem 0.6rem',
             borderRadius: '9999px',
             border: '1px solid rgba(74, 222, 128, 0.3)',
+            whiteSpace: 'nowrap',
           }}
         >
           <span
@@ -333,26 +327,27 @@ export default function NavigationBar() {
 
         {/* User Account / Auth Status */}
         {user ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'nowrap' }}>
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.45rem',
-                fontSize: '0.82rem',
+                gap: '0.35rem',
+                fontSize: '0.78rem',
                 fontWeight: 600,
                 color: '#F8FAFC',
                 background: 'rgba(255, 255, 255, 0.08)',
-                padding: '0.35rem 0.75rem',
-                borderRadius: '8px',
+                padding: '0.3rem 0.65rem',
+                borderRadius: '6px',
                 border: '1px solid rgba(255, 255, 255, 0.12)',
-                boxShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
+                whiteSpace: 'nowrap',
               }}
             >
-              <User size={14} color="#DC2626" />
+              <User size={13} color="#DC2626" />
               <span
                 style={{
-                  maxWidth: '150px',
+                  maxWidth: '110px',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -363,51 +358,36 @@ export default function NavigationBar() {
               </span>
               <span
                 style={{
-                  fontSize: '0.65rem',
+                  fontSize: '0.62rem',
                   fontWeight: 800,
                   textTransform: 'uppercase',
                   background: isAdmin ? 'rgba(220, 38, 38, 0.2)' : 'rgba(56, 189, 248, 0.15)',
                   color: isAdmin ? '#FCA5A5' : '#7DD3FC',
                   border: `1px solid ${isAdmin ? 'rgba(220, 38, 38, 0.35)' : 'rgba(56, 189, 248, 0.3)'}`,
-                  padding: '0.12rem 0.4rem',
-                  borderRadius: '4px',
+                  padding: '0.1rem 0.35rem',
+                  borderRadius: '3px',
                 }}
               >
                 {user.role}
               </span>
             </div>
 
-            {isAdmin ? (
-              <Link
-                href={pathname === '/admin' ? '/app' : '/admin'}
-                className="btn-primary"
-                style={{
-                  padding: '0.45rem 1rem',
-                  fontSize: '0.82rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.3rem',
-                  textDecoration: 'none',
-                }}
-              >
-                <span>{pathname === '/admin' ? 'Tester Workspace' : 'Admin Console'}</span>
-                <ChevronRight size={14} />
-              </Link>
-            ) : pathname !== '/app' && !pathname?.startsWith('/app/report') ? (
+            {isAdmin && pathname === '/admin' ? (
               <Link
                 href="/app"
                 className="btn-primary"
                 style={{
-                  padding: '0.45rem 1rem',
-                  fontSize: '0.82rem',
+                  padding: '0.3rem 0.65rem',
+                  fontSize: '0.74rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.3rem',
+                  gap: '0.25rem',
                   textDecoration: 'none',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 <span>Workspace</span>
-                <ChevronRight size={14} />
+                <ChevronRight size={13} />
               </Link>
             ) : null}
 
@@ -418,19 +398,20 @@ export default function NavigationBar() {
               style={{
                 background: 'transparent',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
-                borderRadius: '8px',
-                padding: '0.4rem 0.6rem',
+                borderRadius: '6px',
+                padding: '0.35rem 0.55rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.3rem',
+                gap: '0.25rem',
                 color: '#94A3B8',
-                fontSize: '0.8rem',
+                fontSize: '0.76rem',
                 fontWeight: 600,
                 transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap',
               }}
             >
-              <LogOut size={13} />
+              <LogOut size={12} />
               <span>{signingOut ? '...' : 'Sign Out'}</span>
             </button>
           </div>

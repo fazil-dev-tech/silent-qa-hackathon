@@ -214,230 +214,238 @@ export default function ReportDetailPage() {
   }
 
   return (
-    <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
-      <div
-        style={{
-          minHeight: '100vh',
-          background: '#07080A',
-          backgroundImage:
-            'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(220, 38, 38, 0.15), rgba(7, 8, 10, 0.98))',
-          padding: '2.5rem 1.5rem',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          color: '#F8FAFC',
-        }}
-      >
-        <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
-          <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Link
-              href="/app"
-              style={{
-                fontSize: '0.85rem',
-                color: '#F87171',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-              }}
-            >
-              <ArrowLeft size={14} />
-              <span>Back to Tester Workspace</span>
-            </Link>
+    <div
+      style={{
+        minHeight: 'calc(100vh - 65px)',
+        background: '#07080A',
+        backgroundImage:
+          'radial-gradient(ellipse 80% 50% at 50% -5%, rgba(220, 38, 38, 0.1), rgba(7, 8, 10, 0.98))',
+        padding: 'clamp(1rem, 2vw, 1.75rem) clamp(0.75rem, 2vw, 1.5rem)',
+        color: '#F8FAFC',
+      }}
+    >
+      <div style={{ maxWidth: '1360px', margin: '0 auto' }}>
+        <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <Link
+            href="/app"
+            style={{
+              fontSize: '0.8rem',
+              color: '#F87171',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              textDecoration: 'none',
+              padding: '0.35rem 0.65rem',
+              background: 'rgba(220, 38, 38, 0.08)',
+              border: '1px solid rgba(220, 38, 38, 0.25)',
+              borderRadius: '6px',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <ArrowLeft size={13} />
+            <span>Back to Tester Workspace</span>
+          </Link>
 
-            <button
-              onClick={() => setExportModalOpen(true)}
-              className="btn-secondary"
-              style={{ fontSize: '0.825rem', padding: '0.4rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
-            >
-              <Share2 size={13} />
-              <span>Export Defect</span>
-            </button>
+          <button
+            onClick={() => setExportModalOpen(true)}
+            className="btn-secondary"
+            style={{ fontSize: '0.78rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+          >
+            <Share2 size={12} />
+            <span>Export Defect</span>
+          </button>
+        </div>
+
+        {actionMessage && (
+          <div
+            style={{
+              padding: '0.75rem 1.15rem',
+              borderRadius: '8px',
+              marginBottom: '1.25rem',
+              background: actionMessage.startsWith('✓') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(220, 38, 38, 0.15)',
+              border: `1px solid ${actionMessage.startsWith('✓') ? 'rgba(52, 211, 153, 0.35)' : 'rgba(248, 113, 113, 0.35)'}`,
+              color: actionMessage.startsWith('✓') ? '#86EFAC' : '#FCA5A5',
+              fontSize: '0.825rem',
+              fontWeight: 600,
+            }}
+          >
+            {actionMessage}
           </div>
+        )}
 
-          {actionMessage && (
-            <div
-              style={{
-                padding: '0.85rem 1.25rem',
-                borderRadius: '10px',
-                marginBottom: '1.5rem',
-                background: actionMessage.startsWith('✓') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(220, 38, 38, 0.15)',
-                border: `1px solid ${actionMessage.startsWith('✓') ? 'rgba(52, 211, 153, 0.35)' : 'rgba(248, 113, 113, 0.35)'}`,
-                color: actionMessage.startsWith('✓') ? '#86EFAC' : '#FCA5A5',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-              }}
-            >
-              {actionMessage}
-            </div>
-          )}
-
-          <div className="glass-panel" style={{ padding: '2.5rem' }}>
-            {/* Title Bar */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                  <span className={`badge-severity severity-${report.severity}`}>{report.severity}</span>
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      padding: '0.2rem 0.65rem',
-                      borderRadius: '9999px',
-                      background:
-                        report.status === 'verified'
-                          ? 'rgba(16, 185, 129, 0.15)'
-                          : report.status === 'sent'
-                            ? 'rgba(56, 189, 248, 0.15)'
-                            : 'rgba(245, 158, 11, 0.15)',
-                      color:
-                        report.status === 'verified'
-                          ? '#4ADE80'
-                          : report.status === 'sent'
-                            ? '#38BDF8'
-                            : '#FBBF24',
-                      border: `1px solid ${
-                        report.status === 'verified'
-                          ? 'rgba(16, 185, 129, 0.35)'
-                          : report.status === 'sent'
-                            ? 'rgba(56, 189, 248, 0.35)'
-                            : 'rgba(245, 158, 11, 0.35)'
-                      }`,
-                    }}
-                  >
-                    {report.status === 'verified' ? '✓ REPRODUCED & VERIFIED' : report.status.toUpperCase()}
-                  </span>
-                  {!report.ai_fallback && (
-                    <span style={{ fontSize: '0.75rem', color: '#F87171', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <Sparkles size={12} /> OpenRouter Nemotron-3
-                    </span>
-                  )}
-                </div>
-                <h1 style={{ fontSize: '1.95rem', fontWeight: 900, color: '#F8FAFC', lineHeight: 1.25 }}>
-                  {report.title}
-                </h1>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <button
-                  onClick={handleRunProbe}
-                  disabled={runningProbe}
-                  className="btn-secondary"
-                  style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
-                >
-                  <Play size={13} color="#38BDF8" />
-                  <span>{runningProbe ? 'Running Probe...' : '▶ Run Reproduction Probe'}</span>
-                </button>
-
-                <button
-                  onClick={() => setExportModalOpen(true)}
-                  className="btn-secondary"
-                  style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
-                >
-                  <Share2 size={13} />
-                  <span>Export</span>
-                </button>
-
-                <button
-                  onClick={() => setSendEmailModalOpen(true)}
-                  className="btn-primary"
-                  style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
-                >
-                  <Send size={13} />
-                  <span>Approve &amp; Send to Gmail</span>
-                </button>
-
-                <button
-                  onClick={handleDeleteReport}
-                  disabled={deleting}
-                  className="btn-secondary"
+        <div className="glass-panel" style={{ padding: 'clamp(1rem, 2vw, 1.5rem)' }}>
+          {/* Title Bar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <div style={{ flex: '1 1 500px', minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.45rem', flexWrap: 'wrap' }}>
+                <span className={`badge-severity severity-${report.severity}`}>{report.severity.toUpperCase()}</span>
+                <span
                   style={{
-                    fontSize: '0.85rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    color: '#F87171',
-                    borderColor: 'rgba(220, 38, 38, 0.35)',
+                    fontSize: '0.7rem',
+                    fontWeight: 800,
+                    padding: '0.15rem 0.55rem',
+                    borderRadius: '9999px',
+                    background:
+                      report.status === 'verified'
+                        ? 'rgba(16, 185, 129, 0.15)'
+                        : report.status === 'sent'
+                          ? 'rgba(56, 189, 248, 0.15)'
+                          : 'rgba(245, 158, 11, 0.15)',
+                    color:
+                      report.status === 'verified'
+                        ? '#4ADE80'
+                        : report.status === 'sent'
+                          ? '#38BDF8'
+                          : '#FBBF24',
+                    border: `1px solid ${
+                      report.status === 'verified'
+                        ? 'rgba(16, 185, 129, 0.35)'
+                        : report.status === 'sent'
+                          ? 'rgba(56, 189, 248, 0.35)'
+                          : 'rgba(245, 158, 11, 0.35)'
+                    }`,
                   }}
                 >
-                  <Trash2 size={13} />
-                  <span>{deleting ? 'Deleting...' : 'Delete'}</span>
-                </button>
+                  {report.status === 'verified' ? '✓ REPRODUCED & VERIFIED' : report.status.toUpperCase()}
+                </span>
+                {!report.ai_fallback && (
+                  <span style={{ fontSize: '0.7rem', color: '#F87171', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <Sparkles size={11} /> OpenRouter Nemotron-3
+                  </span>
+                )}
               </div>
+              <h1 style={{ fontSize: 'clamp(1.25rem, 2vw, 1.65rem)', fontWeight: 800, color: '#F8FAFC', lineHeight: 1.35, letterSpacing: '-0.02em', margin: 0 }}>
+                {report.title}
+              </h1>
+              <p style={{ fontSize: '0.76rem', color: '#94A3B8', marginTop: '0.35rem' }}>
+                ID: <code style={{ color: '#E2E8F0', fontFamily: 'monospace' }}>{id ? id.slice(0, 13) : 'report'}...</code> • Created: {new Date(report.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
             </div>
 
-            {/* 4 Professional Navigation Tabs */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <button
-                onClick={() => setActiveTab('canonical')}
-                style={{
-                  padding: '0.45rem 1rem',
-                  borderRadius: '8px',
-                  fontSize: '0.85rem',
-                  fontWeight: 700,
-                  border: activeTab === 'canonical' ? '1px solid #0284C7' : '1px solid rgba(255, 255, 255, 0.1)',
-                  cursor: 'pointer',
-                  background: activeTab === 'canonical' ? '#0284C7' : 'rgba(255, 255, 255, 0.05)',
-                  color: activeTab === 'canonical' ? '#ffffff' : '#94A3B8',
-                  boxShadow: activeTab === 'canonical' ? '0 0 12px rgba(2, 132, 199, 0.4)' : 'none',
-                  transition: 'all 0.15s ease',
-                }}
+                onClick={handleRunProbe}
+                disabled={runningProbe}
+                className="btn-secondary"
+                style={{ fontSize: '0.78rem', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
               >
-                ⚡ Canonical Spec Card
+                <Play size={12} color="#38BDF8" />
+                <span>{runningProbe ? 'Running Probe...' : '▶ Run Reproduction Probe'}</span>
               </button>
 
               <button
-                onClick={() => setActiveTab('overview')}
-                style={{
-                  padding: '0.45rem 1rem',
-                  borderRadius: '8px',
-                  fontSize: '0.85rem',
-                  fontWeight: 700,
-                  border: activeTab === 'overview' ? '1px solid #DC2626' : '1px solid rgba(255, 255, 255, 0.1)',
-                  cursor: 'pointer',
-                  background: activeTab === 'overview' ? '#DC2626' : 'rgba(255, 255, 255, 0.05)',
-                  color: activeTab === 'overview' ? '#ffffff' : '#94A3B8',
-                  boxShadow: activeTab === 'overview' ? '0 0 12px rgba(220, 38, 38, 0.4)' : 'none',
-                  transition: 'all 0.15s ease',
-                }}
+                onClick={() => setExportModalOpen(true)}
+                className="btn-secondary"
+                style={{ fontSize: '0.78rem', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
               >
-                Overview &amp; Findings
+                <Share2 size={12} />
+                <span>Export</span>
               </button>
 
               <button
-                onClick={() => setActiveTab('timeline')}
-                style={{
-                  padding: '0.45rem 1rem',
-                  borderRadius: '8px',
-                  fontSize: '0.85rem',
-                  fontWeight: 700,
-                  border: activeTab === 'timeline' ? '1px solid #059669' : '1px solid rgba(255, 255, 255, 0.1)',
-                  cursor: 'pointer',
-                  background: activeTab === 'timeline' ? '#059669' : 'rgba(255, 255, 255, 0.05)',
-                  color: activeTab === 'timeline' ? '#ffffff' : '#94A3B8',
-                  boxShadow: activeTab === 'timeline' ? '0 0 12px rgba(5, 150, 105, 0.4)' : 'none',
-                  transition: 'all 0.15s ease',
-                }}
+                onClick={() => setSendEmailModalOpen(true)}
+                className="btn-primary"
+                style={{ fontSize: '0.78rem', padding: '0.4rem 0.95rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
               >
-                Interactive Event Timeline ({Array.isArray(report.evidence) ? report.evidence.length : 0})
+                <Send size={12} />
+                <span>Approve &amp; Send to Gmail</span>
               </button>
 
               <button
-                onClick={() => setActiveTab('playwright')}
+                onClick={handleDeleteReport}
+                disabled={deleting}
+                className="btn-secondary"
                 style={{
-                  padding: '0.45rem 1rem',
-                  borderRadius: '8px',
-                  fontSize: '0.85rem',
-                  fontWeight: 700,
-                  border: activeTab === 'playwright' ? '1px solid #7C3AED' : '1px solid rgba(255, 255, 255, 0.1)',
-                  cursor: 'pointer',
-                  background: activeTab === 'playwright' ? '#7C3AED' : 'rgba(255, 255, 255, 0.05)',
-                  color: activeTab === 'playwright' ? '#ffffff' : '#94A3B8',
-                  boxShadow: activeTab === 'playwright' ? '0 0 12px rgba(124, 58, 237, 0.4)' : 'none',
-                  transition: 'all 0.15s ease',
+                  fontSize: '0.78rem',
+                  padding: '0.4rem 0.8rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  color: '#F87171',
+                  borderColor: 'rgba(220, 38, 38, 0.35)',
                 }}
               >
-                🎭 Playwright Script
+                <Trash2 size={12} />
+                <span>{deleting ? 'Deleting...' : 'Delete'}</span>
               </button>
             </div>
+          </div>
+
+          {/* 4 Professional Navigation Tabs */}
+          <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '1.25rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.65rem', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setActiveTab('canonical')}
+              style={{
+                padding: '0.35rem 0.8rem',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                border: activeTab === 'canonical' ? '1px solid #0284C7' : '1px solid rgba(255, 255, 255, 0.1)',
+                cursor: 'pointer',
+                background: activeTab === 'canonical' ? '#0284C7' : 'rgba(255, 255, 255, 0.04)',
+                color: activeTab === 'canonical' ? '#ffffff' : '#94A3B8',
+                boxShadow: activeTab === 'canonical' ? '0 0 10px rgba(2, 132, 199, 0.35)' : 'none',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              ⚡ Canonical Spec Card
+            </button>
+
+            <button
+              onClick={() => setActiveTab('overview')}
+              style={{
+                padding: '0.35rem 0.8rem',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                border: activeTab === 'overview' ? '1px solid #DC2626' : '1px solid rgba(255, 255, 255, 0.1)',
+                cursor: 'pointer',
+                background: activeTab === 'overview' ? '#DC2626' : 'rgba(255, 255, 255, 0.04)',
+                color: activeTab === 'overview' ? '#ffffff' : '#94A3B8',
+                boxShadow: activeTab === 'overview' ? '0 0 10px rgba(220, 38, 38, 0.35)' : 'none',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              Overview &amp; Findings
+            </button>
+
+            <button
+              onClick={() => setActiveTab('timeline')}
+              style={{
+                padding: '0.35rem 0.8rem',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                border: activeTab === 'timeline' ? '1px solid #059669' : '1px solid rgba(255, 255, 255, 0.1)',
+                cursor: 'pointer',
+                background: activeTab === 'timeline' ? '#059669' : 'rgba(255, 255, 255, 0.04)',
+                color: activeTab === 'timeline' ? '#ffffff' : '#94A3B8',
+                boxShadow: activeTab === 'timeline' ? '0 0 10px rgba(5, 150, 105, 0.35)' : 'none',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              Interactive Event Timeline ({Array.isArray(report.evidence) ? report.evidence.length : 0})
+            </button>
+
+            <button
+              onClick={() => setActiveTab('playwright')}
+              style={{
+                padding: '0.35rem 0.8rem',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                border: activeTab === 'playwright' ? '1px solid #7C3AED' : '1px solid rgba(255, 255, 255, 0.1)',
+                cursor: 'pointer',
+                background: activeTab === 'playwright' ? '#7C3AED' : 'rgba(255, 255, 255, 0.04)',
+                color: activeTab === 'playwright' ? '#ffffff' : '#94A3B8',
+                boxShadow: activeTab === 'playwright' ? '0 0 10px rgba(124, 58, 237, 0.35)' : 'none',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              🎭 Playwright Script
+            </button>
+          </div>
 
             {/* Tab 1: Canonical Defect Card */}
             {activeTab === 'canonical' && (
@@ -675,7 +683,6 @@ export default function ReportDetailPage() {
             )}
           </div>
         </div>
-      </div>
 
       {/* Export Modal */}
       <ExportModal

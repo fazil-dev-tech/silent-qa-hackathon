@@ -931,7 +931,7 @@ export default function HomePage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
               gap: '3rem',
               alignItems: 'center',
               maxWidth: '1120px',
@@ -1265,7 +1265,7 @@ export default function HomePage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
               gap: '1.5rem',
               maxWidth: '1120px',
               margin: '0 auto',
@@ -1866,7 +1866,7 @@ export default function HomePage() {
               position: 'relative',
               zIndex: 2,
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
               gap: '1.25rem',
               alignItems: 'stretch',
             }}
