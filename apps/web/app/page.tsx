@@ -458,8 +458,8 @@ export default function HomePage() {
         }}
       />
 
-      {/* Main Container Scaled (zoom: 0.83 for widescreen balanced proportion) */}
-      <div style={{ position: 'relative', zIndex: 2, maxWidth: '1440px', margin: '0 auto', padding: '2.25rem 1.5rem', zoom: '0.83' }}>
+      {/* Main Container Scaled (Responsive desktop zoom vs 100% mobile) */}
+      <div className="landing-content-zoom" style={{ position: 'relative', zIndex: 2, maxWidth: '1440px', margin: '0 auto', padding: 'clamp(1rem, 3vw, 2.25rem) clamp(0.75rem, 2vw, 1.5rem)' }}>
         
         {/* ================================================================ */}
         {/* 1. HERO SECTION (AssignAI media_1793622034155_85b73f95.jpg)       */}
@@ -472,8 +472,8 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15 }}
             style={{
-              fontSize: '4.25rem',
-              lineHeight: 1.1,
+              fontSize: 'clamp(2.15rem, 5.5vw, 4.25rem)',
+              lineHeight: 1.15,
               fontWeight: 900,
               letterSpacing: '-0.04em',
               color: '#FFFFFF',
@@ -500,7 +500,7 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             style={{
-              fontSize: '1.2rem',
+              fontSize: 'clamp(0.95rem, 2.2vw, 1.2rem)',
               color: '#94A3B8',
               maxWidth: '860px',
               margin: '0 auto 2.25rem',
@@ -703,10 +703,12 @@ export default function HomePage() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '0.45rem',
                 padding: '0.45rem 1.25rem',
                 borderTop: '1px solid rgba(255, 255, 255, 0.06)',
                 background: 'rgba(8, 10, 16, 0.85)',
-                fontSize: '0.7rem',
+                fontSize: 'clamp(0.62rem, 1.8vw, 0.7rem)',
                 fontFamily: 'monospace',
                 color: '#64748B',
               }}
@@ -761,21 +763,17 @@ export default function HomePage() {
 
           {/* Dual Glass Comparison Cards Linked by Glowing Particle Conduit Bridge */}
           <div
+            className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-0"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0',
-              flexWrap: 'nowrap',
               maxWidth: '1120px',
               margin: '0 auto',
+              width: '100%',
             }}
           >
             {/* Left Card: WITHOUT SILENT QA (Red glow) */}
             <div
+              className="w-full lg:flex-1"
               style={{
-                flex: 1,
-                minWidth: '320px',
                 maxWidth: '460px',
                 background: 'rgba(14, 16, 24, 0.7)',
                 backdropFilter: 'blur(28px) saturate(190%)',
@@ -783,7 +781,7 @@ export default function HomePage() {
                 borderRadius: '20px',
                 border: '1px solid rgba(239, 68, 68, 0.25)',
                 boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(239, 68, 68, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-                padding: '2.4rem 2rem',
+                padding: 'clamp(1.5rem, 3vw, 2.4rem) clamp(1.2rem, 2.5vw, 2rem)',
                 position: 'relative',
               }}
             >
@@ -828,14 +826,35 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Center Live Three.js Particle Conduit Bridge */}
-            <ParticleConduitBridge />
+            {/* Center Live Three.js Particle Conduit Bridge (Desktop only) */}
+            <div className="hidden lg:flex items-center justify-center">
+              <ParticleConduitBridge />
+            </div>
+
+            {/* Mobile Central Synthesis Transition Badge */}
+            <div className="lg:hidden flex items-center justify-center py-2">
+              <div
+                style={{
+                  padding: '0.35rem 0.9rem',
+                  borderRadius: '9999px',
+                  background: 'rgba(10, 12, 18, 0.85)',
+                  border: '1px solid rgba(168, 85, 247, 0.5)',
+                  boxShadow: '0 0 15px rgba(168, 85, 247, 0.35)',
+                  color: '#C084FC',
+                  fontSize: '0.72rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                ✦ SYNTHESIS PIPELINE ✦
+              </div>
+            </div>
 
             {/* Right Card: WITH SILENT QA (Cyan/Green glow) */}
             <div
+              className="w-full lg:flex-1"
               style={{
-                flex: 1,
-                minWidth: '320px',
                 maxWidth: '460px',
                 background: 'rgba(16, 20, 30, 0.75)',
                 backdropFilter: 'blur(28px) saturate(200%)',
@@ -843,7 +862,7 @@ export default function HomePage() {
                 borderRadius: '20px',
                 border: '1px solid rgba(0, 240, 255, 0.35)',
                 boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 240, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
-                padding: '2.4rem 2rem',
+                padding: 'clamp(1.5rem, 3vw, 2.4rem) clamp(1.2rem, 2.5vw, 2rem)',
                 position: 'relative',
               }}
             >

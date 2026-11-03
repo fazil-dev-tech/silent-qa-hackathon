@@ -188,9 +188,11 @@ export default function ArchitectureCanvas() {
     const height = mount.clientHeight;
 
     const scene = new THREE.Scene();
+    const isMobileInitial = width < 768;
+    const initialCamZ = isMobileInitial ? 185 : 120;
     const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 1000);
-    // Enhanced 5% internal scene scale (camera distance 120)
-    camera.position.set(0, 7.1, 120);
+    // Responsive camera distance (185 on mobile so all orbital nodes fit in portrait, 120 on desktop)
+    camera.position.set(0, 7.1, initialCamZ);
     camera.lookAt(0, 0, 0);
 
     renderer.setSize(width, height);
@@ -644,6 +646,8 @@ export default function ArchitectureCanvas() {
       if (!mount) return;
       const w = mount.clientWidth;
       const h = mount.clientHeight;
+      const isMobile = w < 768;
+      camera.position.z = isMobile ? 185 : 120;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -690,15 +694,15 @@ export default function ArchitectureCanvas() {
       <div
         style={{
           position: 'absolute',
-          top: '1.25rem',
-          left: '1.5rem',
+          top: 'clamp(0.65rem, 1.5vw, 1.25rem)',
+          left: 'clamp(0.65rem, 1.5vw, 1.5rem)',
           fontFamily: 'monospace',
-          fontSize: '0.72rem',
+          fontSize: 'clamp(0.62rem, 1.8vw, 0.72rem)',
           color: '#94A3B8',
           zIndex: 20,
           pointerEvents: 'none',
           background: 'rgba(10, 12, 20, 0.65)',
-          padding: '0.4rem 0.8rem',
+          padding: 'clamp(0.25rem, 1vw, 0.4rem) clamp(0.5rem, 1.5vw, 0.8rem)',
           borderRadius: '8px',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           backdropFilter: 'blur(16px)',
@@ -708,13 +712,14 @@ export default function ArchitectureCanvas() {
           <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#00F0FF', boxShadow: '0 0 8px #00F0FF' }} />
           <span>SYS_TELEMETRY: ACTIVE (6/6 NODES)</span>
         </div>
-        <div style={{ fontSize: '0.66rem', color: '#64748B', marginTop: '0.2rem' }}>
+        <div style={{ fontSize: '0.64rem', color: '#64748B', marginTop: '0.2rem' }}>
           ORBITAL INCLINATION: 34.25° • LATENCY: 0.8ms
         </div>
       </div>
 
-      {/* Top Right Futuristic Encryption Status */}
+      {/* Top Right Futuristic Encryption Status (Hidden on narrow mobile screens) */}
       <div
+        className="hidden sm:block"
         style={{
           position: 'absolute',
           top: '1.25rem',

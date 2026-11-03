@@ -263,7 +263,7 @@ export default function NavigationBar() {
       </div>
 
       {/* Right Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'nowrap', justifyContent: 'flex-end', flexShrink: 0 }}>
         {/* Chrome Extension Download Button */}
         <button
           onClick={() => setExtensionModalOpen(true)}
@@ -271,13 +271,13 @@ export default function NavigationBar() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.35rem',
+            gap: '0.3rem',
             fontSize: '0.74rem',
             fontWeight: 700,
             color: '#38BDF8',
             background: 'rgba(56, 189, 248, 0.1)',
             border: '1px solid rgba(56, 189, 248, 0.35)',
-            padding: '0.3rem 0.65rem',
+            padding: '0.3rem 0.55rem',
             borderRadius: '6px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
@@ -294,13 +294,14 @@ export default function NavigationBar() {
           }}
         >
           <Download size={13} color="#38BDF8" />
-          <span>Extension .ZIP</span>
+          <span className="hidden sm:inline">Extension .ZIP</span>
+          <span className="sm:hidden">.ZIP</span>
         </button> 
 
-        {/* Supabase Realtime Health Pill */}
+        {/* Supabase Realtime Health Pill (Hidden on narrow mobile screens) */}
         <div
+          className="hidden sm:flex"
           style={{
-            display: 'flex',
             alignItems: 'center',
             gap: '0.35rem',
             fontSize: '0.72rem',
@@ -417,22 +418,24 @@ export default function NavigationBar() {
           </div>
         ) : (
           /* When NOT logged in: Prominent Sign In / Register CTA */
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <Link
               href="/login"
               className="btn-primary"
               style={{
-                padding: '0.5rem 1.15rem',
-                fontSize: '0.875rem',
+                padding: '0.35rem 0.85rem',
+                fontSize: '0.8rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.4rem',
+                gap: '0.35rem',
                 textDecoration: 'none',
                 boxShadow: '0 4px 14px rgba(220, 38, 38, 0.35)',
+                whiteSpace: 'nowrap',
               }}
             >
-              <KeyRound size={14} />
-              <span>Sign In / Register</span>
+              <KeyRound size={13} />
+              <span className="hidden sm:inline">Sign In / Register</span>
+              <span className="sm:hidden">Sign In</span>
             </Link>
           </div>
         )}
