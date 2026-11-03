@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumina Gear • Premium Audio & Tech Store (QA Bug Benchmark)</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ========================================================================= -->
+  <!-- FLOATING QA BENCHMARK HUD DRAWER (10 INTENTIONAL TEST DEFECTS)           -->
+  <!-- ========================================================================= -->
+  <aside class="qa-hud-drawer" id="qaHudDrawer">
+    <div class="qa-hud-header" id="qaHudToggle">
+      <div class="qa-hud-title">
+        <span class="qa-pulse-dot"></span>
+        <strong>QA DEFECT BENCHMARK</strong>
+        <span class="qa-badge">10 BUGS EMBEDDED</span>
+      </div>
+      <button class="qa-toggle-btn" id="qaToggleBtn" aria-label="Toggle QA Panel">▼</button>
+    </div>
+    
+    <div class="qa-hud-content" id="qaHudContent">
+      <div style="margin-bottom: 10px;">
+        <a href="Shopping_Store_Known_Bugs_Catalog.pdf" target="_blank" download class="btn-pdf-download" style="display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg, #4f46e5, #6366f1); color:#fff; text-decoration:none; padding:9px 12px; border-radius:6px; font-size:11px; font-weight:700; border:1px solid #818cf8; letter-spacing:0.03em; box-shadow:0 2px 10px rgba(79, 70, 229, 0.35);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="12" y2="18"></line><line x1="15" y1="15" x2="12" y2="18"></line></svg>
+          DOWNLOAD 10-BUG PDF DOSSIER
+        </a>
+      </div>
+      <p class="qa-hud-desc">
+        Use the <strong>SilentQA Chrome Extension</strong> to record your flight telemetry. 
+        Click any defect below to highlight its location or trigger it directly:
+      </p>
+
+      <div class="qa-bug-grid">
+        <div class="qa-bug-card" onclick="highlightBug('BUG-001')">
+          <div class="qa-bug-tag red">BUG-001 • RACE CONDITION</div>
+          <div class="qa-bug-name">Double-Add Cart Race Condition</div>
+          <div class="qa-bug-sub">Click "Add to Cart" on Aura Pro to increment count by 2 without debounce.</div>
+        </div>
+
+        <div class="qa-bug-card" onclick="highlightBug('BUG-002')">
+          <div class="qa-bug-tag amber">BUG-002 • DEAD CLICK</div>
+          <div class="qa-bug-name">Unresponsive "Special Deals" Navbar</div>
+          <div class="qa-bug-sub">Clicking "Special Deals" in navbar fires e.preventDefault() with zero mutation.</div>
+        </div>
+
+        <div class="qa-bug-card" onclick="highlightBug('BUG-003')">
+          <div class="qa-bug-tag red">BUG-003 • RAGE CLICK / UNCAUGHT EXCEPTION</div>
+          <div class="qa-bug-name">Frozen Checkout "Place Order" Button</div>
+          <div class="qa-bug-sub">Submitting payment throws TypeError, freezing the button into infinite spinner.</div>
+        </div>
+
+        <div class="qa-bug-card" onclick="highlightBug('BUG-004')">
+          <div class="qa-bug-tag amber">BUG-004 • OBSCURED CLICK</div>
+          <div class="qa-bug-name">Unclickable "Apply Coupon" Button</div>
+          <div class="qa-bug-sub">Cart coupon button is blocked by a transparent z-index overlay element.</div>
+        </div>
+
+        <div class="qa-bug-card" onclick="highlightBug('BUG-005')">
+          <div class="qa-bug-tag purple">BUG-005 • NEGATIVE MATH ANOMALY</div>
+          <div class="qa-bug-name">Negative Cart Quantity Decrement</div>
+          <div class="qa-bug-sub">Clicking minus [-] in cart decrements quantity to 0, -1, -2 and corrupts total.</div>
+        </div>
+
+        <div class="qa-bug-card" onclick="highlightBug('BUG-006')">
+          <div class="qa-bug-tag red">BUG-006 • SILENT DOM CRASH</div>
+          <div class="qa-bug-name">Quick View Blank Modal Crash</div>
+          <div class="qa-bug-sub">Product #3 "Apex Pro Keyboard" Quick View queries missing DOM selector.</div>
+        </div>
+
+        <div class="qa-bug-card" onclick="highlightBug('BUG-007')">
+          <div class="qa-bug-tag red">BUG-007 • CONSOLE ERROR FLOOD</div>
+          <div class="qa-bug-name">Search Input Memory Leak & 500 Flood</div>
+          <div class="qa-bug-sub">Typing in the top search bar triggers unthrottled failing API requests.</div>
+        </div>
+
+        <div class="qa-bug-card" onclick="highlightBug('BUG-008')">
+          <div class="qa-bug-tag purple">BUG-008 • STATE DESYNC</div>
+          <div class="qa-bug-name">Currency Switcher Price Desync</div>
+          <div class="qa-bug-sub">Switching currency to EUR changes symbol on cards but keeps cart total in USD.</div>
+        </div>
+
+        <div class="qa-bug-card" onclick="highlightBug('BUG-009')">
+          <div class="qa-bug-tag red">BUG-009 • NETWORK 502 GATEWAY</div>
+          <div class="qa-bug-name">Amex Payment Gateway Failure</div>
+          <div class="qa-bug-sub">Paying with an American Express test card simulates a 502 Bad Gateway error.</div>
+        </div>
+
+        <div class="qa-bug-card" onclick="highlightBug('BUG-010')">
+          <div class="qa-bug-tag amber">BUG-010 • SILENT FORM DISCARD</div>
+          <div class="qa-bug-name">Missing Validation Error on Shipping</div>
+          <div class="qa-bug-sub">Submitting blank shipping form silently blocks advance with zero error message.</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- TOP ANNOUNCEMENT BANNER                                                   -->
+  <!-- ========================================================================= -->
+  <div class="announcement-bar">
+    <div class="container announcement-inner">
+      <span>🚀 <strong>QA BENCHMARK ACTIVE:</strong> 10 Intentional Software Bugs Embedded for SilentQA Telemetry Verification &nbsp;|&nbsp; <a href="Shopping_Store_Known_Bugs_Catalog.pdf" download style="color:#a5b4fc; text-decoration:underline; font-weight:700;">Download Bug Catalog PDF</a></span>
+      <div class="announcement-right">
+        <a href="Shopping_Store_Known_Bugs_Catalog.pdf" target="_blank" download class="live-pill" style="text-decoration:none; color:inherit; cursor:pointer;"><span class="dot"></span> Download PDF Dossier</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN NAVIGATION BAR                                                       -->
+  <!-- ========================================================================= -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <!-- Brand Logo -->
+      <a href="#" class="brand-logo">
+        <span class="logo-mark"></span>
+        <span class="logo-text">LUMINA<span>.GEAR</span></span>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="nav-menu">
+        <a href="#catalog" class="nav-link active">All Products</a>
+        <a href="#audio" class="nav-link">Audio</a>
+        <a href="#wearables" class="nav-link">Wearables</a>
+        <!-- BUG-002: Dead click in Special Deals -->
+        <a href="#deals" class="nav-link bug-target" id="navDealsLink" title="[BUG-002 Target] Special Deals Link">
+          Special Deals <span class="hot-badge">HOT</span>
+        </a>
+      </nav>
+
+      <!-- Search Bar (BUG-007: Console flood on typing) -->
+      <div class="search-box">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          id="globalSearchInput" 
+          placeholder="Search headphones, keyboards..." 
+          title="[BUG-007 Target] Search bar triggers unthrottled 500 error flood"
+        >
+      </div>
+
+      <!-- Action Utilities -->
+      <div class="nav-actions">
+        <!-- BUG-008: Currency Switcher Math Desync -->
+        <div class="currency-selector">
+          <select id="currencySelect" title="[BUG-008 Target] Currency Switcher Desync">
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+          </select>
+        </div>
+
+        <!-- Cart Button Drawer Trigger -->
+        <button class="cart-btn" id="openCartBtn" aria-label="Open Shopping Cart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span class="cart-counter" id="cartCountBadge">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- HERO BANNER SECTION                                                       -->
+  <!-- ========================================================================= -->
+  <section class="hero-section">
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <span class="hero-pill">✨ Flagship Acoustic Series</span>
+        <h1 class="hero-title">Studio Purity.<br><span class="gradient-text">Zero Compromise.</span></h1>
+        <p class="hero-desc">
+          Engineered for producers, audiophiles, and software engineers who demand ultra-low distortion, 
+          spatial depth, and flawless telemetry response.
+        </p>
+        <div class="hero-cta-group">
+          <a href="#catalog" class="btn btn-primary">Explore Products</a>
+          <button class="btn btn-secondary" onclick="openCartDrawer()">View Cart (<span id="heroCartCount">0</span>)</button>
+        </div>
+      </div>
+      <div class="hero-image-wrap">
+        <img 
+          src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80" 
+          alt="Lumina Flagship Headphones"
+          class="hero-product-img"
+        >
+        <div class="hero-spec-tag">
+          <strong>AURA PRO ANC</strong>
+          <span>40mm Beryllium Drivers • 96kHz / 24-bit</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- CATEGORY FILTER STRIP                                                     -->
+  <!-- ========================================================================= -->
+  <section class="category-strip" id="catalog">
+    <div class="container">
+      <div class="filter-pills">
+        <button class="filter-pill active" data-category="all">All Gear (8)</button>
+        <button class="filter-pill" data-category="audio">Studio Audio (3)</button>
+        <button class="filter-pill" data-category="wearables">Smart Wearables (2)</button>
+        <button class="filter-pill" data-category="peripherals">Peripherals (3)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- PRODUCT CATALOG GRID                                                      -->
+  <!-- ========================================================================= -->
+  <main class="container catalog-section">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Signature Hardware</h2>
+        <p class="section-subtitle">Real-time inventory synced to live in-browser telemetry</p>
+      </div>
+      <div class="inventory-status">
+        <span class="live-dot"></span> 8 In-Stock Devices Ready to Test
+      </div>
+    </div>
+
+    <div class="products-grid" id="productsGrid">
+      <!-- Product Cards dynamically rendered by app.js -->
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- SLIDE-OUT CART DRAWER                                                     -->
+  <!-- ========================================================================= -->
+  <div class="cart-backdrop" id="cartBackdrop" onclick="closeCartDrawer()"></div>
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <div class="cart-header-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+        <h3>Your Flight Cart</h3>
+        <span class="cart-total-badge" id="cartItemsCount">0 items</span>
+      </div>
+      <button class="close-btn" onclick="closeCartDrawer()" aria-label="Close Cart">✕</button>
+    </div>
+
+    <!-- Cart Item List -->
+    <div class="cart-body" id="cartBody">
+      <!-- Rendered by app.js (Includes BUG-005 Negative Quantity Decrement) -->
+    </div>
+
+    <!-- Cart Summary & Coupon Section -->
+    <div class="cart-footer">
+      <!-- BUG-004: Obscured Coupon Apply Button -->
+      <div class="coupon-box" id="couponBoxWrapper">
+        <div class="coupon-input-group" style="position: relative;">
+          <input type="text" id="couponInput" placeholder="Enter coupon code (LUMINA20)">
+          <button type="button" id="applyCouponBtn" class="coupon-btn">Apply</button>
+          
+          <!-- BUG-004 Invisible Overlay that blocks pointer events to Apply button -->
+          <div 
+            id="bug004ObscureOverlay" 
+            title="[BUG-004] Obscured click blocker overlay"
+            style="position: absolute; right: 0; top: 0; width: 85px; height: 100%; z-index: 10; opacity: 0; background: red; cursor: not-allowed;"
+          ></div>
+        </div>
+        <div class="coupon-message" id="couponMessage"></div>
+      </div>
+
+      <!-- Financial Calculation Summary -->
+      <div class="summary-line">
+        <span>Subtotal</span>
+        <span id="cartSubtotal">$0.00</span>
+      </div>
+      <div class="summary-line">
+        <span>Estimated Shipping</span>
+        <span id="cartShipping">FREE</span>
+      </div>
+      <div class="summary-line total">
+        <span>Total Due</span>
+        <span id="cartTotal" class="total-amount">$0.00</span>
+      </div>
+
+      <!-- Proceed to Checkout Button -->
+      <button class="btn btn-primary btn-block checkout-trigger-btn" id="openCheckoutBtn" onclick="openCheckoutModal()">
+        Proceed to Secure Checkout →
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- CHECKOUT & PAYMENT MODAL                                                  -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop" id="checkoutBackdrop">
+    <div class="modal-card checkout-modal">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="lock-icon">🔒</span>
+          <h3>Secure Telemetry Checkout</h3>
+        </div>
+        <button class="close-btn" onclick="closeCheckoutModal()">✕</button>
+      </div>
+
+      <div class="checkout-layout">
+        <!-- Shipping Details Form -->
+        <div class="checkout-form-section">
+          <h4>1. Shipping Destination</h4>
+          <form id="shippingForm" onsubmit="event.preventDefault();">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipName">Full Name *</label>
+                <input type="text" id="shipName" placeholder="Alex Morgan" value="Alex Morgan" required>
+              </div>
+              <div class="form-group">
+                <label for="shipEmail">Email Address *</label>
+                <!-- BUG-010 Target: If empty, submission silently drops with no validation warning -->
+                <input type="email" id="shipEmail" placeholder="alex.morgan@tech.io" value="">
+                <small class="field-hint">[BUG-010] Leave blank to trigger silent discard defect</small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="shipAddress">Street Address *</label>
+              <input type="text" id="shipAddress" placeholder="452 Innovation Blvd, Suite 200" value="452 Innovation Blvd">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="shipCity">City *</label>
+                <input type="text" id="shipCity" placeholder="San Francisco" value="San Francisco">
+              </div>
+              <div class="form-group">
+                <label for="shipZip">ZIP Code *</label>
+                <input type="text" id="shipZip" placeholder="94107" value="94107">
+              </div>
+            </div>
+          </form>
+
+          <!-- Payment Section -->
+          <h4 style="margin-top: 1.5rem;">2. Payment Method</h4>
+          <div class="card-presets-bar">
+            <span>Test Cards (Luhn Valid):</span>
+            <button type="button" class="preset-card-btn" onclick="fillTestCard('visa')">Visa (Pass)</button>
+            <button type="button" class="preset-card-btn" onclick="fillTestCard('amex')">Amex (502 Error)</button>
+          </div>
+
+          <form id="paymentForm" onsubmit="event.preventDefault();">
+            <div class="form-group">
+              <label for="cardNumber">Card Number (PCI-DSS Scrubbed) *</label>
+              <input type="text" id="cardNumber" placeholder="4242 •••• •••• 4242" value="4242424242424242">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="cardExpiry">Expiration (MM/YY) *</label>
+                <input type="text" id="cardExpiry" placeholder="12/28" value="12/28">
+              </div>
+              <div class="form-group">
+                <label for="cardCvc">CVC Code *</label>
+                <input type="text" id="cardCvc" placeholder="921" value="921">
+              </div>
+            </div>
+
+            <!-- Error Banner for API Faults -->
+            <div class="checkout-error-banner" id="checkoutErrorBanner" style="display: none;">
+              <span class="error-icon">⚠️</span>
+              <span id="checkoutErrorMessage"></span>
+            </div>
+
+            <!-- BUG-003: Frozen Checkout Submit Button -->
+            <button 
+              type="button" 
+              class="btn btn-primary btn-block place-order-btn" 
+              id="placeOrderBtn"
+              onclick="handlePlaceOrder()"
+              title="[BUG-003 Target] Place Order button throws TypeError and spins endlessly"
+            >
+              <span class="btn-spinner" id="orderBtnSpinner" style="display: none;"></span>
+              <span id="orderBtnText">Place Order & Authorize Telemetry</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Mini Order Summary Sidebar -->
+        <div class="checkout-summary-section">
+          <h4>Order Review</h4>
+          <div class="checkout-items-list" id="checkoutItemsList">
+            <!-- Rendered by app.js -->
+          </div>
+          <div class="summary-line">
+            <span>Subtotal</span>
+            <span id="checkoutSubtotal">$0.00</span>
+          </div>
+          <div class="summary-line total">
+            <span>Total to Charge</span>
+            <span id="checkoutTotal">$0.00</span>
+          </div>
+          <div class="security-guarantee">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span>SilentQA In-Flight Scrubber Active (Luhn-10 & Secret Masking)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- PRODUCT QUICK VIEW MODAL (BUG-006 TARGET)                                 -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop" id="quickViewBackdrop">
+    <div class="modal-card quick-view-modal">
+      <button class="close-btn" onclick="closeQuickViewModal()">✕</button>
+      <div id="quickViewContent">
+        <!-- Rendered by app.js (Product 3 triggers BUG-006 Blank Modal Crash) -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- ORDER SUCCESS CONFIRMATION MODAL                                          -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop" id="successBackdrop">
+    <div class="modal-card success-modal">
+      <div class="success-icon-wrap">✓</div>
+      <h2>Order Authorized Successfully!</h2>
+      <p class="order-id-label">Confirmation Number: <strong id="successOrderId">ORD-894102</strong></p>
+      <p class="success-desc">
+        Your flight telemetry was captured cleanly without anomalies. 
+        All payment identifiers were masked with Luhn Modulo-10 filtering.
+      </p>
+      <button class="btn btn-primary" onclick="closeSuccessModal()">Continue Shopping</button>
+    </div>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
