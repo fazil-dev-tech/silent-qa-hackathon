@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const statusText = document.getElementById('status-text');
   const siteHost = document.getElementById('site-host');
   const gatewayLabel = document.getElementById('gateway-label');
-  const btnQuickSwitchHost = document.getElementById('btn-quick-switch-host');
+  const btnQuickSwitchLocal = document.getElementById('btn-quick-switch-local');
   const btnQuickSwitchCloud = document.getElementById('btn-quick-switch-cloud');
   const sessionDisplay = document.getElementById('session-display');
   const workspaceBtn = document.getElementById('btn-workspace');
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     siteHost.textContent = 'Active Browser Tab';
   }
 
-  // 1b. Quick Gateway Switchers
+  // 1b. Quick Gateway Switchers (Cloud Production vs Localhost)
   if (btnQuickSwitchCloud) {
     btnQuickSwitchCloud.addEventListener('click', () => {
       chrome.storage.local.set({ api_endpoint: CLOUD_PROD_API }, () => {
@@ -78,16 +78,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  if (btnQuickSwitchHost) {
-    btnQuickSwitchHost.addEventListener('click', () => {
-      if (!currentTabOrigin || currentTabOrigin.startsWith('chrome') || currentTabOrigin.startsWith('about')) {
-        updateStatus('Current tab does not have a web origin.', '#DC2626');
-        return;
-      }
-      const hostEndpoint = `${currentTabOrigin}/api/ingest`;
-      chrome.storage.local.set({ api_endpoint: hostEndpoint }, () => {
-        setGatewayLabel(currentTabOrigin);
-        updateStatus(`✓ Switched to Tab Host (${currentTabOrigin})`, '#166534');
+  if (btnQuickSwitchLocal) {
+    btnQuickSwitchLocal.addEventListener('click', () => {
+      const localEndpoint = 'http://localhost:3000/api/ingest';
+      chrome.storage.local.set({ api_endpoint: localEndpoint }, () => {
+        setGatewayLabel('http://localhost:3000');
+        updateStatus('✓ Switched to Local Dev (localhost:3000)', '#166534');
         setTimeout(() => updateStatus(''), 2500);
       });
     });
@@ -165,21 +161,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       'sqa_stats',
     ],
     (stored) => {
-      // Intelligently resolve endpoint if missing or legacy localhost
+      // Ensure activeEndpoint is always valid; default to Cloud Production
       let activeEndpoint = stored.api_endpoint;
-      const isLegacyLocal = !activeEndpoint || activeEndpoint.includes('localhost:3000');
-
-      if (isLegacyLocal) {
-        if (currentTabOrigin && !currentTabOrigin.includes('localhost') && !currentTabOrigin.startsWith('chrome')) {
-          // If on silentai.dpdns.org or custom domain running Silent QA, adapt to tab host
-          if (currentTabOrigin.includes('silentai') || currentTabOrigin.includes('vercel.app')) {
-            activeEndpoint = `${currentTabOrigin}/api/ingest`;
-          } else {
-            activeEndpoint = CLOUD_PROD_API;
-          }
-        } else {
-          activeEndpoint = CLOUD_PROD_API;
-        }
+      if (!activeEndpoint || activeEndpoint.includes('localhost:3000') || activeEndpoint.includes('silentai.dpdns.org')) {
+        activeEndpoint = CLOUD_PROD_API;
         chrome.storage.local.set({ api_endpoint: activeEndpoint });
       }
 
@@ -380,30 +365,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         chrome.storage.local.set({ session_id: activeSessionId });
       }
 
-      // Build ordered candidate base URLs with graceful automatic fallback
+      // Build candidate base URLs with Cloud Production priority
       const candidateBases = [];
 
-      // 1. Configured endpoint base
+      // 1. Configured endpoint if explicitly set and not localhost/shop
       if (stored.api_endpoint) {
         const configuredBase = stored.api_endpoint.replace(/\/api\/ingest\/?$/, '').replace(/\/+$/, '');
-        if (configuredBase && !configuredBase.includes('localhost:3000')) {
+        if (
+          configuredBase &&
+          !configuredBase.includes('localhost:3000') &&
+          !configuredBase.includes('silentai.dpdns.org')
+        ) {
           candidateBases.push(configuredBase);
         }
       }
 
-      // 2. Active Tab Origin (e.g. silentai.dpdns.org or vercel.app)
-      if (currentTabOrigin && !currentTabOrigin.includes('localhost') && !currentTabOrigin.startsWith('chrome')) {
-        if (!candidateBases.includes(currentTabOrigin)) {
-          candidateBases.push(currentTabOrigin);
-        }
-      }
-
-      // 3. Official Cloud Production
+      // 2. Official Cloud Production (primary server)
       if (!candidateBases.includes(CLOUD_PROD_URL)) {
         candidateBases.push(CLOUD_PROD_URL);
       }
 
-      // 4. Localhost fallback if all else fails
+      // 3. Localhost fallback if configured
       if (stored.api_endpoint && stored.api_endpoint.includes('localhost:3000')) {
         candidateBases.push('http://localhost:3000');
       }
@@ -415,25 +397,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
           updateStatus(`Connecting to ${baseApiUrl}...`, '#4B5563');
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 9000);
+          const timeoutId = setTimeout(() => controller.abort(), 45000);
 
-          const response = await fetch(`${baseApiUrl}/api/complaints`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            signal: controller.signal,
-            body: JSON.stringify({
-              session_id: activeSessionId,
-              note,
-              picked_selector: currentPickedSelector || undefined,
-              tester_name: stored.tester_name || 'Engineer #1',
-              device_tag: stored.device_tag || 'Station-01',
-              recent_event_id: currentRecentEventId || undefined,
-              submitted_at: Date.now(),
-            }),
-          });
-          clearTimeout(timeoutId);
+          // Progressive status notifications
+          const progTimer1 = setTimeout(() => {
+            updateStatus('Synthesizing with Causal AI (OpenRouter Nemotron)...', '#7C3AED');
+          }, 3000);
+          const progTimer2 = setTimeout(() => {
+            updateStatus('Synthesizing deterministic Playwright reproduction script...', '#2563EB');
+          }, 12000);
 
-          const data = await response.json();
+          let response;
+          try {
+            response = await fetch(`${baseApiUrl}/api/complaints`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              signal: controller.signal,
+              body: JSON.stringify({
+                session_id: activeSessionId,
+                note,
+                picked_selector: currentPickedSelector || undefined,
+                tester_name: stored.tester_name || 'Engineer #1',
+                device_tag: stored.device_tag || 'Station-01',
+                recent_event_id: currentRecentEventId || undefined,
+                submitted_at: Date.now(),
+              }),
+            });
+          } finally {
+            clearTimeout(timeoutId);
+            clearTimeout(progTimer1);
+            clearTimeout(progTimer2);
+          }
+
+          const data = await response.json().catch(() => ({}));
           if (response.ok && data.report) {
             success = true;
             // Persist the working endpoint as default
@@ -441,7 +437,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             chrome.storage.local.set({ api_endpoint: workingEndpoint });
             setGatewayLabel(baseApiUrl);
 
-            updateStatus('✓ Defect synthesized! Opening report...', '#16A34A');
+            updateStatus('✓ Defect synthesized! Opening report in Studio...', '#16A34A');
             noteInput.value = '';
             currentPickedSelector = '';
             currentRecentEventId = '';
@@ -450,13 +446,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Automatically open report in browser workspace
             setTimeout(() => {
               chrome.tabs.create({ url: `${baseApiUrl}/app/report/${data.report.id}` });
-            }, 800);
+            }, 600);
             break;
           } else {
-            lastErrorMessage = data?.error || `HTTP ${response.status} from ${baseApiUrl}`;
+            lastErrorMessage = data?.error || data?.message || `HTTP ${response.status} from ${baseApiUrl}`;
           }
         } catch (err) {
-          lastErrorMessage = `Cannot reach ${baseApiUrl}`;
+          if (err?.name === 'AbortError') {
+            lastErrorMessage = `Timeout waiting for AI report (>45s) from ${baseApiUrl}`;
+          } else {
+            lastErrorMessage = `Cannot reach ${baseApiUrl} (${err?.message || 'Network error'})`;
+          }
         }
       }
 

@@ -43,14 +43,17 @@ export async function POST(
 
     const customMessage = body.custom_message || body.note || undefined;
 
-    // 1. Strictly fetch the real report from Supabase (omitting bloated evidence column)
-    const { data: reportData, error: fetchErr } = await supabaseAdmin
+    // 1. Fetch real report from Supabase (clean columns only)
+    let { data: reportData, error: fetchErr } = await supabaseAdmin
       .from('reports')
-      .select('id, complaint_id, title, severity, steps, expected, actual, root_cause, confidence, suggested_fix, app_url, status, complaints(note)')
+      .select('id, complaint_id, title, severity, steps, expected, actual, root_cause, confidence, status, complaints(note)')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
-    if (fetchErr || !reportData) {
+    // Fallback to body.report payload if DB lookup did not find report
+    const targetReport = reportData || body.report;
+
+    if (!targetReport) {
       return NextResponse.json(
         { error: 'Defect report not found in database', report_id: id },
         { status: 404, headers: { 'Access-Control-Allow-Origin': '*' } }
@@ -58,10 +61,14 @@ export async function POST(
     }
 
     // Enrich reportData with raw_note and suggested_fix if needed
-    const rawNote = (reportData as any).complaints?.note || (reportData as any).raw_note || reportData.title;
-    let suggestedFix = reportData.suggested_fix;
+    const rawNote =
+      (targetReport as any).complaints?.note ||
+      (targetReport as any).raw_note ||
+      targetReport.title;
+
+    let suggestedFix = (targetReport as any).suggested_fix;
     if (!suggestedFix) {
-      const text = ((reportData.root_cause || '') + ' ' + (reportData.actual || '') + ' ' + (reportData.title || '')).toLowerCase();
+      const text = ((targetReport.root_cause || '') + ' ' + (targetReport.actual || '') + ' ' + (targetReport.title || '')).toLowerCase();
       if (text.includes('duplicate') || text.includes('race') || text.includes('count')) {
         suggestedFix = `// Fix: Debounce interaction and enforce idempotency key\nlet isSubmitting = false;\nasync function handleAction(payload) {\n  if (isSubmitting) return;\n  isSubmitting = true;\n  try {\n    await api.post('/action', payload, {\n      headers: { 'X-Idempotency-Key': crypto.randomUUID() }\n    });\n  } finally {\n    isSubmitting = false;\n  }\n};`;
       } else if (text.includes('undefined') || text.includes('typeerror') || text.includes('chargeid') || text.includes('read properties')) {
@@ -72,16 +79,18 @@ export async function POST(
     }
 
     const enrichedReport = {
-      ...reportData,
+      ...targetReport,
       raw_note: rawNote,
       suggested_fix: suggestedFix,
     };
 
-    // 2. Mark report as approved and sent
-    await supabaseAdmin
-      .from('reports')
-      .update({ status: 'sent', updated_at: new Date().toISOString() })
-      .eq('id', id);
+    // 2. Mark report as approved and sent in Supabase if persisted
+    if (reportData?.id) {
+      await supabaseAdmin
+        .from('reports')
+        .update({ status: 'sent', updated_at: new Date().toISOString() })
+        .eq('id', id);
+    }
 
     // 3. Dynamic server origin resolution (never hardcode localhost for production deployments)
     const reqUrl = new URL(req.url);
@@ -113,7 +122,7 @@ export async function POST(
           body: JSON.stringify({
             from: process.env.MAIL_FROM || 'Silent QA <reports@resend.dev>',
             to: recipientsList,
-            subject: `[DEFECT REPORT] ${reportData.title} (${reportData.severity.toUpperCase()})`,
+            subject: `[DEFECT REPORT] ${enrichedReport.title} (${(enrichedReport.severity || 'HIGH').toUpperCase()})`,
             html: emailHtml,
           }),
         });
@@ -133,7 +142,7 @@ export async function POST(
         await transport.sendMail({
           from: process.env.MAIL_FROM || 'Silent QA <reports@silentqa.local>',
           to: recipientsList.join(', '),
-          subject: `[DEFECT REPORT] ${reportData.title} (${reportData.severity.toUpperCase()})`,
+          subject: `[DEFECT REPORT] ${enrichedReport.title} (${(enrichedReport.severity || 'HIGH').toUpperCase()})`,
           html: emailHtml,
         });
         deliveryMethod = 'smtp';

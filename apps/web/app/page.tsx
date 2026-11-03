@@ -765,7 +765,7 @@ export default function HomePage() {
           <div className="comparison-pipeline-container">
             {/* Left Card: WITHOUT SILENT QA (Red glow) */}
             <div
-              className="comparison-card"
+              className="comparison-card comparison-card-left"
               style={{
                 background: 'rgba(14, 16, 24, 0.7)',
                 backdropFilter: 'blur(28px) saturate(190%)',
@@ -845,7 +845,7 @@ export default function HomePage() {
 
             {/* Right Card: WITH SILENT QA (Cyan/Green glow) */}
             <div
-              className="comparison-card"
+              className="comparison-card comparison-card-right"
               style={{
                 background: 'rgba(16, 20, 30, 0.75)',
                 backdropFilter: 'blur(28px) saturate(200%)',

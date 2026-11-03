@@ -104,6 +104,7 @@ export default function SendEmailModal({
         body: JSON.stringify({
           recipients,
           custom_message: customNote.trim() || undefined,
+          report,
         }),
       });
 

@@ -12,6 +12,19 @@ import { supabaseAdmin, ensureUUID } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: CORS_HEADERS,
+  });
+}
+
 export async function POST(req: Request) {
   try {
     const json = await req.json();
@@ -20,7 +33,7 @@ export async function POST(req: Request) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid complaint submission', details: parsed.error.format() },
-        { status: 400 }
+        { status: 400, headers: CORS_HEADERS }
       );
     }
 
@@ -79,7 +92,7 @@ export async function POST(req: Request) {
     if (eventsErr) {
       return NextResponse.json(
         { error: 'Database event retrieval failed', details: eventsErr.message },
-        { status: 500 }
+        { status: 500, headers: CORS_HEADERS }
       );
     }
 
@@ -187,20 +200,23 @@ export async function POST(req: Request) {
       // Audit non-blocking
     }
 
-    return NextResponse.json({
-      success: true,
-      report: {
-        ...fullReport,
-        raw_note: note,
-        suggested_fix: generatedReport.suggested_fix,
-        tester_name: tester_name || 'Engineer #1',
-        device_tag: device_tag || 'Station-01',
+    return NextResponse.json(
+      {
+        success: true,
+        report: {
+          ...fullReport,
+          raw_note: note,
+          suggested_fix: generatedReport.suggested_fix,
+          tester_name: tester_name || 'Engineer #1',
+          device_tag: device_tag || 'Station-01',
+        },
       },
-    });
+      { headers: CORS_HEADERS }
+    );
   } catch (err: any) {
     return NextResponse.json(
       { error: 'Failed to process complaint', message: err?.message },
-      { status: 500 }
+      { status: 500, headers: CORS_HEADERS }
     );
   }
 }

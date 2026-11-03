@@ -117,47 +117,58 @@ body {
 /* Problem & Comparison Synthesis Pipeline Layout System                     */
 /* ========================================================================= */
 .comparison-pipeline-container {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: minmax(320px, 480px) 210px minmax(320px, 480px);
   align-items: center;
   justify-content: center;
   gap: 0;
-  max-width: 1160px;
+  max-width: 1200px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
 }
 
 .comparison-card {
-  flex: 1 1 0%;
-  max-width: 460px;
   width: 100%;
+  max-width: 480px;
   box-sizing: border-box;
+}
+
+.comparison-card-left {
+  justify-self: end;
+}
+
+.comparison-card-right {
+  justify-self: start;
 }
 
 .comparison-bridge-desktop {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 210px;
   flex-shrink: 0;
 }
 
 .comparison-bridge-mobile {
-  display: none;
+  display: none !important;
 }
 
-@media (max-width: 992px) {
+@media (max-width: 980px) {
   .comparison-pipeline-container {
+    display: flex !important;
     flex-direction: column !important;
     gap: 1.5rem !important;
     padding: 0 1rem;
     align-items: center !important;
+    justify-content: center !important;
   }
 
   .comparison-card {
     max-width: 520px !important;
     width: 100% !important;
     margin: 0 auto !important;
+    justify-self: center !important;
   }
 
   .comparison-bridge-desktop {

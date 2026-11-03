@@ -61,7 +61,7 @@ INSTALLATION STEPS (UNDER 30 SECONDS):
 
 6. LINK ACTIVE WORKSPACE / STATION:
    Click the extension icon to view your live ring buffer telemetry status.
-   Default endpoint: http://localhost:3000/api/ingest
+   Default endpoint: https://hhhcct.vercel.app/api/ingest (or http://localhost:3000 for local dev)
    Enter your Tester Station ID (e.g. Station-01) and start recording!
 
 ===================================================================
