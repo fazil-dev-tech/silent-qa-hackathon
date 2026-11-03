@@ -1,9 +1,15 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  const CLOUD_PROD_URL = 'https://hhhcct.vercel.app';
+  const CLOUD_PROD_API = 'https://hhhcct.vercel.app/api/ingest';
+
   const noteInput = document.getElementById('complaint-note');
   const submitBtn = document.getElementById('btn-submit');
   const pickBtn = document.getElementById('btn-pick');
   const statusText = document.getElementById('status-text');
   const siteHost = document.getElementById('site-host');
+  const gatewayLabel = document.getElementById('gateway-label');
+  const btnQuickSwitchHost = document.getElementById('btn-quick-switch-host');
+  const btnQuickSwitchCloud = document.getElementById('btn-quick-switch-cloud');
   const sessionDisplay = document.getElementById('session-display');
   const workspaceBtn = document.getElementById('btn-workspace');
   const toggleRecordingBtn = document.getElementById('btn-toggle-recording');
@@ -24,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let isRecordingEnabled = true;
   let activeTesterName = 'Eng #1';
   let activeDeviceTag = 'Station-01';
+  let currentTabOrigin = '';
 
   function updateStatus(msg, color) {
     if (!statusText) return;
@@ -37,12 +44,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // 1. Identify active tab host
+  function setGatewayLabel(url) {
+    if (!gatewayLabel) return;
+    const clean = (url || '').replace(/\/api\/ingest\/?$/, '').replace(/\/+$/, '');
+    gatewayLabel.textContent = clean || CLOUD_PROD_URL;
+    gatewayLabel.title = `Current Target Gateway: ${clean || CLOUD_PROD_URL}`;
+  }
+
+  // 1. Identify active tab host & origin
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab?.url) {
       try {
         const u = new URL(tab.url);
+        currentTabOrigin = `${u.protocol}//${u.host}`;
         siteHost.textContent = `${u.hostname}${u.port ? ':' + u.port : ''}`;
       } catch {
         siteHost.textContent = tab.url.slice(0, 30);
@@ -50,6 +65,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   } catch {
     siteHost.textContent = 'Active Browser Tab';
+  }
+
+  // 1b. Quick Gateway Switchers
+  if (btnQuickSwitchCloud) {
+    btnQuickSwitchCloud.addEventListener('click', () => {
+      chrome.storage.local.set({ api_endpoint: CLOUD_PROD_API }, () => {
+        setGatewayLabel(CLOUD_PROD_URL);
+        updateStatus('✓ Switched to Cloud Production (hhhcct.vercel.app)', '#4338CA');
+        setTimeout(() => updateStatus(''), 2500);
+      });
+    });
+  }
+
+  if (btnQuickSwitchHost) {
+    btnQuickSwitchHost.addEventListener('click', () => {
+      if (!currentTabOrigin || currentTabOrigin.startsWith('chrome') || currentTabOrigin.startsWith('about')) {
+        updateStatus('Current tab does not have a web origin.', '#DC2626');
+        return;
+      }
+      const hostEndpoint = `${currentTabOrigin}/api/ingest`;
+      chrome.storage.local.set({ api_endpoint: hostEndpoint }, () => {
+        setGatewayLabel(currentTabOrigin);
+        updateStatus(`✓ Switched to Tab Host (${currentTabOrigin})`, '#166534');
+        setTimeout(() => updateStatus(''), 2500);
+      });
+    });
   }
 
   // 2. Master Recording Toggle Sync & Controller
@@ -112,7 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 3. Hydrate storage (Session ID, Tester Identity, Recent Items, Stats)
+  // 3. Hydrate storage & Smart Resolve API Endpoint
   chrome.storage.local.get(
     [
       'session_id',
@@ -124,6 +165,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       'sqa_stats',
     ],
     (stored) => {
+      // Intelligently resolve endpoint if missing or legacy localhost
+      let activeEndpoint = stored.api_endpoint;
+      const isLegacyLocal = !activeEndpoint || activeEndpoint.includes('localhost:3000');
+
+      if (isLegacyLocal) {
+        if (currentTabOrigin && !currentTabOrigin.includes('localhost') && !currentTabOrigin.startsWith('chrome')) {
+          // If on silentai.dpdns.org or custom domain running Silent QA, adapt to tab host
+          if (currentTabOrigin.includes('silentai') || currentTabOrigin.includes('vercel.app')) {
+            activeEndpoint = `${currentTabOrigin}/api/ingest`;
+          } else {
+            activeEndpoint = CLOUD_PROD_API;
+          }
+        } else {
+          activeEndpoint = CLOUD_PROD_API;
+        }
+        chrome.storage.local.set({ api_endpoint: activeEndpoint });
+      }
+
+      setGatewayLabel(activeEndpoint);
+
       // Recording state
       if (typeof stored.sqa_recording_enabled === 'boolean') {
         renderRecordingState(stored.sqa_recording_enabled);
@@ -179,60 +240,63 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     recentChipsContainer.innerHTML = '';
-    items.slice(0, 3).forEach((item) => {
+    items.forEach((item) => {
       const chip = document.createElement('div');
       chip.className = 'recent-chip';
-
-      let icon = '🔘';
-      if (item.type === 'error' || item.type === 'network_error') {
-        icon = '⚠️';
-      } else if (item.type === 'input') {
-        icon = '📝';
+      chip.setAttribute('data-id', item.id);
+      if (item.selector) {
+        chip.setAttribute('data-selector', item.selector);
       }
 
-      const elapsed = Math.max(0, Math.round((Date.now() - item.ts) / 1000));
-      const timeStr = elapsed < 60 ? `${elapsed}s ago` : `${Math.round(elapsed / 60)}m ago`;
+      const isError = item.type === 'error' || item.type === 'network_error';
+      const icon = isError ? '⚠️' : '🔘';
+      const timeAgo = formatTimeAgo(item.ts);
 
       chip.innerHTML = `
         <span class="chip-icon">${icon}</span>
-        <div class="chip-info">
-          <div class="chip-title">${escapeHtml(item.label || item.selector || 'Element')}</div>
-          <div class="chip-meta">${escapeHtml(item.type.toUpperCase())} • ${timeStr}</div>
+        <div class="chip-body">
+          <div class="chip-label">${escapeHtml(item.label || item.selector || item.type)}</div>
+          <div class="chip-meta">${item.type.toUpperCase()}${item.status ? ' [' + item.status + ']' : ''} • ${timeAgo}</div>
         </div>
       `;
 
       chip.addEventListener('click', () => {
-        // Toggle selection
-        const alreadySelected = chip.classList.contains('is-selected');
         document.querySelectorAll('.recent-chip').forEach((c) => c.classList.remove('is-selected'));
+        chip.classList.add('is-selected');
 
-        if (!alreadySelected) {
-          chip.classList.add('is-selected');
-          currentPickedSelector = item.selector || '';
-          currentRecentEventId = item.id || '';
-          boundText.textContent = item.selector || item.label || 'Selected Target';
+        currentRecentEventId = item.id;
+        if (item.selector) {
+          currentPickedSelector = item.selector;
+          boundText.textContent = item.selector;
           boundTargetPill.style.display = 'flex';
-
-          // Pre-populate complaint if empty
-          if (!noteInput.value.trim()) {
-            if (item.type === 'network_error') {
-              noteInput.value = `API request to ${item.label} failed with status ${item.status || 500}`;
-            } else if (item.type === 'click') {
-              noteInput.value = `Clicking "${item.label}" does not respond or failed`;
-            }
-          }
-        } else {
-          currentPickedSelector = '';
-          currentRecentEventId = '';
-          boundTargetPill.style.display = 'none';
         }
+
+        // Prefill or append to note
+        const notePrefix = isError
+          ? `Observed ${item.type.toUpperCase()}: ${item.label || item.selector}`
+          : `Interacted with ${item.label || item.selector}`;
+
+        if (!noteInput.value.trim()) {
+          noteInput.value = notePrefix;
+        }
+        noteInput.focus();
       });
 
       recentChipsContainer.appendChild(chip);
     });
   }
 
-  // Clear target button
+  function formatTimeAgo(ts) {
+    if (!ts) return '';
+    const diff = Math.floor((Date.now() - ts) / 1000);
+    if (diff < 5) return 'just now';
+    if (diff < 60) return `${diff}s ago`;
+    const mins = Math.floor(diff / 60);
+    if (mins < 60) return `${mins}m ago`;
+    return `${Math.floor(mins / 60)}h ago`;
+  }
+
+  // Clear Bound Target
   clearTargetBtn.addEventListener('click', () => {
     currentPickedSelector = '';
     currentRecentEventId = '';
@@ -264,13 +328,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   workspaceBtn.addEventListener('click', async () => {
-    try {
-      const stored = await chrome.storage.sync.get(['api_endpoint']);
-      const base = (stored.api_endpoint || 'http://localhost:3000/api/ingest').replace(/\/api\/ingest\/?$/, '');
+    chrome.storage.local.get(['api_endpoint'], (stored) => {
+      const ep = stored.api_endpoint || CLOUD_PROD_API;
+      const base = ep.replace(/\/api\/ingest\/?$/, '').replace(/\/+$/, '') || CLOUD_PROD_URL;
       chrome.tabs.create({ url: `${base}/app` });
-    } catch {
-      chrome.tabs.create({ url: 'http://localhost:3000/app' });
-    }
+    });
   });
 
   // 6. Element Picker integration
@@ -292,7 +354,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 7. Submit complaint note & trigger AI synthesis with full tester attribution
+  // 7. Submit complaint note with auto-failover & full tester attribution
   submitBtn.addEventListener('click', async () => {
     const note = noteInput.value.trim();
     if (!note) {
@@ -317,43 +379,91 @@ document.addEventListener('DOMContentLoaded', async () => {
         activeSessionId = crypto.randomUUID();
         chrome.storage.local.set({ session_id: activeSessionId });
       }
-      const baseApiUrl = (stored.api_endpoint || 'http://localhost:3000/api/ingest').replace('/api/ingest', '');
 
-      try {
-        const response = await fetch(`${baseApiUrl}/api/complaints`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            session_id: activeSessionId,
-            note,
-            picked_selector: currentPickedSelector || undefined,
-            tester_name: stored.tester_name || 'Engineer #1',
-            device_tag: stored.device_tag || 'Station-01',
-            recent_event_id: currentRecentEventId || undefined,
-            submitted_at: Date.now(),
-          }),
-        });
+      // Build ordered candidate base URLs with graceful automatic fallback
+      const candidateBases = [];
 
-        const data = await response.json();
-        if (response.ok && data.report) {
-          updateStatus('✓ Defect synthesized! Opening report...', '#16A34A');
-          noteInput.value = '';
-          currentPickedSelector = '';
-          currentRecentEventId = '';
-          boundTargetPill.style.display = 'none';
-
-          // Automatically open report in browser workspace
-          setTimeout(() => {
-            chrome.tabs.create({ url: `${baseApiUrl}/app/report/${data.report.id}` });
-          }, 800);
-        } else {
-          updateStatus(data?.error || 'Failed to submit flag.', '#DC2626');
+      // 1. Configured endpoint base
+      if (stored.api_endpoint) {
+        const configuredBase = stored.api_endpoint.replace(/\/api\/ingest\/?$/, '').replace(/\/+$/, '');
+        if (configuredBase && !configuredBase.includes('localhost:3000')) {
+          candidateBases.push(configuredBase);
         }
-      } catch (err) {
-        updateStatus(`Cannot reach API at ${baseApiUrl}`, '#DC2626');
-      } finally {
-        submitBtn.disabled = false;
       }
+
+      // 2. Active Tab Origin (e.g. silentai.dpdns.org or vercel.app)
+      if (currentTabOrigin && !currentTabOrigin.includes('localhost') && !currentTabOrigin.startsWith('chrome')) {
+        if (!candidateBases.includes(currentTabOrigin)) {
+          candidateBases.push(currentTabOrigin);
+        }
+      }
+
+      // 3. Official Cloud Production
+      if (!candidateBases.includes(CLOUD_PROD_URL)) {
+        candidateBases.push(CLOUD_PROD_URL);
+      }
+
+      // 4. Localhost fallback if all else fails
+      if (stored.api_endpoint && stored.api_endpoint.includes('localhost:3000')) {
+        candidateBases.push('http://localhost:3000');
+      }
+
+      let success = false;
+      let lastErrorMessage = '';
+
+      for (const baseApiUrl of candidateBases) {
+        try {
+          updateStatus(`Connecting to ${baseApiUrl}...`, '#4B5563');
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 9000);
+
+          const response = await fetch(`${baseApiUrl}/api/complaints`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              session_id: activeSessionId,
+              note,
+              picked_selector: currentPickedSelector || undefined,
+              tester_name: stored.tester_name || 'Engineer #1',
+              device_tag: stored.device_tag || 'Station-01',
+              recent_event_id: currentRecentEventId || undefined,
+              submitted_at: Date.now(),
+            }),
+          });
+          clearTimeout(timeoutId);
+
+          const data = await response.json();
+          if (response.ok && data.report) {
+            success = true;
+            // Persist the working endpoint as default
+            const workingEndpoint = `${baseApiUrl}/api/ingest`;
+            chrome.storage.local.set({ api_endpoint: workingEndpoint });
+            setGatewayLabel(baseApiUrl);
+
+            updateStatus('✓ Defect synthesized! Opening report...', '#16A34A');
+            noteInput.value = '';
+            currentPickedSelector = '';
+            currentRecentEventId = '';
+            boundTargetPill.style.display = 'none';
+
+            // Automatically open report in browser workspace
+            setTimeout(() => {
+              chrome.tabs.create({ url: `${baseApiUrl}/app/report/${data.report.id}` });
+            }, 800);
+            break;
+          } else {
+            lastErrorMessage = data?.error || `HTTP ${response.status} from ${baseApiUrl}`;
+          }
+        } catch (err) {
+          lastErrorMessage = `Cannot reach ${baseApiUrl}`;
+        }
+      }
+
+      if (!success) {
+        updateStatus(`Failed to connect: ${lastErrorMessage}. Use ☁️ Cloud or ⚙ settings to update gateway.`, '#DC2626');
+      }
+      submitBtn.disabled = false;
     });
   });
 

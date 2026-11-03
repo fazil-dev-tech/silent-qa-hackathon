@@ -1281,40 +1281,26 @@ export default function HomePage() {
               margin: '0 auto',
             }}
           >
-            {/* Card 1: Sub-Second Compile */}
-            <div
-              className="glass-morphism-card"
-              style={{
-                borderRadius: '20px',
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                minHeight: '270px',
-                position: 'relative',
-              }}
-            >
-              <div className="hud-bracket hud-bracket-tl" style={{ borderColor: 'rgba(245, 158, 11, 0.5)' }} />
-              <div className="hud-bracket hud-bracket-br" style={{ borderColor: 'rgba(245, 158, 11, 0.5)' }} />
+            {/* Card 1: Sub-Millisecond Flight Recording */}
+            <div className="glass-feature-card glass-feature-card-amber">
+              <div className="glass-sheen" />
+              <div className="hud-bracket hud-bracket-tl" style={{ borderColor: 'rgba(245, 158, 11, 0.7)', boxShadow: '0 0 8px rgba(245, 158, 11, 0.4)' }} />
+              <div className="hud-bracket hud-bracket-br" style={{ borderColor: 'rgba(245, 158, 11, 0.7)', boxShadow: '0 0 8px rgba(245, 158, 11, 0.4)' }} />
+              <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '130px', height: '130px', background: 'radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(20px)' }} />
 
               <div>
                 <div
+                  className="glass-icon-orb"
                   style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '10px',
-                    background: 'rgba(245, 158, 11, 0.15)',
-                    border: '1px solid rgba(245, 158, 11, 0.35)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(245, 158, 11, 0.08) 100%)',
+                    border: '1px solid rgba(245, 158, 11, 0.45)',
+                    boxShadow: '0 0 20px rgba(245, 158, 11, 0.25)',
                     color: '#F59E0B',
-                    marginBottom: '1.25rem',
                   }}
                 >
-                  <Zap size={20} />
+                  <Zap size={22} />
                 </div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.45rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.45rem', letterSpacing: '-0.01em' }}>
                   Sub-Millisecond Flight Recording
                 </h3>
                 <p style={{ fontSize: '0.88rem', color: '#94A3B8', lineHeight: 1.6 }}>
@@ -1322,77 +1308,107 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Micro-visual: Live Oscilloscope SVG & Progress Bar */}
-              <div style={{ marginTop: '1.25rem' }}>
-                <div style={{ height: '20px', marginBottom: '0.4rem', overflow: 'hidden' }}>
-                  <svg width="100%" height="20" viewBox="0 0 240 20" preserveAspectRatio="none">
-                    <path
-                      d="M 0 10 Q 30 10 45 10 L 55 2 L 65 18 L 75 5 L 85 14 L 95 10 L 140 10 L 150 2 L 160 18 L 170 10 L 240 10"
-                      fill="none"
-                      stroke="#F59E0B"
-                      strokeWidth="1.5"
-                      strokeDasharray="240"
-                      strokeDashoffset="0"
-                      style={{ animation: 'circuit-flow 2.2s linear infinite' }}
-                    />
-                  </svg>
-                </div>
+              {/* Micro-visual: Real-time Multi-Channel Oscilloscope & Telemetry Meter */}
+              <div style={{ marginTop: '1.5rem' }}>
                 <div
                   style={{
-                    background: 'rgba(0, 0, 0, 0.4)',
-                    borderRadius: '8px',
-                    padding: '0.5rem 0.75rem',
-                    border: '1px solid rgba(255, 255, 255, 0.06)',
-                    fontFamily: 'monospace',
-                    fontSize: '0.72rem',
-                    color: '#94A3B8',
+                    background: 'rgba(5, 7, 12, 0.85)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(245, 158, 11, 0.22)',
+                    boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.9), 0 4px 18px rgba(0, 0, 0, 0.45)',
+                    padding: '0.75rem',
+                    position: 'relative',
+                    overflow: 'hidden',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-                    <span>flight_stream.dat</span>
-                    <span style={{ color: '#4ADE80' }}>0.8ms</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem', fontSize: '0.68rem', fontFamily: 'monospace', position: 'relative', zIndex: 2 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#F59E0B', fontWeight: 700 }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#F59E0B', boxShadow: '0 0 8px #F59E0B' }} className="live-pulse-dot" />
+                      <span>CH-1: DOM_MUTATION</span>
+                    </div>
+                    <span style={{ color: '#4ADE80', fontWeight: 800 }}>0.72ms [PASS]</span>
                   </div>
-                  <div style={{ height: '4px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '9999px', overflow: 'hidden' }}>
-                    <div style={{ width: '85%', height: '100%', background: 'linear-gradient(90deg, #F59E0B, #10B981)' }} />
+
+                  <div style={{ height: '42px', position: 'relative', zIndex: 2 }}>
+                    <svg width="100%" height="42" viewBox="0 0 280 42" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.4" />
+                          <stop offset="35%" stopColor="#F59E0B" stopOpacity="1" />
+                          <stop offset="65%" stopColor="#10B981" stopOpacity="1" />
+                          <stop offset="100%" stopColor="#00F0FF" stopOpacity="0.9" />
+                        </linearGradient>
+                        <linearGradient id="waveFill" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.22" />
+                          <stop offset="100%" stopColor="#F59E0B" stopOpacity="0" />
+                        </linearGradient>
+                        <filter id="glowGold" x="-20%" y="-20%" width="140%" height="140%">
+                          <feGaussianBlur stdDeviation="2" result="blur" />
+                          <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                          </feMerge>
+                        </filter>
+                      </defs>
+
+                      <line x1="0" y1="21" x2="280" y2="21" stroke="rgba(245, 158, 11, 0.15)" strokeWidth="0.8" strokeDasharray="3 3" />
+                      <line x1="70" y1="0" x2="70" y2="42" stroke="rgba(245, 158, 11, 0.1)" strokeWidth="0.8" strokeDasharray="3 3" />
+                      <line x1="140" y1="0" x2="140" y2="42" stroke="rgba(245, 158, 11, 0.1)" strokeWidth="0.8" strokeDasharray="3 3" />
+                      <line x1="210" y1="0" x2="210" y2="42" stroke="rgba(245, 158, 11, 0.1)" strokeWidth="0.8" strokeDasharray="3 3" />
+
+                      <path
+                        d="M 0 21 Q 25 21 35 21 L 42 12 L 48 30 L 56 6 L 64 36 L 72 16 L 80 21 L 120 21 L 128 8 L 136 34 L 144 14 L 152 28 L 160 21 L 205 21 L 212 10 L 220 32 L 228 15 L 235 21 L 280 21 L 280 42 L 0 42 Z"
+                        fill="url(#waveFill)"
+                      />
+
+                      <path
+                        d="M 0 21 Q 25 21 35 21 L 42 12 L 48 30 L 56 6 L 64 36 L 72 16 L 80 21 L 120 21 L 128 8 L 136 34 L 144 14 L 152 28 L 160 21 L 205 21 L 212 10 L 220 32 L 228 15 L 235 21 L 280 21"
+                        fill="none"
+                        stroke="url(#waveGrad)"
+                        strokeWidth="2"
+                        filter="url(#glowGold)"
+                        strokeDasharray="300"
+                        strokeDashoffset="0"
+                        style={{ animation: 'circuit-flow 3s linear infinite' }}
+                      />
+
+                      <circle cx="160" cy="21" r="3" fill="#00F0FF" filter="url(#glowGold)" />
+                    </svg>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.45rem', fontSize: '0.66rem', fontFamily: 'monospace', color: '#94A3B8', position: 'relative', zIndex: 2 }}>
+                    <span>RING BUFFER: 50/50</span>
+                    <div style={{ display: 'flex', gap: '3px' }}>
+                      {[...Array(8)].map((_, i) => (
+                        <div key={i} style={{ width: '6px', height: '8px', borderRadius: '1px', background: i < 6 ? '#10B981' : '#F59E0B', boxShadow: i < 6 ? '0 0 4px #10B981' : '0 0 4px #F59E0B' }} />
+                      ))}
+                    </div>
+                    <span style={{ color: '#F59E0B' }}>0.0% FRAME DROP</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Card 2: AI Causal Vision Graphs */}
-            <div
-              className="glass-morphism-card"
-              style={{
-                borderRadius: '20px',
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                minHeight: '270px',
-                position: 'relative',
-              }}
-            >
-              <div className="hud-bracket hud-bracket-tl" style={{ borderColor: 'rgba(236, 72, 153, 0.5)' }} />
-              <div className="hud-bracket hud-bracket-br" style={{ borderColor: 'rgba(236, 72, 153, 0.5)' }} />
+            {/* Card 2: Causal Root-Cause Graphs */}
+            <div className="glass-feature-card glass-feature-card-pink">
+              <div className="glass-sheen" />
+              <div className="hud-bracket hud-bracket-tl" style={{ borderColor: 'rgba(236, 72, 153, 0.7)', boxShadow: '0 0 8px rgba(236, 72, 153, 0.4)' }} />
+              <div className="hud-bracket hud-bracket-br" style={{ borderColor: 'rgba(236, 72, 153, 0.7)', boxShadow: '0 0 8px rgba(236, 72, 153, 0.4)' }} />
+              <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '130px', height: '130px', background: 'radial-gradient(circle, rgba(236, 72, 153, 0.22) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(20px)' }} />
 
               <div>
                 <div
+                  className="glass-icon-orb"
                   style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '10px',
-                    background: 'rgba(236, 72, 153, 0.15)',
-                    border: '1px solid rgba(236, 72, 153, 0.35)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.25) 0%, rgba(236, 72, 153, 0.08) 100%)',
+                    border: '1px solid rgba(236, 72, 153, 0.45)',
+                    boxShadow: '0 0 20px rgba(236, 72, 153, 0.25)',
                     color: '#EC4899',
-                    marginBottom: '1.25rem',
                   }}
                 >
-                  <Sparkles size={20} />
+                  <Sparkles size={22} />
                 </div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.45rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.45rem', letterSpacing: '-0.01em' }}>
                   Causal Root-Cause Graphs
                 </h3>
                 <p style={{ fontSize: '0.88rem', color: '#94A3B8', lineHeight: 1.6 }}>
@@ -1400,54 +1416,111 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Micro-visual: Animated SVG Constellation Graph */}
-              <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'center' }}>
-                <svg width="220" height="44" viewBox="0 0 220 44">
-                  <line x1="25" y1="22" x2="80" y2="10" stroke="#EC4899" strokeWidth="1.2" strokeDasharray="3 3" />
-                  <line x1="80" y1="10" x2="140" y2="32" stroke="#A855F7" strokeWidth="1.4" />
-                  <line x1="140" y1="32" x2="195" y2="18" stroke="#00F0FF" strokeWidth="1.2" strokeDasharray="3 3" />
-                  <circle cx="25" cy="22" r="5" fill="#EC4899" />
-                  <circle cx="80" cy="10" r="7" fill="#A855F7" style={{ animation: 'neon-glow-pulse 2s infinite' }} />
-                  <circle cx="140" cy="32" r="6" fill="#38BDF8" />
-                  <circle cx="195" cy="18" r="5" fill="#00F0FF" />
-                </svg>
+              {/* Micro-visual: Interactive Causal DAG Topology Network */}
+              <div style={{ marginTop: '1.5rem' }}>
+                <div
+                  style={{
+                    background: 'rgba(5, 7, 12, 0.85)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(236, 72, 153, 0.22)',
+                    boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.9), 0 4px 18px rgba(0, 0, 0, 0.45)',
+                    padding: '0.75rem',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem', fontSize: '0.68rem', fontFamily: 'monospace' }}>
+                    <span style={{ color: '#F472B6', fontWeight: 700 }}>CAUSAL DAG TOPOLOGY</span>
+                    <span style={{ color: '#00F0FF', fontWeight: 800 }}>P(Root) = 98.4%</span>
+                  </div>
+
+                  <div style={{ height: '58px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="100%" height="58" viewBox="0 0 280 58">
+                      <defs>
+                        <linearGradient id="pinkPurpleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#EC4899" />
+                          <stop offset="50%" stopColor="#A855F7" />
+                          <stop offset="100%" stopColor="#00F0FF" />
+                        </linearGradient>
+                        <filter id="glowPink" x="-20%" y="-20%" width="140%" height="140%">
+                          <feGaussianBlur stdDeviation="2.5" result="blur" />
+                          <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                          </feMerge>
+                        </filter>
+                      </defs>
+
+                      <path
+                        d="M 28 32 C 60 12, 85 12, 115 30 S 175 48, 205 24 S 235 24, 258 32"
+                        fill="none"
+                        stroke="url(#pinkPurpleGrad)"
+                        strokeWidth="2"
+                        filter="url(#glowPink)"
+                      />
+                      <path
+                        d="M 28 32 C 60 12, 85 12, 115 30 S 175 48, 205 24 S 235 24, 258 32"
+                        fill="none"
+                        stroke="#FFFFFF"
+                        strokeWidth="2"
+                        strokeDasharray="8 60"
+                        style={{ animation: 'circuit-flow 2.2s linear infinite' }}
+                      />
+                      <path
+                        d="M 115 30 C 130 46, 150 50, 170 50"
+                        fill="none"
+                        stroke="rgba(239, 68, 68, 0.65)"
+                        strokeWidth="1.4"
+                        strokeDasharray="3 3"
+                      />
+
+                      <circle cx="28" cy="32" r="5" fill="#EC4899" filter="url(#glowPink)" />
+                      <circle cx="28" cy="32" r="9" fill="none" stroke="#EC4899" strokeWidth="1" opacity="0.6" />
+                      <text x="28" y="48" fill="#F472B6" fontSize="7" fontFamily="monospace" textAnchor="middle">CLICK</text>
+
+                      <circle cx="115" cy="30" r="7" fill="#A855F7" filter="url(#glowPink)" />
+                      <circle cx="115" cy="30" r="12" fill="none" stroke="#A855F7" strokeWidth="1" strokeDasharray="3 3" />
+                      <text x="115" y="16" fill="#C084FC" fontSize="7" fontFamily="monospace" textAnchor="middle">RACE</text>
+
+                      <circle cx="205" cy="24" r="5" fill="#EF4444" filter="url(#glowPink)" />
+                      <text x="205" y="40" fill="#F87171" fontSize="7" fontFamily="monospace" textAnchor="middle">422 ERR</text>
+
+                      <circle cx="170" cy="50" r="3.5" fill="#EF4444" opacity="0.8" />
+
+                      <circle cx="258" cy="32" r="6" fill="#00F0FF" filter="url(#glowPink)" />
+                      <circle cx="258" cy="32" r="11" fill="none" stroke="#00F0FF" strokeWidth="1.2" opacity="0.8" />
+                      <text x="258" y="48" fill="#38BDF8" fontSize="7" fontFamily="monospace" textAnchor="middle">ROOT</text>
+                    </svg>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.45rem', fontSize: '0.66rem', fontFamily: 'monospace', color: '#94A3B8' }}>
+                    <span>TREE DEPTH: 4 HOPS</span>
+                    <span style={{ color: '#EC4899' }}>ISOLATED IN 1.18s</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Card 3: Batch Ring Buffer Automation */}
-            <div
-              className="glass-morphism-card"
-              style={{
-                borderRadius: '20px',
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                minHeight: '270px',
-                position: 'relative',
-              }}
-            >
-              <div className="hud-bracket hud-bracket-tl" style={{ borderColor: 'rgba(168, 85, 247, 0.5)' }} />
-              <div className="hud-bracket hud-bracket-br" style={{ borderColor: 'rgba(168, 85, 247, 0.5)' }} />
+            {/* Card 3: Partitioned PostgreSQL Buffers */}
+            <div className="glass-feature-card glass-feature-card-purple">
+              <div className="glass-sheen" />
+              <div className="hud-bracket hud-bracket-tl" style={{ borderColor: 'rgba(168, 85, 247, 0.7)', boxShadow: '0 0 8px rgba(168, 85, 247, 0.4)' }} />
+              <div className="hud-bracket hud-bracket-br" style={{ borderColor: 'rgba(168, 85, 247, 0.7)', boxShadow: '0 0 8px rgba(168, 85, 247, 0.4)' }} />
+              <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '130px', height: '130px', background: 'radial-gradient(circle, rgba(168, 85, 247, 0.22) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(20px)' }} />
 
               <div>
                 <div
+                  className="glass-icon-orb"
                   style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '10px',
-                    background: 'rgba(168, 85, 247, 0.15)',
-                    border: '1px solid rgba(168, 85, 247, 0.35)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(168, 85, 247, 0.08) 100%)',
+                    border: '1px solid rgba(168, 85, 247, 0.45)',
+                    boxShadow: '0 0 20px rgba(168, 85, 247, 0.25)',
                     color: '#A855F7',
-                    marginBottom: '1.25rem',
                   }}
                 >
-                  <Database size={20} />
+                  <Database size={22} />
                 </div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.45rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.45rem', letterSpacing: '-0.01em' }}>
                   Partitioned PostgreSQL Buffers
                 </h3>
                 <p style={{ fontSize: '0.88rem', color: '#94A3B8', lineHeight: 1.6 }}>
@@ -1455,51 +1528,97 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Micro-visual: 3D Isometric SVG Disk Stack */}
-              <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'center' }}>
-                <svg width="140" height="48" viewBox="0 0 140 48">
-                  <ellipse cx="70" cy="36" rx="46" ry="10" fill="none" stroke="#A855F7" strokeWidth="1.2" opacity="0.35" />
-                  <ellipse cx="70" cy="24" rx="46" ry="10" fill="none" stroke="#A855F7" strokeWidth="1.2" opacity="0.65" />
-                  <ellipse cx="70" cy="12" rx="46" ry="10" fill="rgba(168, 85, 247, 0.18)" stroke="#C084FC" strokeWidth="1.8" style={{ animation: 'neon-glow-pulse 2s infinite' }} />
-                  <circle cx="70" cy="12" r="3" fill="#FFFFFF" />
-                </svg>
+              {/* Micro-visual: 3D Isometric Holographic Storage Platter Stack */}
+              <div style={{ marginTop: '1.5rem' }}>
+                <div
+                  style={{
+                    background: 'rgba(5, 7, 12, 0.85)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(168, 85, 247, 0.22)',
+                    boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.9), 0 4px 18px rgba(0, 0, 0, 0.45)',
+                    padding: '0.75rem',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem', fontSize: '0.68rem', fontFamily: 'monospace' }}>
+                    <span style={{ color: '#C084FC', fontWeight: 700 }}>CIRCULAR PARTITION ARRAY</span>
+                    <span style={{ color: '#10B981', fontWeight: 800 }}>ZERO MOCK DATA</span>
+                  </div>
+
+                  <div style={{ height: '58px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="100%" height="58" viewBox="0 0 240 58">
+                      <defs>
+                        <linearGradient id="diskGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#A855F7" stopOpacity="0.4" />
+                          <stop offset="50%" stopColor="#C084FC" stopOpacity="0.85" />
+                          <stop offset="100%" stopColor="#A855F7" stopOpacity="0.4" />
+                        </linearGradient>
+                        <linearGradient id="diskGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#7C3AED" stopOpacity="0.3" />
+                          <stop offset="50%" stopColor="#A855F7" stopOpacity="0.75" />
+                          <stop offset="100%" stopColor="#7C3AED" stopOpacity="0.3" />
+                        </linearGradient>
+                        <linearGradient id="laserBeamGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#00F0FF" stopOpacity="0" />
+                          <stop offset="50%" stopColor="#00F0FF" stopOpacity="0.9" />
+                          <stop offset="100%" stopColor="#A855F7" stopOpacity="0" />
+                        </linearGradient>
+                        <filter id="glowPurple" x="-20%" y="-20%" width="140%" height="140%">
+                          <feGaussianBlur stdDeviation="2" result="blur" />
+                          <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                          </feMerge>
+                        </filter>
+                      </defs>
+
+                      <line x1="120" y1="2" x2="120" y2="56" stroke="url(#laserBeamGrad)" strokeWidth="2.5" filter="url(#glowPurple)" />
+
+                      <ellipse cx="120" cy="46" rx="68" ry="10" fill="rgba(124, 58, 237, 0.15)" stroke="url(#diskGrad2)" strokeWidth="1.2" />
+                      <line x1="52" y1="46" x2="52" y2="49" stroke="#7C3AED" strokeWidth="1.2" />
+                      <line x1="188" y1="46" x2="188" y2="49" stroke="#7C3AED" strokeWidth="1.2" />
+
+                      <ellipse cx="120" cy="30" rx="68" ry="10" fill="rgba(168, 85, 247, 0.22)" stroke="url(#diskGrad1)" strokeWidth="1.5" />
+                      <ellipse cx="120" cy="30" rx="44" ry="6.5" fill="none" stroke="rgba(255, 255, 255, 0.25)" strokeWidth="0.8" strokeDasharray="6 4" />
+
+                      <ellipse cx="120" cy="14" rx="68" ry="10" fill="rgba(192, 132, 252, 0.28)" stroke="#C084FC" strokeWidth="2" filter="url(#glowPurple)" />
+                      <ellipse cx="120" cy="14" rx="44" ry="6.5" fill="none" stroke="#FFFFFF" strokeWidth="1" strokeDasharray="12 6" />
+
+                      <circle cx="164" cy="14" r="3.5" fill="#00F0FF" filter="url(#glowPurple)" />
+                      <circle cx="76" cy="30" r="2.5" fill="#F472B6" />
+                      <circle cx="120" cy="14" r="3" fill="#FFFFFF" />
+                    </svg>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.45rem', fontSize: '0.66rem', fontFamily: 'monospace', color: '#94A3B8' }}>
+                    <span>SHARDS: 12 TENANTS</span>
+                    <span style={{ color: '#C084FC' }}>AES-256 GCM AT REST</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Card 4: ISO/IEC 29119 Formatting */}
-            <div
-              className="glass-morphism-card"
-              style={{
-                borderRadius: '20px',
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                minHeight: '270px',
-                position: 'relative',
-              }}
-            >
-              <div className="hud-bracket hud-bracket-tl" style={{ borderColor: 'rgba(59, 130, 246, 0.5)' }} />
-              <div className="hud-bracket hud-bracket-br" style={{ borderColor: 'rgba(59, 130, 246, 0.5)' }} />
+            {/* Card 4: ISO/IEC 29119 Compliance */}
+            <div className="glass-feature-card glass-feature-card-blue">
+              <div className="glass-sheen" />
+              <div className="hud-bracket hud-bracket-tl" style={{ borderColor: 'rgba(59, 130, 246, 0.7)', boxShadow: '0 0 8px rgba(59, 130, 246, 0.4)' }} />
+              <div className="hud-bracket hud-bracket-br" style={{ borderColor: 'rgba(59, 130, 246, 0.7)', boxShadow: '0 0 8px rgba(59, 130, 246, 0.4)' }} />
+              <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '130px', height: '130px', background: 'radial-gradient(circle, rgba(59, 130, 246, 0.22) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(20px)' }} />
 
               <div>
                 <div
+                  className="glass-icon-orb"
                   style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '10px',
-                    background: 'rgba(59, 130, 246, 0.15)',
-                    border: '1px solid rgba(59, 130, 246, 0.35)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0.08) 100%)',
+                    border: '1px solid rgba(59, 130, 246, 0.45)',
+                    boxShadow: '0 0 20px rgba(59, 130, 246, 0.25)',
                     color: '#3B82F6',
-                    marginBottom: '1.25rem',
                   }}
                 >
-                  <ShieldCheck size={20} />
+                  <ShieldCheck size={22} />
                 </div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.45rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.45rem', letterSpacing: '-0.01em' }}>
                   ISO/IEC 29119 Compliance
                 </h3>
                 <p style={{ fontSize: '0.88rem', color: '#94A3B8', lineHeight: 1.6 }}>
@@ -1508,52 +1627,104 @@ export default function HomePage() {
               </div>
 
               {/* Micro-visual: Holographic Security Shield SVG */}
-              <div style={{ marginTop: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.85rem' }}>
-                <svg width="34" height="40" viewBox="0 0 34 40">
-                  <path d="M 17 2 L 31 7 L 31 19 Q 31 32 17 38 Q 3 32 3 19 L 3 7 Z" fill="rgba(59, 130, 246, 0.15)" stroke="#3B82F6" strokeWidth="1.5" />
-                  <path d="M 10 19 L 15 24 L 24 14" fill="none" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: '#64748B' }}>
-                  <div style={{ color: '#60A5FA', fontWeight: 800 }}>ISO/IEC 29119: AUDITED</div>
-                  <div>DIGITAL CHECKSUM: PASS</div>
+              <div style={{ marginTop: '1.5rem' }}>
+                <div
+                  style={{
+                    background: 'rgba(5, 7, 12, 0.85)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(59, 130, 246, 0.22)',
+                    boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.9), 0 4px 18px rgba(0, 0, 0, 0.45)',
+                    padding: '0.75rem',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem', fontSize: '0.68rem', fontFamily: 'monospace' }}>
+                    <span style={{ color: '#60A5FA', fontWeight: 700 }}>ISO/IEC 29119-3 DEFECT SPEC</span>
+                    <span style={{ color: '#4ADE80', fontWeight: 800 }}>AUDITED</span>
+                  </div>
+
+                  <div style={{ height: '58px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                    <svg width="44" height="52" viewBox="0 0 44 52">
+                      <defs>
+                        <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.4" />
+                          <stop offset="50%" stopColor="#1D4ED8" stopOpacity="0.2" />
+                          <stop offset="100%" stopColor="#00F0FF" stopOpacity="0.3" />
+                        </linearGradient>
+                        <filter id="glowBlue" x="-20%" y="-20%" width="140%" height="140%">
+                          <feGaussianBlur stdDeviation="2.5" result="blur" />
+                          <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                          </feMerge>
+                        </filter>
+                      </defs>
+
+                      <circle cx="22" cy="26" r="23" fill="none" stroke="rgba(59, 130, 246, 0.25)" strokeWidth="1" strokeDasharray="8 6" />
+
+                      <path
+                        d="M 22 4 L 40 10 L 40 26 C 40 38, 22 48, 22 48 C 22 48, 4 38, 4 26 L 4 10 Z"
+                        fill="url(#shieldGrad)"
+                        stroke="#3B82F6"
+                        strokeWidth="1.8"
+                        filter="url(#glowBlue)"
+                      />
+
+                      <path
+                        d="M 22 9 L 35 14 L 35 25 C 35 34, 22 42, 22 42 C 22 42, 9 34, 9 25 L 9 14 Z"
+                        fill="none"
+                        stroke="rgba(0, 240, 255, 0.45)"
+                        strokeWidth="1"
+                        strokeDasharray="4 2"
+                      />
+
+                      <path
+                        d="M 14 26 L 19 31 L 30 19"
+                        fill="none"
+                        stroke="#00F0FF"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        filter="url(#glowBlue)"
+                      />
+                    </svg>
+
+                    <div style={{ fontFamily: 'monospace', fontSize: '0.66rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                      <div style={{ color: '#F1F5F9', fontWeight: 800 }}>CANONICAL DEFECT SCHEMA</div>
+                      <div style={{ color: '#60A5FA' }}>HASH: SHA-256 [0x7F4B..9A]</div>
+                      <div style={{ color: '#94A3B8' }}>CLAUSE: 8.2 TEST REPORTING</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.45rem', fontSize: '0.66rem', fontFamily: 'monospace', color: '#94A3B8' }}>
+                    <span>VERIFIED COMPLIANCE</span>
+                    <span style={{ color: '#38BDF8' }}>100% AUDIT READY</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Card 5: Multi-Format Export */}
-            <div
-              className="glass-morphism-card"
-              style={{
-                borderRadius: '20px',
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                minHeight: '270px',
-                position: 'relative',
-              }}
-            >
-              <div className="hud-bracket hud-bracket-tl" style={{ borderColor: 'rgba(16, 185, 129, 0.5)' }} />
-              <div className="hud-bracket hud-bracket-br" style={{ borderColor: 'rgba(16, 185, 129, 0.5)' }} />
+            {/* Card 5: Multi-Framework Synthesizer */}
+            <div className="glass-feature-card glass-feature-card-emerald">
+              <div className="glass-sheen" />
+              <div className="hud-bracket hud-bracket-tl" style={{ borderColor: 'rgba(16, 185, 129, 0.7)', boxShadow: '0 0 8px rgba(16, 185, 129, 0.4)' }} />
+              <div className="hud-bracket hud-bracket-br" style={{ borderColor: 'rgba(16, 185, 129, 0.7)', boxShadow: '0 0 8px rgba(16, 185, 129, 0.4)' }} />
+              <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '130px', height: '130px', background: 'radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(20px)' }} />
 
               <div>
                 <div
+                  className="glass-icon-orb"
                   style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '10px',
-                    background: 'rgba(16, 185, 129, 0.15)',
-                    border: '1px solid rgba(16, 185, 129, 0.35)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.08) 100%)',
+                    border: '1px solid rgba(16, 185, 129, 0.45)',
+                    boxShadow: '0 0 20px rgba(16, 185, 129, 0.25)',
                     color: '#10B981',
-                    marginBottom: '1.25rem',
                   }}
                 >
-                  <Terminal size={20} />
+                  <Terminal size={22} />
                 </div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.45rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.45rem', letterSpacing: '-0.01em' }}>
                   Multi-Framework Synthesizer
                 </h3>
                 <p style={{ fontSize: '0.88rem', color: '#94A3B8', lineHeight: 1.6 }}>
@@ -1561,72 +1732,91 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Micro-visual: Dual Dialect Selector */}
-              <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'center', gap: '0.65rem' }}>
-                <span
+              {/* Micro-visual: Glass IDE Code Compiler Output */}
+              <div style={{ marginTop: '1.5rem' }}>
+                <div
                   style={{
-                    padding: '0.3rem 0.75rem',
-                    borderRadius: '6px',
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    background: 'rgba(16, 185, 129, 0.18)',
-                    color: '#34D399',
-                    border: '1px solid #10B981',
-                    boxShadow: '0 0 10px rgba(16, 185, 129, 0.3)',
+                    background: 'rgba(5, 7, 12, 0.85)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(16, 185, 129, 0.22)',
+                    boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.9), 0 4px 18px rgba(0, 0, 0, 0.45)',
+                    padding: '0.75rem',
+                    position: 'relative',
+                    overflow: 'hidden',
                   }}
                 >
-                  PLAYWRIGHT (.spec.ts)
-                </span>
-                <span
-                  style={{
-                    padding: '0.3rem 0.75rem',
-                    borderRadius: '6px',
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    color: '#94A3B8',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                  }}
-                >
-                  CYPRESS (.cy.ts)
-                </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.4rem' }}>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#EF4444' }} />
+                      <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#F59E0B' }} />
+                      <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10B981' }} />
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.45rem', fontSize: '0.64rem', fontFamily: 'monospace' }}>
+                      <span style={{ color: '#34D399', fontWeight: 800, background: 'rgba(16, 185, 129, 0.15)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>playwright.spec.ts</span>
+                      <span style={{ color: '#64748B' }}>cypress.cy.ts</span>
+                    </div>
+                  </div>
+
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.67rem', lineHeight: 1.5, color: '#CBD5E1' }}>
+                    <div>
+                      <span style={{ color: '#EC4899' }}>test</span>
+                      <span style={{ color: '#94A3B8' }}>(</span>
+                      <span style={{ color: '#FBBF24' }}>&apos;repro_cart_race&apos;</span>
+                      <span style={{ color: '#94A3B8' }}>, </span>
+                      <span style={{ color: '#38BDF8' }}>async</span>
+                      <span style={{ color: '#94A3B8' }}> () =&gt; &#123;</span>
+                    </div>
+                    <div style={{ paddingLeft: '0.75rem' }}>
+                      <span style={{ color: '#38BDF8' }}>await</span>
+                      <span style={{ color: '#94A3B8' }}> page.</span>
+                      <span style={{ color: '#60A5FA' }}>locator</span>
+                      <span style={{ color: '#94A3B8' }}>(</span>
+                      <span style={{ color: '#34D399' }}>&apos;#checkout&apos;</span>
+                      <span style={{ color: '#94A3B8' }}>).</span>
+                      <span style={{ color: '#FBBF24' }}>dblclick</span>
+                      <span style={{ color: '#94A3B8' }}>();</span>
+                    </div>
+                    <div style={{ paddingLeft: '0.75rem' }}>
+                      <span style={{ color: '#38BDF8' }}>await</span>
+                      <span style={{ color: '#94A3B8' }}> expect(badge).</span>
+                      <span style={{ color: '#F472B6' }}>toHaveText</span>
+                      <span style={{ color: '#94A3B8' }}>(</span>
+                      <span style={{ color: '#34D399' }}>&apos;1&apos;</span>
+                      <span style={{ color: '#94A3B8' }}>);</span>
+                    </div>
+                    <div>
+                      <span style={{ color: '#94A3B8' }}>&#125;);</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.45rem', fontSize: '0.66rem', fontFamily: 'monospace', color: '#94A3B8', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '0.35rem' }}>
+                    <span style={{ color: '#10B981', fontWeight: 700 }}>● PLAYWRIGHT READY</span>
+                    <span style={{ color: '#38BDF8' }}>100% DETERMINISTIC</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Card 6: Smart Issue Dispatch */}
-            <div
-              className="glass-morphism-card"
-              style={{
-                borderRadius: '20px',
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                minHeight: '270px',
-                position: 'relative',
-              }}
-            >
-              <div className="hud-bracket hud-bracket-tl" style={{ borderColor: 'rgba(239, 68, 68, 0.5)' }} />
-              <div className="hud-bracket hud-bracket-br" style={{ borderColor: 'rgba(239, 68, 68, 0.5)' }} />
+            {/* Card 6: Smart Issue & Email Delivery */}
+            <div className="glass-feature-card glass-feature-card-red">
+              <div className="glass-sheen" />
+              <div className="hud-bracket hud-bracket-tl" style={{ borderColor: 'rgba(239, 68, 68, 0.7)', boxShadow: '0 0 8px rgba(239, 68, 68, 0.4)' }} />
+              <div className="hud-bracket hud-bracket-br" style={{ borderColor: 'rgba(239, 68, 68, 0.7)', boxShadow: '0 0 8px rgba(239, 68, 68, 0.4)' }} />
+              <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '130px', height: '130px', background: 'radial-gradient(circle, rgba(239, 68, 68, 0.22) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(20px)' }} />
 
               <div>
                 <div
+                  className="glass-icon-orb"
                   style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '10px',
-                    background: 'rgba(239, 68, 68, 0.15)',
-                    border: '1px solid rgba(239, 68, 68, 0.35)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(239, 68, 68, 0.08) 100%)',
+                    border: '1px solid rgba(239, 68, 68, 0.45)',
+                    boxShadow: '0 0 20px rgba(239, 68, 68, 0.25)',
                     color: '#EF4444',
-                    marginBottom: '1.25rem',
                   }}
                 >
-                  <Send size={20} />
+                  <Send size={22} />
                 </div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.45rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.45rem', letterSpacing: '-0.01em' }}>
                   Smart Issue &amp; Email Delivery
                 </h3>
                 <p style={{ fontSize: '0.88rem', color: '#94A3B8', lineHeight: 1.6 }}>
@@ -1634,28 +1824,72 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Micro-visual: Animated SVG Packet Beam into Jira & SMTP */}
-              <div style={{ marginTop: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.65rem' }}>
-                <svg width="80" height="22" viewBox="0 0 80 22">
-                  <line x1="0" y1="11" x2="80" y2="11" stroke="rgba(239, 68, 68, 0.25)" strokeWidth="2" strokeDasharray="3 3" />
-                  <line x1="0" y1="11" x2="80" y2="11" stroke="#EF4444" strokeWidth="2" strokeDasharray="10 20" style={{ animation: 'circuit-flow 1.6s linear infinite' }} />
-                </svg>
+              {/* Micro-visual: Enterprise Multi-Channel Dispatch Pipeline */}
+              <div style={{ marginTop: '1.5rem' }}>
                 <div
                   style={{
-                    padding: '0.35rem 0.85rem',
-                    borderRadius: '8px',
-                    background: 'rgba(239, 68, 68, 0.12)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                    color: '#F87171',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
+                    background: 'rgba(5, 7, 12, 0.85)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(239, 68, 68, 0.22)',
+                    boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.9), 0 4px 18px rgba(0, 0, 0, 0.45)',
+                    padding: '0.75rem',
+                    position: 'relative',
+                    overflow: 'hidden',
                   }}
                 >
-                  <Send size={13} />
-                  <span>Jira &amp; SMTP Live</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem', fontSize: '0.68rem', fontFamily: 'monospace' }}>
+                    <span style={{ color: '#F87171', fontWeight: 700 }}>MULTI-CHANNEL DISPATCH</span>
+                    <span style={{ color: '#4ADE80', fontWeight: 800 }}>&lt;220ms</span>
+                  </div>
+
+                  <div style={{ height: '58px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="100%" height="58" viewBox="0 0 280 58">
+                      <defs>
+                        <linearGradient id="dispatchGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#EF4444" />
+                          <stop offset="60%" stopColor="#F43F5E" />
+                          <stop offset="100%" stopColor="#38BDF8" />
+                        </linearGradient>
+                        <filter id="glowRed" x="-20%" y="-20%" width="140%" height="140%">
+                          <feGaussianBlur stdDeviation="2" result="blur" />
+                          <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                          </feMerge>
+                        </filter>
+                      </defs>
+
+                      <circle cx="28" cy="29" r="8" fill="#EF4444" filter="url(#glowRed)" />
+                      <circle cx="28" cy="29" r="14" fill="none" stroke="#EF4444" strokeWidth="1" opacity="0.5" strokeDasharray="3 3" />
+                      <circle cx="28" cy="29" r="3" fill="#FFFFFF" />
+
+                      <path d="M 36 29 C 80 29, 120 12, 190 12" fill="none" stroke="url(#dispatchGrad)" strokeWidth="1.8" />
+                      <path d="M 36 29 C 80 29, 120 12, 190 12" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeDasharray="6 40" style={{ animation: 'circuit-flow 1.5s linear infinite' }} />
+
+                      <path d="M 36 29 C 80 29, 120 29, 190 29" fill="none" stroke="url(#dispatchGrad)" strokeWidth="1.8" />
+                      <path d="M 36 29 C 80 29, 120 29, 190 29" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeDasharray="6 40" style={{ animation: 'circuit-flow 1.8s linear infinite' }} />
+
+                      <path d="M 36 29 C 80 29, 120 46, 190 46" fill="none" stroke="url(#dispatchGrad)" strokeWidth="1.8" />
+                      <path d="M 36 29 C 80 29, 120 46, 190 46" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeDasharray="6 40" style={{ animation: 'circuit-flow 1.2s linear infinite' }} />
+
+                      <rect x="195" y="4" width="75" height="16" rx="4" fill="rgba(37, 99, 235, 0.2)" stroke="#3B82F6" strokeWidth="1" />
+                      <circle cx="203" cy="12" r="3" fill="#3B82F6" />
+                      <text x="211" y="15" fill="#93C5FD" fontSize="8" fontFamily="monospace" fontWeight="bold">JIRA PROJ</text>
+
+                      <rect x="195" y="21" width="75" height="16" rx="4" fill="rgba(168, 85, 247, 0.2)" stroke="#A855F7" strokeWidth="1" />
+                      <circle cx="203" cy="29" r="3" fill="#A855F7" />
+                      <text x="211" y="32" fill="#D8B4FE" fontSize="8" fontFamily="monospace" fontWeight="bold">GITHUB #42</text>
+
+                      <rect x="195" y="38" width="75" height="16" rx="4" fill="rgba(239, 68, 68, 0.2)" stroke="#EF4444" strokeWidth="1" />
+                      <circle cx="203" cy="46" r="3" fill="#EF4444" />
+                      <text x="211" y="49" fill="#FCA5A5" fontSize="8" fontFamily="monospace" fontWeight="bold">SMTP GMAIL</text>
+                    </svg>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.45rem', fontSize: '0.66rem', fontFamily: 'monospace', color: '#94A3B8' }}>
+                    <span>CHANNELS: 3 PIPELINES</span>
+                    <span style={{ color: '#4ADE80' }}>STATUS 200 DELIVERED</span>
+                  </div>
                 </div>
               </div>
             </div>

@@ -584,6 +584,18 @@
       </div>
     </div>
 
+    <!-- Active Uplink Gateway Bar with One-Click Preset Switchers -->
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.35rem 0.55rem; background: #F3F4F6; border-radius: 8px; margin-bottom: 0.55rem; font-size: 0.68rem; border: 1px solid #E5E7EB;">
+      <div style="display: flex; align-items: center; gap: 0.3rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">
+        <span style="color: #6B7280; font-weight: 700;">Uplink:</span>
+        <span id="gateway-label" style="color: #1F2937; font-weight: 700; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="Target Backend API">https://hhhcct.vercel.app</span>
+      </div>
+      <div style="display: flex; gap: 0.25rem; flex-shrink: 0;">
+        <button id="btn-quick-switch-host" type="button" title="Switch target to current tab host" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 0.15rem 0.4rem; font-size: 0.65rem; font-weight: 700; cursor: pointer; color: #374151;">📍 Host</button>
+        <button id="btn-quick-switch-cloud" type="button" title="Switch target to Cloud Production (hhhcct.vercel.app)" style="background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 4px; padding: 0.15rem 0.4rem; font-size: 0.65rem; font-weight: 700; cursor: pointer; color: #4338CA;">☁️ Cloud</button>
+      </div>
+    </div>
+
     <!-- Recent Actions & Detected Issues -->
     <div class="recent-box">
       <div class="recent-top">

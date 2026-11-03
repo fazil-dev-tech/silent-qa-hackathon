@@ -32,7 +32,7 @@ const ringBuffer: StoredEvent[] = [];
 let sessionId = generateUUID();
 let sessionStartTs = Date.now();
 let projectToken = 'sqa_live_demo_key_2026';
-let apiEndpoint = 'http://localhost:3000/api/ingest';
+let apiEndpoint = 'https://hhhcct.vercel.app/api/ingest';
 let testerName = 'Engineer #1';
 let deviceTag = 'Station-01';
 let isRecordingEnabled = true;
@@ -70,7 +70,14 @@ chrome.storage.local.get(
     if (res.project_token) projectToken = res.project_token;
     if (res.session_id) sessionId = res.session_id;
     if (res.session_start_ts) sessionStartTs = Number(res.session_start_ts);
-    if (res.api_endpoint) apiEndpoint = res.api_endpoint;
+    if (res.api_endpoint) {
+      if (res.api_endpoint === 'http://localhost:3000/api/ingest') {
+        apiEndpoint = 'https://hhhcct.vercel.app/api/ingest';
+        chrome.storage.local.set({ api_endpoint: apiEndpoint });
+      } else {
+        apiEndpoint = res.api_endpoint;
+      }
+    }
     if (res.buffer_cap) bufferCap = Number(res.buffer_cap);
     if (res.tester_name) testerName = res.tester_name;
     if (res.device_tag) deviceTag = res.device_tag;

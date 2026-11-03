@@ -278,7 +278,11 @@
 
       <div class="field">
         <label for="api-endpoint">Backend Ingestion Endpoint</label>
-        <input type="text" id="api-endpoint" value="http://localhost:3000/api/ingest" required>
+        <input type="text" id="api-endpoint" value="https://hhhcct.vercel.app/api/ingest" required>
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.4rem;">
+          <button type="button" id="btn-preset-cloud" class="btn-secondary" style="font-size: 0.72rem; padding: 0.25rem 0.55rem;">☁️ Production Cloud (hhhcct.vercel.app)</button>
+          <button type="button" id="btn-preset-local" class="btn-secondary" style="font-size: 0.72rem; padding: 0.25rem 0.55rem;">💻 Localhost (3000)</button>
+        </div>
         <div class="field-hint">Dispatches ring-buffered telemetry to the partitioned events table.</div>
       </div>
 

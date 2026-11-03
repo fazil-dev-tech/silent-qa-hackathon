@@ -411,6 +411,87 @@ pre, code {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ========================================================================= */
+/* Enhanced Glassmorphism & High-Tech Holographic Visual System              */
+/* ========================================================================= */
+.glass-feature-card {
+  position: relative;
+  border-radius: 20px;
+  padding: 2.2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 340px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.015) 35%, rgba(10, 13, 22, 0.75) 100%) !important;
+  backdrop-filter: blur(28px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.22), inset 0 0 20px rgba(255, 255, 255, 0.02) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  overflow: hidden;
+}
+
+.glass-feature-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.85), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+}
+
+.glass-feature-card-amber:hover {
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(245, 158, 11, 0.22), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+}
+.glass-feature-card-pink:hover {
+  border-color: rgba(236, 72, 153, 0.5) !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(236, 72, 153, 0.22), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+}
+.glass-feature-card-purple:hover {
+  border-color: rgba(168, 85, 247, 0.5) !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(168, 85, 247, 0.22), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+}
+.glass-feature-card-blue:hover {
+  border-color: rgba(59, 130, 246, 0.5) !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(59, 130, 246, 0.22), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+}
+.glass-feature-card-emerald:hover {
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(16, 185, 129, 0.22), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+}
+.glass-feature-card-red:hover {
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(239, 68, 68, 0.22), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+}
+
+.glass-sheen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.45) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.glass-icon-orb {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  margin-bottom: 1.35rem;
+  transition: transform 0.25s ease;
+}
+
+.glass-feature-card:hover .glass-icon-orb {
+  transform: scale(1.08);
+}
+
 .hud-bracket {
   position: absolute;
   width: 10px;
@@ -448,7 +529,8 @@ pre, code {
   border-right: 2px solid;
 }
 
-.glass-morphism-card:hover .hud-bracket {
+.glass-morphism-card:hover .hud-bracket,
+.glass-feature-card:hover .hud-bracket {
   border-color: rgba(0, 240, 255, 0.8);
   box-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
 }

@@ -27,6 +27,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
   }
 
+  const CLOUD_PROD_API = 'https://hhhcct.vercel.app/api/ingest';
+  const LOCAL_DEV_API = 'http://localhost:3000/api/ingest';
+
+  const btnPresetCloud = document.getElementById('btn-preset-cloud');
+  const btnPresetLocal = document.getElementById('btn-preset-local');
+
+  if (btnPresetCloud) {
+    btnPresetCloud.addEventListener('click', () => {
+      endpointInput.value = CLOUD_PROD_API;
+      showToast('✓ Selected Cloud Production Gateway', '#EFF6FF', '#1D4ED8', '#BFDBFE');
+    });
+  }
+
+  if (btnPresetLocal) {
+    btnPresetLocal.addEventListener('click', () => {
+      endpointInput.value = LOCAL_DEV_API;
+      showToast('✓ Selected Localhost Gateway', '#EFF6FF', '#1D4ED8', '#BFDBFE');
+    });
+  }
+
   // 1. Load stored settings or defaults
   chrome.storage.local.get(
     [
@@ -44,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
       testerNameInput.value = res.tester_name || 'Engineer #1 - QA Rig';
       deviceTagInput.value = res.device_tag || 'Station-01 (Chrome)';
       defaultRecSelect.value = res.default_rec_state || 'active';
-      endpointInput.value = res.api_endpoint || 'http://localhost:3000/api/ingest';
+      endpointInput.value = res.api_endpoint || CLOUD_PROD_API;
       tokenInput.value = res.project_token || 'sqa_live_demo_key_2026';
       if (res.flush_rate) flushSelect.value = String(res.flush_rate);
       if (res.buffer_cap) bufferSelect.value = String(res.buffer_cap);
@@ -154,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     testerNameInput.value = 'Engineer #1 - QA Rig';
     deviceTagInput.value = 'Station-01 (Chrome)';
     defaultRecSelect.value = 'active';
-    endpointInput.value = 'http://localhost:3000/api/ingest';
+    endpointInput.value = CLOUD_PROD_API;
     tokenInput.value = 'sqa_live_demo_key_2026';
     flushSelect.value = '2000';
     bufferSelect.value = '500';
@@ -165,14 +185,14 @@ document.addEventListener('DOMContentLoaded', () => {
         tester_name: 'Engineer #1 - QA Rig',
         device_tag: 'Station-01 (Chrome)',
         default_rec_state: 'active',
-        api_endpoint: 'http://localhost:3000/api/ingest',
+        api_endpoint: CLOUD_PROD_API,
         project_token: 'sqa_live_demo_key_2026',
         flush_rate: 2000,
         buffer_cap: 500,
         pii_level: 'strict',
       },
       () => {
-        showToast('✓ Preferences reset to defaults.', '#EFF6FF', '#1D4ED8', '#BFDBFE');
+        showToast('✓ Preferences reset to defaults (Cloud Production Gateway).', '#EFF6FF', '#1D4ED8', '#BFDBFE');
       }
     );
   });
