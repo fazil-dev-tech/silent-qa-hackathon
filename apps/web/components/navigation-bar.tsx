@@ -336,6 +336,33 @@ export default function NavigationBar() {
           <span className="sm:hidden">.ZIP</span>
         </button> 
 
+        {/* Live Demo Store Link (10-Bug Playground) */}
+        <Link
+          href="/shop"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '0.3rem 0.65rem',
+            borderRadius: '6px',
+            background: 'rgba(236, 72, 153, 0.12)',
+            border: '1px solid rgba(236, 72, 153, 0.35)',
+            color: '#F472B6',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
+            transition: 'all 0.2s ease',
+          }}
+          title="Open Live Shopping Store with 10 Real Bugs"
+        >
+          <span style={{ fontSize: '0.78rem' }}>🛍️</span>
+          <span className="hidden sm:inline">Demo Shop (10 Bugs)</span>
+          <span className="sm:hidden">Shop</span>
+        </Link>
+
         {/* Supabase Realtime Health Pill (Hidden on narrow mobile screens) */}
         <div
           className="hidden sm:flex"

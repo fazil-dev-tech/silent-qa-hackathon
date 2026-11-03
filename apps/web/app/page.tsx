@@ -542,6 +542,29 @@ export default function HomePage() {
                 </Link>
 
                 <a
+                  href="/shop"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    padding: '0.95rem 1.8rem',
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                    borderRadius: '9999px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.55rem',
+                    background: 'rgba(236, 72, 153, 0.12)',
+                    color: '#F472B6',
+                    border: '1px solid rgba(236, 72, 153, 0.45)',
+                    boxShadow: '0 4px 18px rgba(236, 72, 153, 0.25)',
+                    textDecoration: 'none',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <span>🛍️ TEST 10-BUG DEMO STORE ↗</span>
+                </a>
+
+                <a
                   href="#architecture"
                   style={{
                     padding: '0.95rem 2.2rem',
@@ -585,6 +608,29 @@ export default function HomePage() {
                   <KeyRound size={18} />
                   <span>START FLIGHT RECORDING →</span>
                 </Link>
+
+                <a
+                  href="/shop"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    padding: '0.95rem 1.8rem',
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                    borderRadius: '9999px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.55rem',
+                    background: 'rgba(236, 72, 153, 0.12)',
+                    color: '#F472B6',
+                    border: '1px solid rgba(236, 72, 153, 0.45)',
+                    boxShadow: '0 4px 18px rgba(236, 72, 153, 0.25)',
+                    textDecoration: 'none',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <span>🛍️ TEST 10-BUG DEMO STORE ↗</span>
+                </a>
 
                 <a
                   href="#how-it-works"
@@ -762,19 +808,11 @@ export default function HomePage() {
           </div>
 
           {/* Dual Glass Comparison Cards Linked by Glowing Particle Conduit Bridge */}
-          <div
-            className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-0"
-            style={{
-              maxWidth: '1120px',
-              margin: '0 auto',
-              width: '100%',
-            }}
-          >
+          <div className="comparison-pipeline-container">
             {/* Left Card: WITHOUT SILENT QA (Red glow) */}
             <div
-              className="w-full lg:flex-1"
+              className="comparison-card"
               style={{
-                maxWidth: '460px',
                 background: 'rgba(14, 16, 24, 0.7)',
                 backdropFilter: 'blur(28px) saturate(190%)',
                 WebkitBackdropFilter: 'blur(28px) saturate(190%)',
@@ -827,12 +865,12 @@ export default function HomePage() {
             </div>
 
             {/* Center Live Three.js Particle Conduit Bridge (Desktop only) */}
-            <div className="hidden lg:flex items-center justify-center">
+            <div className="comparison-bridge-desktop">
               <ParticleConduitBridge />
             </div>
 
             {/* Mobile Central Synthesis Transition Badge */}
-            <div className="lg:hidden flex items-center justify-center py-2">
+            <div className="comparison-bridge-mobile">
               <div
                 style={{
                   padding: '0.35rem 0.9rem',
@@ -853,9 +891,8 @@ export default function HomePage() {
 
             {/* Right Card: WITH SILENT QA (Cyan/Green glow) */}
             <div
-              className="w-full lg:flex-1"
+              className="comparison-card"
               style={{
-                maxWidth: '460px',
                 background: 'rgba(16, 20, 30, 0.75)',
                 backdropFilter: 'blur(28px) saturate(200%)',
                 WebkitBackdropFilter: 'blur(28px) saturate(200%)',

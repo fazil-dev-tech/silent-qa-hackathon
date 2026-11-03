@@ -38,15 +38,10 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL(target, req.url));
   }
 
-  // 3. Ensure trailing slash for /shop so relative assets resolve properly
-  if (pathname === '/shop') {
-    return NextResponse.redirect(new URL('/shop/', req.url));
-  }
-
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/app', '/app/:path*', '/admin', '/admin/:path*', '/login', '/shop'],
+  matcher: ['/app', '/app/:path*', '/admin', '/admin/:path*', '/login'],
 };
 

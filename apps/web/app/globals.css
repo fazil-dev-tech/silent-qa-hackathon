@@ -58,6 +58,121 @@ body {
   }
 }
 
+/* ========================================================================= */
+/* Responsive Visibility Primitives (Pure CSS for Standalone Reliability)   */
+/* ========================================================================= */
+.hidden {
+  display: none !important;
+}
+
+@media (min-width: 640px) {
+  .sm\:hidden {
+    display: none !important;
+  }
+  .sm\:inline {
+    display: inline !important;
+  }
+  .sm\:flex {
+    display: flex !important;
+  }
+  .sm\:block {
+    display: block !important;
+  }
+}
+
+@media (max-width: 639px) {
+  .sm\:inline {
+    display: none !important;
+  }
+  .sm\:flex {
+    display: none !important;
+  }
+  .sm\:block {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:hidden {
+    display: none !important;
+  }
+  .lg\:flex {
+    display: flex !important;
+  }
+  .lg\:block {
+    display: block !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .lg\:flex {
+    display: none !important;
+  }
+  .lg\:block {
+    display: none !important;
+  }
+}
+
+/* ========================================================================= */
+/* Problem & Comparison Synthesis Pipeline Layout System                     */
+/* ========================================================================= */
+.comparison-pipeline-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  max-width: 1160px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.comparison-card {
+  flex: 1 1 0%;
+  max-width: 460px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.comparison-bridge-desktop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.comparison-bridge-mobile {
+  display: none;
+}
+
+@media (max-width: 992px) {
+  .comparison-pipeline-container {
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    padding: 0 1rem;
+    align-items: center !important;
+  }
+
+  .comparison-card {
+    max-width: 520px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  .comparison-bridge-desktop {
+    display: none !important;
+  }
+
+  .comparison-bridge-mobile {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0;
+    width: 100%;
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;
