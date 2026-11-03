@@ -5,6 +5,17 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+    },
+  });
+}
+
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -32,17 +43,17 @@ export async function POST(
 
     const customMessage = body.custom_message || body.note || undefined;
 
-    // 1. Strictly fetch the real report from Supabase (NO MOCKS)
+    // 1. Strictly fetch the real report from Supabase (omitting bloated evidence column)
     const { data: reportData, error: fetchErr } = await supabaseAdmin
       .from('reports')
-      .select('*, complaints(note)')
+      .select('id, complaint_id, title, severity, steps, expected, actual, root_cause, confidence, suggested_fix, app_url, status, complaints(note)')
       .eq('id', id)
       .single();
 
     if (fetchErr || !reportData) {
       return NextResponse.json(
         { error: 'Defect report not found in database', report_id: id },
-        { status: 404 }
+        { status: 404, headers: { 'Access-Control-Allow-Origin': '*' } }
       );
     }
 
@@ -161,18 +172,21 @@ export async function POST(
       });
     } catch {}
 
-    return NextResponse.json({
-      success: true,
-      report_id: id,
-      status: 'sent',
-      delivery_method: deliveryMethod,
-      recipients: recipientsList,
-      public_url: publicUrl,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        report_id: id,
+        status: 'sent',
+        delivery_method: deliveryMethod,
+        recipients: recipientsList,
+        public_url: publicUrl,
+      },
+      { headers: { 'Access-Control-Allow-Origin': '*' } }
+    );
   } catch (err: any) {
     return NextResponse.json(
       { error: 'Failed to dispatch report', message: err?.message },
-      { status: 500 }
+      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
     );
   }
 }

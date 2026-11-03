@@ -93,17 +93,29 @@ export default function SendEmailModal({
     setSending(true);
     setErrorMessage(null);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
+
     try {
       const res = await fetch(`/api/reports/${report.id}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           recipients,
           custom_message: customNote.trim() || undefined,
         }),
       });
 
-      const data = await res.json();
+      clearTimeout(timeoutId);
+
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(`Server returned ${res.status} ${res.statusText}`);
+      }
+
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Failed to deliver email');
       }
@@ -113,7 +125,14 @@ export default function SendEmailModal({
         onSentSuccess(data);
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Error occurred while dispatching email');
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        setErrorMessage('Request timed out after 20 seconds. The email may still be processing in the background.');
+      } else if (err?.message === 'Failed to fetch' || err?.message?.includes('fetch failed')) {
+        setErrorMessage('Connection error contacting dispatch service. Please check your network connection and try again.');
+      } else {
+        setErrorMessage(err?.message || 'Error occurred while dispatching email');
+      }
     } finally {
       setSending(false);
     }

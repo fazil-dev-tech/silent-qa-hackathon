@@ -22,13 +22,12 @@
         <span><strong>SPRING AUDIOPHILE EVENT:</strong> Complimentary express shipping on all orders over $150 &nbsp;|&nbsp; Use code <code>LUMINA20</code> for 20% off</span>
       </div>
       <div class="announcement-right">
-        <a href="Shopping_Store_Known_Bugs_Catalog.pdf" target="_blank" download class="announcement-link">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="12" y2="18"></line><line x1="15" y1="15" x2="12" y2="18"></line></svg>
-          <span>Download 10-Bug PDF Dossier</span>
-        </a>
-        <div class="live-pill">
-          <span class="dot"></span>
-          <span>Telemetry Active</span>
+        <span class="announcement-link">
+          <span>Concierge: <strong>1-800-LUMINA-AUDIO</strong></span>
+        </span>
+        <div class="live-pill" style="background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.12); color: #E2E8F0;">
+          <span class="dot" style="background: #10B981; box-shadow: 0 0 8px #10B981;"></span>
+          <span>Official Storefront</span>
         </div>
       </div>
     </div>
@@ -417,7 +416,7 @@
           <li><a href="#" onclick="showToast('Orders ship via FedEx Express with tracking within 24 hours.')">Shipping & Global Delivery</a></li>
           <li><a href="#" onclick="showToast('30-Day in-home acoustic trial with 100% full refunds.')">30-Day Risk-Free Trial</a></li>
           <li><a href="#" onclick="showToast('All hardware includes 2-year manufacturer warranty.')">Warranty & Repairs</a></li>
-          <li><a href="Shopping_Store_Known_Bugs_Catalog.pdf" target="_blank" download>QA Bug Benchmark Catalog (PDF)</a></li>
+          <li><a href="#" onclick="showToast('Authentic reference hardware certified for studio streaming.')">Acoustic Certification</a></li>
         </ul>
       </div>
 
@@ -425,7 +424,7 @@
       <div class="footer-col">
         <h4>Secure Processing</h4>
         <p class="footer-small">
-          All financial payloads are processed through PCI-DSS compliant gateways with client-side Luhn Modulo-10 scrubbing.
+          All financial payloads are processed through PCI-DSS Level-1 encrypted checkout infrastructure.
         </p>
         <div class="payment-badges-row">
           <span class="pay-chip">VISA</span>
@@ -439,11 +438,11 @@
 
     <!-- Bottom Copyright Row -->
     <div class="container footer-bottom">
-      <p>&copy; 2026 Lumina Gear Inc. All rights reserved. Built as an official QA Benchmark for SilentQA Telemetry Testing.</p>
+      <p>&copy; 2026 Lumina Gear Inc. All rights reserved. Premium acoustic engineering &amp; precision hardware.</p>
       <div class="footer-bottom-links">
-        <a href="https://silentai.dpdns.org" target="_blank">SilentQA Platform</a>
-        <a href="https://silentai.dpdns.org/SilentQA_System_Architecture_and_User_Manual.pdf" target="_blank">Architecture Manual</a>
-        <a href="Shopping_Store_Known_Bugs_Catalog.pdf" target="_blank">10-Bug Catalog</a>
+        <a href="#privacy">Privacy Policy</a>
+        <a href="#terms">Terms of Service</a>
+        <a href="#compliance">Regulatory Compliance</a>
       </div>
     </div>
   </footer>
@@ -745,102 +744,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ========================================================================= -->
-  <!-- 14. MINIMIZED FLOATING QA BENCHMARK CONTROLLER & DOCK                     -->
-  <!-- ========================================================================= -->
-  <!-- Minimized Floating Pill Trigger -->
-  <button class="qa-hud-floating-pill" id="qaPillBtn" onclick="toggleQaHud()" title="Toggle SilentQA Defect Probes">
-    <span class="qa-pulse-dot"></span>
-    <strong>⚡ QA Benchmark Dock (10 Bugs)</strong>
-    <span class="qa-badge">ACTIVE</span>
-  </button>
-
-  <!-- Collapsible Slide-Out QA Defect Drawer -->
-  <aside class="qa-hud-drawer collapsed" id="qaHudDrawer" aria-label="QA Benchmark Panel">
-    <div class="qa-hud-header" onclick="toggleQaHud()">
-      <div class="qa-hud-title">
-        <span class="qa-pulse-dot"></span>
-        <strong>SILENTQA DEFECT BENCHMARK</strong>
-        <span class="qa-badge">10 DEFECTS</span>
-      </div>
-      <button class="qa-toggle-btn" id="qaToggleBtn" aria-label="Close QA Panel">&times;</button>
-    </div>
-    
-    <div class="qa-hud-content" id="qaHudContent">
-      <div class="qa-pdf-btn-wrap">
-        <a href="Shopping_Store_Known_Bugs_Catalog.pdf" target="_blank" download class="btn-pdf-download">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="12" y2="18"></line><line x1="15" y1="15" x2="12" y2="18"></line></svg>
-          DOWNLOAD 13-PAGE PDF BUG CATALOG
-        </a>
-      </div>
-      <p class="qa-hud-desc">
-        Click any defect scenario below to scroll to and highlight its trigger element:
-      </p>
-
-      <div class="qa-bug-grid">
-        <div class="qa-bug-card" onclick="highlightBug('BUG-001')">
-          <div class="qa-bug-tag red">BUG-001 • RACE CONDITION</div>
-          <div class="qa-bug-name">Double-Add Cart Race Condition</div>
-          <div class="qa-bug-sub">Click "Add to Cart" on Aura Pro to increment count by 2 without debounce.</div>
-        </div>
-
-        <div class="qa-bug-card" onclick="highlightBug('BUG-002')">
-          <div class="qa-bug-tag amber">BUG-002 • DEAD CLICK</div>
-          <div class="qa-bug-name">Unresponsive "Special Deals" Navbar</div>
-          <div class="qa-bug-sub">Clicking "Special Deals" in navbar fires e.preventDefault() with zero mutation.</div>
-        </div>
-
-        <div class="qa-bug-card" onclick="highlightBug('BUG-003')">
-          <div class="qa-bug-tag red">BUG-003 • RAGE CLICK / EXCEPTION</div>
-          <div class="qa-bug-name">Frozen Checkout "Place Order" Button</div>
-          <div class="qa-bug-sub">Submitting payment throws TypeError, freezing the button into infinite spinner.</div>
-        </div>
-
-        <div class="qa-bug-card" onclick="highlightBug('BUG-004')">
-          <div class="qa-bug-tag amber">BUG-004 • OBSCURED CLICK</div>
-          <div class="qa-bug-name">Unclickable "Apply Coupon" Button</div>
-          <div class="qa-bug-sub">Cart coupon button is blocked by a transparent z-index overlay element.</div>
-        </div>
-
-        <div class="qa-bug-card" onclick="highlightBug('BUG-005')">
-          <div class="qa-bug-tag purple">BUG-005 • NEGATIVE MATH ANOMALY</div>
-          <div class="qa-bug-name">Negative Cart Quantity Decrement</div>
-          <div class="qa-bug-sub">Clicking minus [-] in cart decrements quantity to 0, -1, -2 and corrupts total.</div>
-        </div>
-
-        <div class="qa-bug-card" onclick="highlightBug('BUG-006')">
-          <div class="qa-bug-tag red">BUG-006 • SILENT DOM CRASH</div>
-          <div class="qa-bug-name">Quick View Blank Modal Crash</div>
-          <div class="qa-bug-sub">Product #3 "Apex Pro Keyboard" Quick View queries missing DOM selector.</div>
-        </div>
-
-        <div class="qa-bug-card" onclick="highlightBug('BUG-007')">
-          <div class="qa-bug-tag red">BUG-007 • CONSOLE ERROR FLOOD</div>
-          <div class="qa-bug-name">Search Input Memory Leak & 500 Flood</div>
-          <div class="qa-bug-sub">Typing in the top search bar triggers unthrottled failing API requests.</div>
-        </div>
-
-        <div class="qa-bug-card" onclick="highlightBug('BUG-008')">
-          <div class="qa-bug-tag purple">BUG-008 • STATE DESYNC</div>
-          <div class="qa-bug-name">Currency Switcher Price Desync</div>
-          <div class="qa-bug-sub">Switching currency to EUR changes symbol on cards but keeps cart total in USD.</div>
-        </div>
-
-        <div class="qa-bug-card" onclick="highlightBug('BUG-009')">
-          <div class="qa-bug-tag red">BUG-009 • NETWORK 502 GATEWAY</div>
-          <div class="qa-bug-name">Amex Payment Gateway Failure</div>
-          <div class="qa-bug-sub">Paying with an American Express test card simulates a 502 Bad Gateway error.</div>
-        </div>
-
-        <div class="qa-bug-card" onclick="highlightBug('BUG-010')">
-          <div class="qa-bug-tag amber">BUG-010 • SILENT FORM DISCARD</div>
-          <div class="qa-bug-name">Missing Validation Error on Shipping</div>
-          <div class="qa-bug-sub">Submitting blank shipping form silently blocks advance with zero error message.</div>
-        </div>
-      </div>
-    </div>
-  </aside>
 
   <!-- Notification Toast Container -->
   <div class="toast-container" id="toastContainer"></div>

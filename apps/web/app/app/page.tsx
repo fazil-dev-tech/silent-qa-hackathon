@@ -38,6 +38,7 @@ import EventTimeline from '@/components/event-timeline';
 import ExportModal from '@/components/export-modal';
 import SendEmailModal from '@/components/send-email-modal';
 import CanonicalDefectCard from '@/components/canonical-defect-card';
+import { supabaseBrowserClient } from '@/lib/supabase';
 import QACopilotChat from '@/components/qa-copilot-chat';
 import ExtensionInstallModal from '@/components/extension-install-modal';
 
@@ -143,13 +144,30 @@ export default function TesterWorkspacePage() {
     }
     verifyAuth();
 
-    // Realtime Dynamic Sync: Periodic auto-refresh every 10s (silent background sync)
+    // 1. Live Supabase Realtime WebSocket Subscription
+    const channel = supabaseBrowserClient
+      .channel('app_realtime_sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => {
+        fetchReports(false, true);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'complaints' }, () => {
+        fetchReports(false, true);
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'events' }, () => {
+        fetchSessions();
+      })
+      .subscribe();
+
+    // 2. Fallback periodic sync every 12s (silent background sync)
     const syncInterval = setInterval(() => {
       fetchReports(false, true);
       fetchSessions();
-    }, 10000);
+    }, 12000);
 
-    return () => clearInterval(syncInterval);
+    return () => {
+      clearInterval(syncInterval);
+      supabaseBrowserClient.removeChannel(channel);
+    };
   }, []);
 
   // 2. Fetch Sessions & Preserve User Selected Session

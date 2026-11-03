@@ -542,29 +542,6 @@ export default function HomePage() {
                 </Link>
 
                 <a
-                  href="/shop"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    padding: '0.95rem 1.8rem',
-                    fontSize: '0.95rem',
-                    fontWeight: 700,
-                    borderRadius: '9999px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.55rem',
-                    background: 'rgba(236, 72, 153, 0.12)',
-                    color: '#F472B6',
-                    border: '1px solid rgba(236, 72, 153, 0.45)',
-                    boxShadow: '0 4px 18px rgba(236, 72, 153, 0.25)',
-                    textDecoration: 'none',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  <span>🛍️ TEST 10-BUG DEMO STORE ↗</span>
-                </a>
-
-                <a
                   href="#architecture"
                   style={{
                     padding: '0.95rem 2.2rem',
@@ -608,29 +585,6 @@ export default function HomePage() {
                   <KeyRound size={18} />
                   <span>START FLIGHT RECORDING →</span>
                 </Link>
-
-                <a
-                  href="/shop"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    padding: '0.95rem 1.8rem',
-                    fontSize: '0.95rem',
-                    fontWeight: 700,
-                    borderRadius: '9999px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.55rem',
-                    background: 'rgba(236, 72, 153, 0.12)',
-                    color: '#F472B6',
-                    border: '1px solid rgba(236, 72, 153, 0.45)',
-                    boxShadow: '0 4px 18px rgba(236, 72, 153, 0.25)',
-                    textDecoration: 'none',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  <span>🛍️ TEST 10-BUG DEMO STORE ↗</span>
-                </a>
 
                 <a
                   href="#how-it-works"

@@ -3,16 +3,27 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
 export async function GET() {
   try {
     const { data: reports, error } = await supabaseAdmin
       .from('reports')
-      .select('*, complaints(note)')
+      .select('id, complaint_id, title, severity, steps, expected, actual, root_cause, confidence, playwright_script, status, ai_provider, ai_fallback, assignee_id, created_at, updated_at, complaints(note)')
       .order('created_at', { ascending: false })
       .limit(30);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: error.message }, { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } });
     }
 
     const enrichedReports = (reports || []).map((r: any) => {
@@ -51,12 +62,15 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({
-      success: true,
-      reports: enrichedReports,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        reports: enrichedReports,
+      },
+      { headers: { 'Access-Control-Allow-Origin': '*' } }
+    );
   } catch (err: any) {
-    return NextResponse.json({ error: err?.message }, { status: 500 });
+    return NextResponse.json({ error: err?.message }, { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } });
   }
 }
 

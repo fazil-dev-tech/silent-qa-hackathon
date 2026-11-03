@@ -10,13 +10,19 @@ export const isSmtpConfigured = Boolean(
 );
 
 export const transport = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.example.com',
-  port: Number(process.env.SMTP_PORT ?? 587),
-  secure: process.env.SMTP_SECURE === 'true',
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: Number(process.env.SMTP_PORT ?? 465),
+  secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
   auth: {
-    user: process.env.SMTP_USER || 'user',
-    pass: process.env.SMTP_PASS || 'pass',
+    user: process.env.SMTP_USER || 'mohamedfazilpasha156@gmail.com',
+    pass: process.env.SMTP_PASS || 'mfwsvobjkejsycbg',
   },
+  pool: true,
+  maxConnections: 3,
+  maxMessages: 100,
+  connectionTimeout: 5000,
+  greetingTimeout: 4000,
+  socketTimeout: 6000,
 });
 
 export interface RenderEmailOptions {

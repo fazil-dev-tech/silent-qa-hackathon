@@ -3,6 +3,19 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // Handle global CORS preflight OPTIONS requests immediately
+  if (req.method === 'OPTIONS') {
+    return new NextResponse(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      },
+    });
+  }
+
   const sessionCookie = req.cookies.get('sqa_session');
 
   let session: { role?: string; email?: string; name?: string } | null = null;
@@ -42,6 +55,6 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/app', '/app/:path*', '/admin', '/admin/:path*', '/login'],
+  matcher: ['/app', '/app/:path*', '/admin', '/admin/:path*', '/login', '/api/:path*'],
 };
 

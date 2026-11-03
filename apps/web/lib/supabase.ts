@@ -23,6 +23,18 @@ export const supabaseAdmin = createClient(
   }
 );
 
+export const supabaseBrowserClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vdifshqatwyaycxhtbua.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkaWZzaHFhdHd5YXljeGh0YnVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2NDA4NzEsImV4cCI6MjEwODIxNjg3MX0.ulux5a3yNbtQAkJcF2gOc4R7zLfHth466OylypG1mMk',
+  {
+    realtime: {
+      params: {
+        eventsPerSecond: 10,
+      },
+    },
+  }
+);
+
 /**
  * Ensures any string is a valid RFC-4122 UUID format for Postgres UUID columns.
  * If already a UUID, returns as-is. If missing, generates a fresh randomUUID().

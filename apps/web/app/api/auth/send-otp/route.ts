@@ -5,16 +5,33 @@ import { sendOtpMail } from '@/lib/mail';
 
 export const dynamic = 'force-dynamic';
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
 export async function POST(req: Request) {
   try {
     const { email, phone, mode = 'login' } = await req.json();
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {
-      return NextResponse.json({ error: 'Please enter a valid email address' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Please enter a valid email address' },
+        { status: 400, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
     }
 
     if (mode === 'register' && (!phone || typeof phone !== 'string' || phone.replace(/\D/g, '').length < 7)) {
-      return NextResponse.json({ error: 'Please enter a valid mobile number with at least 7 digits' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Please enter a valid mobile number with at least 7 digits' },
+        { status: 400, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
     }
 
     const cleanEmail = email.trim().toLowerCase();
@@ -38,26 +55,33 @@ export async function POST(req: Request) {
       console.warn('[Auth DB Warning]:', dbErr.message);
     }
 
-    // 3. Dispatch verification email via Nodemailer Gmail SMTP with resilient fallback
+    // 3. Dispatch verification email via Nodemailer Gmail SMTP with resilient fast timeout
     let deliveryMethod = 'smtp';
     try {
-      await sendOtpMail(cleanEmail, otpCode, mode);
+      const sendPromise = sendOtpMail(cleanEmail, otpCode, mode);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('SMTP timeout')), 4500)
+      );
+      await Promise.race([sendPromise, timeoutPromise]);
     } catch (mailErr: any) {
       console.warn('[SMTP Auth Warning]:', mailErr?.message);
       deliveryMethod = 'cloud_simulation_fallback';
       console.log(`[TESTER DISPATCH FALLBACK - OTP for ${cleanEmail}]: ${otpCode}`);
     }
 
-    return NextResponse.json({
-      success: true,
-      message: `6-digit verification code sent to ${cleanEmail}`,
-      delivery_method: deliveryMethod,
-      expires_in: 600,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        message: `6-digit verification code sent to ${cleanEmail}`,
+        delivery_method: deliveryMethod,
+        expires_in: 600,
+      },
+      { headers: { 'Access-Control-Allow-Origin': '*' } }
+    );
   } catch (err: any) {
     return NextResponse.json(
       { error: 'Authentication service error', message: err?.message },
-      { status: 500 }
+      { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
     );
   }
 }

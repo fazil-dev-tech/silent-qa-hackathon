@@ -198,44 +198,6 @@ export default function NavigationBar() {
               />
               <span>Architecture</span>
             </a>
-            <a
-              href="/shop/"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: '#F472B6',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.22rem 0.65rem',
-                borderRadius: '9999px',
-                background: 'rgba(244, 114, 182, 0.1)',
-                border: '1px solid rgba(244, 114, 182, 0.3)',
-                boxShadow: '0 0 12px rgba(244, 114, 182, 0.15)',
-                fontWeight: 700,
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(244, 114, 182, 0.2)';
-                e.currentTarget.style.boxShadow = '0 0 18px rgba(244, 114, 182, 0.35)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(244, 114, 182, 0.1)';
-                e.currentTarget.style.boxShadow = '0 0 12px rgba(244, 114, 182, 0.15)';
-              }}
-            >
-              <span
-                style={{
-                  width: '6px',
-                  height: '6px',
-                  borderRadius: '50%',
-                  backgroundColor: '#EC4899',
-                  boxShadow: '0 0 6px #EC4899',
-                }}
-              />
-              <span>Demo Shop</span>
-            </a>
             {user && (
               <Link
                 href="/app"
@@ -335,33 +297,6 @@ export default function NavigationBar() {
           <span className="hidden sm:inline">Extension .ZIP</span>
           <span className="sm:hidden">.ZIP</span>
         </button> 
-
-        {/* Live Demo Store Link (10-Bug Playground) */}
-        <Link
-          href="/shop"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            padding: '0.3rem 0.65rem',
-            borderRadius: '6px',
-            background: 'rgba(236, 72, 153, 0.12)',
-            border: '1px solid rgba(236, 72, 153, 0.35)',
-            color: '#F472B6',
-            fontSize: '0.74rem',
-            fontWeight: 700,
-            textDecoration: 'none',
-            whiteSpace: 'nowrap',
-            transition: 'all 0.2s ease',
-          }}
-          title="Open Live Shopping Store with 10 Real Bugs"
-        >
-          <span style={{ fontSize: '0.78rem' }}>🛍️</span>
-          <span className="hidden sm:inline">Demo Shop (10 Bugs)</span>
-          <span className="sm:hidden">Shop</span>
-        </Link>
 
         {/* Supabase Realtime Health Pill (Hidden on narrow mobile screens) */}
         <div

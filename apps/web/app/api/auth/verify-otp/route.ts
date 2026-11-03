@@ -4,6 +4,17 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
 export async function POST(req: Request) {
   try {
     const { email, phone, code, mode = 'login' } = await req.json();
@@ -108,17 +119,20 @@ export async function POST(req: Request) {
     const targetRedirect = '/app';
 
     // 6. Return verified session payload & set auth cookie
-    const response = NextResponse.json({
-      success: true,
-      message: 'Verification successful',
-      user: {
-        email: cleanEmail,
-        phone: cleanPhone,
-        role: validRole,
-        org_id: orgId,
+    const response = NextResponse.json(
+      {
+        success: true,
+        message: 'Verification successful',
+        user: {
+          email: cleanEmail,
+          phone: cleanPhone,
+          role: validRole,
+          org_id: orgId,
+        },
+        redirect: targetRedirect,
       },
-      redirect: targetRedirect,
-    });
+      { headers: { 'Access-Control-Allow-Origin': '*' } }
+    );
 
     response.cookies.set({
       name: 'sqa_session',

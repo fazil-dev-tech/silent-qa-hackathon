@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import ProjectSettingsModal from '@/components/project-settings-modal';
 import AuditLogModal from '@/components/audit-log-modal';
+import { supabaseBrowserClient } from '@/lib/supabase';
 
 interface ReportItem {
   id: string;
@@ -154,14 +155,32 @@ export default function AdminDashboardPage() {
     }
     verifyAdminAuth();
 
-    // Realtime Dynamic Sync: Periodic auto-refresh every 10s
+    // 1. Live Supabase Realtime WebSocket Subscription for Admin Command Center
+    const channel = supabaseBrowserClient
+      .channel('admin_realtime_sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => {
+        loadData();
+        loadAnalytics();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        loadUsers();
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'audit_log' }, () => {
+        loadAnalytics();
+      })
+      .subscribe();
+
+    // 2. Fallback periodic auto-refresh every 12s
     const syncInterval = setInterval(() => {
       loadData();
       loadUsers();
       loadAnalytics();
-    }, 10000);
+    }, 12000);
 
-    return () => clearInterval(syncInterval);
+    return () => {
+      clearInterval(syncInterval);
+      supabaseBrowserClient.removeChannel(channel);
+    };
   }, []);
 
   const totalReports = reports.length;
